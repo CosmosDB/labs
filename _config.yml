@@ -1,0 +1,9 @@
+title: 'Azure Cosmos DB Lab Experience'
+remote_theme: azure-immersion/docs-jekyll-theme
+exclude:
+  - .build/
+  - .circleci/
+plugins:
+  - jekyll-sitemap
+  - jekyll-mentions
+  - jemoji
