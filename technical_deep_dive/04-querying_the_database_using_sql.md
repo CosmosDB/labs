@@ -1,6 +1,6 @@
 ## Querying An Azure Cosmos DB Database using the SQL API
 
-
+In this lab, you will create SQL queries that provides insight into a large dataset of 50,000 documents. You will create queries that searches for documents both within a partition and across multiple partitions.
 
 ### Setup
 
@@ -84,15 +84,21 @@
 
     1. In the *Windows Explorer* dialog that opens, locate and select the **students.json** file you downloaded earlier in this lab. Click the **Open** button to add the file.
 
+    1. Select the **Decompress data** checkbox.
+
     1. Click the **Next** button.
 
 1. In the **Target Information** step of the tool, perform the following actions:
 
-    1. In the **Export to** list, select the **DocumentDB - Sequential record import (partitioned collection)** option.
+    1. In the **Export to** list, select the **Azure Cosmos DB - Sequential record import (partitioned collection)** option.
 
     1. In the **Connection String** field, enter a newly constructed connection string replacing the placeholders with values from your Azure Cosmos DB account recorded earlier in this lab: ```AccountEndpoint=[uri];AccountKey=[key];Database=[database name];```. *Make sure you replace the **[uri]**, **[key]**, and **[database name]** placeholders with the corresponding values from your Azure Cosmos DB account. For example, if your **uri** is ``https://labqury.documents.azure.com:443/``, your **key** is ``Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==`` and your **database's name** is ``UniversityDatabase``, then your connection string will look like this: ```AccountEndpoint=https://labqury.documents.azure.com:443/;AccountKey=Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==;Database=UniversityDatabase;```*
 
-    1. In the **Partition Key** field, enter the value ``/studentAlias``.
+    1. Click the **Verify** button to validate your connection string.
+
+    1. In the **Collection** field, enter the value **StudentCollection**.
+
+    1. In the **Partition Key** field, enter the value ``/enrollmentYear``.
 
     1. In the **Collection Throughput** field, enter the value ``10000``.
 
@@ -104,11 +110,61 @@
 
 1. In the **Summary** step of the tool, review your options and then click the **Import** button.
 
-1. 
+1. Wait for the import process to complete. This step can take two to five minutes.
+
+1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
 ### Task: Executing Simple Queries
 
-1.
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group* link.
+
+1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left-hand side of the blade.
+
+1. In the **Data Explorer** section, expand the **UniversityDatabase** database node and then expand the **StudentCollection** collection node. 
+
+1. Within the **StudentCollection** node, click the **Documents** link to view a subset of the various documents in the collection. Select a few of the documents and observe the properties and structure of the documents.
+
+1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM students s WHERE s.enrollmentYear = 2018
+    ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a page of records from a single partition.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE s.studentAlias FROM students s WHERE s.enrollmentYear = 2015
+    ```
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a JSON array containing the aliases of students in the particular collection.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE CONCAT(s.studentAlias, '@contoso.edu') FROM students s WHERE s.enrollmentYear = 2015
+    ```
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a JSON array containing the e-mail address of students in the particular collection.
+
+
 
 ### Task: Running Intra-document Queries
 
