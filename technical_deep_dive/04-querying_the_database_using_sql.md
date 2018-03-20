@@ -1,14 +1,14 @@
-## Querying An Azure Cosmos DB Database using the SQL API
+# Querying An Azure Cosmos DB Database using the SQL API
 
-### Exercise 0: Setup
+## Exercise 0: Setup
 
 > Prior to starting this lab, we will create an Azure Cosmos DB account, database and container. We will then populate this account with placeholder data for the lab.
 
-#### Task I: Download Required Files
+### Task I: Download Required Files
 
 1. Download the [students.json](files/students.json) file and save it to your local machine. This file will be used later to import documents into your collection.
 
-#### Task II: Create Azure Cosmos DB Assets
+### Task II: Create Azure Cosmos DB Assets
 
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -40,7 +40,7 @@
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
-#### Task III: Create Azure Cosmos DB Database and Collection
+### Task III: Create Azure Cosmos DB Database and Collection
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -72,13 +72,13 @@
 
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
-#### Task IV: Retrieve Account Credentials
+### Task IV: Retrieve Account Credentials
 
 1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
 1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-#### Task V: Import Lab Data Into Collection
+### Task V: Import Lab Data Into Collection
 
 1. On your local machine, open the **Azure Cosmos DB Data Migration Tool**.
 
@@ -122,9 +122,9 @@
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
-### Exercise 1: Executing Simple Queries
+## Exercise 1: Executing Simple Queries
 
-#### Task I: Validate Imported Data
+### Task I: Validate Imported Data
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -140,7 +140,7 @@
 
 1. Within the **StudentCollection** node, click the **Documents** link to view a subset of the various documents in the collection. Select a few of the documents and observe the properties and structure of the documents.
 
-#### Task II: Executing SELECT Queries
+### Task II: Executing SELECT Queries
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -166,7 +166,7 @@
 
     > This query should have returned a JSON array containing the aliases of students in the particular collection.
 
-#### Task III: Use Built-In Functions
+### Task III: Use Built-In Functions
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -186,9 +186,9 @@
 
 1. In the **Results** pane, observe the results of your query.
 
-### Exercise 2: Running Intra-document Queries
+## Exercise 2: Running Intra-document Queries
 
-#### Task I: Query Intra-document Array
+### Task I: Query Intra-document Array
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -216,7 +216,7 @@
 
     > This query should have returned a more useful JSON array of string values.
 
-#### Task II: Execute Cross-Platform Query
+### Task II: Execute Cross-Platform Query
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -232,9 +232,9 @@
 
     > This query should have returned all clubs for all students. You will quickly notice that the list of clubs is not unique.
 
-### Exercise 3: Projecting Query Results
+## Exercise 3: Projecting Query Results
 
-#### Task I: Modifying Structure of Query Results
+### Task I: Modifying Structure of Query Results
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -284,9 +284,9 @@
 
     > This query should have returned a JSON array containing the unfiltered contact information necessary to welcome new students.
 
-### Exercise 4: Deploy Serverless API
+## Exercise 4: Deploy Serverless API
 
-#### Task I: Create Serverless Assets
+### Task I: Create Serverless Assets
 
 1. On the left side of the portal, click the **Create a resource** link.
 
@@ -346,7 +346,7 @@
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
-#### Task II: Write Function App Code
+### Task II: Write Function App Code
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -488,7 +488,7 @@
 
 1. Click the **Save** button at the top of the editor.
 
-#### Task III: Generate Function App OpenAPI Specification and Enable CORS
+### Task III: Generate Function App OpenAPI Specification and Enable CORS
 
 1. Locate the **Function Apps** list on the left side of the blade. Click the node with the name of the *Function App* you created earlier in this lab.
 
@@ -520,7 +520,7 @@
 
     1. Close the **CORS** popup.
 
-#### Task IV: Validate Function App
+### Task IV: Validate Function App
 
 1. Locate the **Function Apps** list on the left side of the blade. Click the **RetrieveFilteredStudents** node.
 
@@ -558,7 +558,7 @@
 
     1. Observe the results of the request.
 
-#### Task V: Configure API Management Instance
+### Task V: Configure API Management Instance
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -634,7 +634,7 @@
 
     1. Click the **Save** button at the bottom of the tab.
 
-#### Task VI: Validate API Endpoint
+### Task VI: Validate API Endpoint
 
 1. Back in the *API editor*, click the **Test** tab at the top of the editor.
 
@@ -644,7 +644,7 @@
 
 1. Observe the results of the test run.
 
-#### Task VII: View API Management Developer Portal
+### Task VII: View API Management Developer Portal
 
 1. At the top of the *API editor*, click the **Developer portal** button.
 
@@ -658,15 +658,15 @@
 
 1. Observe the results of the test run.
 
-### Exercise 5: Lab Cleanup
+## Exercise 5: Lab Cleanup
 
-#### Task I: Open Cloud Shell
+### Task I: Open Cloud Shell
 
 1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
 
     > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
 
-#### Task 2: Use Azure CLI to Delete Resource Group
+### Task 2: Use Azure CLI to Delete Resource Group
 
 1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
 
