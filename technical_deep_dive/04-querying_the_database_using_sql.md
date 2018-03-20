@@ -135,7 +135,7 @@ In this lab, you will create SQL queries that provides insight into a large data
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM students s WHERE s.enrollmentYear = 2018
+    SELECT * FROM students s WHERE s.enrollmentYear = 2017
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
@@ -147,7 +147,7 @@ In this lab, you will create SQL queries that provides insight into a large data
 1. In the *query editor*, replace the current query with the following query:
 
     ```sql
-    SELECT VALUE s.studentAlias FROM students s WHERE s.enrollmentYear = 2015
+    SELECT VALUE s.studentAlias FROM students s WHERE s.enrollmentYear = 2016
     ```
 
 1. In the **Results** pane, observe the results of your query.
@@ -157,22 +157,96 @@ In this lab, you will create SQL queries that provides insight into a large data
 1. In the *query editor*, replace the current query with the following query:
 
     ```sql
-    SELECT VALUE CONCAT(s.studentAlias, '@contoso.edu') FROM students s WHERE s.enrollmentYear = 2015
+    SELECT CONCAT(s.studentAlias, '@contoso.edu') AS email FROM students s WHERE s.enrollmentYear = 2015
     ```
 
 1. In the **Results** pane, observe the results of your query.
 
     > This query should have returned a JSON array containing the e-mail address of students in the particular collection.
 
+1. In the *query editor*, replace the current query with the following query:
 
+    ```sql
+    SELECT VALUE CONCAT(s.studentAlias, '@contoso.edu') FROM students s WHERE s.enrollmentYear = 2014
+    ```
+
+1. In the **Results** pane, observe the results of your query.
 
 ### Task: Running Intra-document Queries
 
-1.
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT clubs
+    FROM students s
+    JOIN clubs IN s.clubs
+    WHERE s.enrollmentYear = 2018
+    ```
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a list of all clubs that new students are participating in.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE clubs
+    FROM students s
+    JOIN clubs IN s.clubs
+    WHERE s.enrollmentYear = 2018
+    ```
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a more useful JSON array of string values.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE clubs
+    FROM students s
+    JOIN clubs IN s.clubs
+    ```
+
+1. In the **Results** pane, observe the amount of time required to fetch the query and the RU charge.
+
+1. Observe the results of your query.
+
+    > This query should have returned all clubs for all students. You will quickly notice that the list of clubs is not unique.
 
 ### Task: Projecting Query Results
 
-1.
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT {
+        "name": CONCAT(s.firstName, " ", s.lastName), 
+        "isWarned": s.academicStatus.warning, 
+        "isSuspended": s.academicStatus.suspension, 
+        "isExpelled": s.academicStatus.expulsion
+    } AS studentStatus
+    FROM students s WHERE s.enrollmentYear = 2018
+    ```
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a JSON array containing the status of all new students.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE {
+        "name": CONCAT(s.firstName, " ", s.lastName),    
+        "email": {
+            "home": s.homeEmailAddress,
+            "school": CONCAT(s.studentAlias, '@contoso.edu')
+        }
+    } FROM students s WHERE s.enrollmentYear = 2018
+    ```
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a JSON array containing the contact information necessary to welcome new students.
 
 ### Task: Deploy Serverless Compute Instance
 
