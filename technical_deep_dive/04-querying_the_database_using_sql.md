@@ -463,14 +463,15 @@
     using Microsoft.Azure.Documents.Client;
     using Microsoft.Azure.Documents.Linq;
 
-    public static async Task<HttpResponseMessage> Run(HttpRequestMessage request, TraceWriter log)
-    {
-        string endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"];
-        string authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"];
-        string databaseId = ConfigurationManager.AppSettings["DatabaseId"];
-        string collectionId = ConfigurationManager.AppSettings["CollectionId"];
 
-        DocumentClient client = new DocumentClient(new Uri(endpointUrl), authorizationKey);
+    private static string endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"];
+    private static string authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"];
+    private static string databaseId = ConfigurationManager.AppSettings["DatabaseId"];
+    private static string collectionId = ConfigurationManager.AppSettings["CollectionId"];
+    private static DocumentClient client = new DocumentClient(new Uri(endpointUrl), authorizationKey);
+
+    public static async Task<HttpResponseMessage> Run(HttpRequestMessage request, TraceWriter log)
+    {        
         Uri collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
         DocumentCollection collection = await client.ReadDocumentCollectionAsync(collectionUri);
         
