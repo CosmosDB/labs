@@ -118,7 +118,9 @@
 
 1. In the **Summary** step of the tool, review your options and then click the **Import** button.
 
-1. Wait for the import process to complete. This step can take two to five minutes.
+1. Wait for the import process to complete.
+
+    > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to five minutes.
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
