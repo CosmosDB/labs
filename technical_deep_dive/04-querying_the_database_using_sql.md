@@ -164,6 +164,8 @@
     SELECT VALUE s.studentAlias FROM students s WHERE s.enrollmentYear = 2016
     ```
 
+1. Click the **Execute Query** button in the query tab to run the query. 
+
 1. In the **Results** pane, observe the results of your query.
 
     > This query should have returned a JSON array containing the aliases of students in the particular collection.
@@ -176,6 +178,8 @@
     SELECT CONCAT(s.studentAlias, '@contoso.edu') AS email FROM students s WHERE s.enrollmentYear = 2015
     ```
 
+1. Click the **Execute Query** button in the query tab to run the query. 
+
 1. In the **Results** pane, observe the results of your query.
 
     > This query should have returned a JSON array containing the e-mail address of students in the particular collection.
@@ -185,6 +189,8 @@
     ```sql
     SELECT VALUE CONCAT(s.studentAlias, '@contoso.edu') FROM students s WHERE s.enrollmentYear = 2014
     ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
 
@@ -201,6 +207,8 @@
     WHERE s.enrollmentYear = 2018
     ```
 
+1. Click the **Execute Query** button in the query tab to run the query. 
+
 1. In the **Results** pane, observe the results of your query.
 
     > This query should have returned a list of all clubs that new students are participating in.
@@ -213,6 +221,8 @@
     JOIN clubs IN s.clubs
     WHERE s.enrollmentYear = 2018
     ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
 
@@ -227,6 +237,8 @@
     FROM students s
     JOIN clubs IN s.clubs
     ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the amount of time required to fetch the query and the RU charge.
 
@@ -250,6 +262,8 @@
     FROM students s WHERE s.enrollmentYear = 2018
     ```
 
+1. Click the **Execute Query** button in the query tab to run the query. 
+
 1. In the **Results** pane, observe the results of your query.
 
     > This query should have returned a JSON array containing the status of all new students.
@@ -264,6 +278,8 @@
         }
     } FROM students s WHERE s.enrollmentYear = 2018
     ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
 
@@ -281,6 +297,8 @@
         }
     } FROM students s WHERE s.enrollmentYear = 2018
     ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
 
