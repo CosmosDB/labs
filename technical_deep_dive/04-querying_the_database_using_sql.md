@@ -494,7 +494,7 @@
 
     1. In the **API definition source** section, select the **Function** option.
 
-    1. In the editor that appears, click the **Generate API definition template** button.
+    1. In the editor that appears, click the **Generate API definition template** button. *It can take up to two minutes for the template to generate*.    
 
     1. Once the OpenAPI definition template is generated in the editor, observe the content of the template.
     
@@ -508,7 +508,7 @@
 
 1. In the **CORS** popup that appears, perform the following actions:
 
-    1. In the field at the bottom of the popup, enter the value: **\***
+    1. In the **ALLOWED ORIGINS** list, locate the field at the bottom of the list. Enter the value: **\***
     
     1. Click the **Save** button at the top of the popup.
 
