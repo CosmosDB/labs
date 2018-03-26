@@ -320,7 +320,7 @@
 
 1. In the new **Function App** blade, perform the following actions:
 
-    1. In the **Name** field, enter a globally unique value.
+    1. In the **App name** field, enter a globally unique value.
 
     1. Leave the **Subscription** field set to its default value.
 
@@ -328,13 +328,13 @@
 
     1. In the **Resource group** list, select the **LABQURY** option.
 
+    1. In the **OS** section, select the **Windows** option.
+
+    1. In the **Hosting Plan** list, select the **Consumption Plan** option.
+    
     1. In the **Location** field, select the **West US** location.
 
-    1. In the **Organization name** field, enter the value **Contoso University**.
-
-    1. In the **Administrator email** field, enter the value **technology@contoso.edu**.
-
-    1. In the **Pricing tier** list, select the **Developer** option.
+    1. Leave the **Storage** settings set to their default values.
 
     1. Click the **Create** button.
 
