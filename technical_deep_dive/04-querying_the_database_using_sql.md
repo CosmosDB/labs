@@ -6,7 +6,7 @@
 
 ### Task I: Download Required Files
 
-1. Download the [students.json](files/students.json) file and save it to your local machine. This file will be used later to import documents into your collection.
+1. Download the [students.json](../files/students.json) file and save it to your local machine. This file will be used later to import documents into your collection.
 
 ### Task II: Create Azure Cosmos DB Assets
 
@@ -286,7 +286,7 @@
 
 ## Exercise 4: Deploy Serverless API
 
-### Task I: Create Serverless Assets
+### Task I: Create Function App
 
 1. On the left side of the portal, click the **Create a resource** link.
 
@@ -320,32 +320,6 @@
 
 1. Wait for the creation task to complete before moving on with this lab. 
  
-1. On the left side of the portal, click the **Create a resource** link.
-
-1. At the top of the **New** blade, locate the **Search the Marketplace** field.
-
-1. Enter the text **API** into the search field and press **Enter**.
-
-1. In the **Everything** search results blade, select the **API management** result.
-
-1. In the **API management** blade, click the **Create** button.
-
-1. In the **API management service** blade, perform the following actions:
-
-    1. In the **ID** field, enter a globally unique value.
-
-    1. Leave the **Subscription** field set to its default value.
-
-    1. In the **Resource group** section, select the **Use existing** option.
-
-    1. In the **Resource group** list, select the **LABQURY** option.
-
-    1. In the **Location** field, select the **West US** location.
-
-    1. Click the **Create** button.
-
-1. Wait for the creation task to complete before moving on with this lab.  
-
 ### Task II: Write Function App Code
 
 1. On the left side of the portal, click the **Resource groups** link.
@@ -559,9 +533,41 @@
 
     1. Observe the results of the request.
 
-### Task V: Configure API Management Instance
+## Bonus Exercise: Create API Management Application
 
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
+### Task I: Create API Mangement Application
+
+1. On the left side of the portal, click the **Create a resource** link.
+
+1. At the top of the **New** blade, locate the **Search the Marketplace** field.
+
+1. Enter the text **API** into the search field and press **Enter**.
+
+1. In the **Everything** search results blade, select the **API management** result.
+
+1. In the **API management** blade, click the **Create** button.
+
+1. In the **API management service** blade, perform the following actions:
+
+    1. Leave the **Subscription** field set to its default value.
+
+    1. In the **Resource group** section, select the **Use existing** option.
+
+    1. In the **Resource group** list, select the **LABQURY** option.
+
+    1. In the **Location** field, select the **West US** location.
+
+    1. In the **Organization name** field, enter the value **Contoso University**.
+
+    1. In the **Administrator email** field, enter the value **technology@contoso.edu**.
+
+    1. In the **Pricing tier** list, select the **Developer** option.
+
+    1. Click the **Create** button.
+
+1. Wait for the creation task to complete before moving on with this lab.  
+
+### Task II: Configure API Management Instance
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -573,7 +579,9 @@
 
 1. In the **APIs** blade, click the **OpenAPI specification** option.
 
-1. In the **Create from Function App** dialog that appears, perform the following actions:
+    > If you do not see any options in the APIs blade, it is because the API Managment instance is still "starting up". It can take up to 30 minutes for an API management instance to be ready to use.
+
+1. In the **Create from OpenAPI specification** dialog that appears, perform the following actions:
 
     1. In the **OpenAPI specification** field, enter the **API definition URL** you recorded earlier in this lab.
     
@@ -635,7 +643,7 @@
 
     1. Click the **Save** button at the bottom of the tab.
 
-### Task VI: Validate API Endpoint
+### Task III: Validate API Endpoint
 
 1. Back in the *API editor*, click the **Test** tab at the top of the editor.
 
@@ -645,7 +653,7 @@
 
 1. Observe the results of the test run.
 
-### Task VII: View API Management Developer Portal
+### Task IV: View API Management Developer Portal
 
 1. At the top of the *API editor*, click the **Developer portal** button.
 
@@ -659,7 +667,7 @@
 
 1. Observe the results of the test run.
 
-## Exercise 5: Lab Cleanup
+## Lab Cleanup
 
 ### Task I: Open Cloud Shell
 
