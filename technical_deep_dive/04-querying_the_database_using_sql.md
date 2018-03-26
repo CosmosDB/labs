@@ -448,7 +448,7 @@
 
 1. Back in the **View files** popup, click the **run.csx** file.
 
-1. In the *open editor for **run.csx***, enter the following C# code:
+1. In the *open editor for **run.csx***, replace all existing code with the following C# code:
 
     ```
     using System.Configuration;
@@ -456,7 +456,6 @@
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Microsoft.Azure.Documents.Linq;
-
 
     private static string endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"];
     private static string authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"];
