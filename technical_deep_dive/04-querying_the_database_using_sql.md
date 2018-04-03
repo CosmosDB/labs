@@ -1,8 +1,15 @@
 # Querying An Azure Cosmos DB Database using the SQL API
 
+## Required Software
+
+| Software | Download Link |
+| --- | --- |
+| Visual Studio Code | [code.visualstudio.com](https://go.microsoft.com/fwlink/?Linkid=852157) |
+| Azure Cosmos DB Data Migration Tool | [cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
+
 ## Exercise 0: Setup
 
-> Prior to starting this lab, we will create an Azure Cosmos DB account, database and container. We will then populate this account with placeholder data for the lab.
+*Prior to starting this lab, we will create an Azure Cosmos DB account, database and container. We will then populate this account with placeholder data for the lab.*
 
 ### Task I: Download Required Files
 
@@ -13,6 +20,8 @@
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 
 1. On the left side of the portal, click the **Create a resource** link.
+
+    ![Create a resource](../media/04-create_a_resource.png)
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
@@ -112,6 +121,8 @@
 
     1. Click the **Advanced Options** button.
 
+    1. 
+
     1. Click the **Next** button.
 
 1. In the **Advanced** step of the tool, leave the existing options set to their default values and click the **Next** button.
@@ -158,6 +169,18 @@
 
     > This query should have returned a page of records from a single partition.
 
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM students s
+    ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a page of records from a single partition.
+
 1. In the *query editor*, replace the current query with the following query:
 
     ```sql
@@ -194,7 +217,27 @@
 
 1. In the **Results** pane, observe the results of your query.
 
-## Exercise 2: Running Intra-document Queries
+### Task IV: Projecting Query Results
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT {
+        "name": CONCAT(s.firstName, " ", s.lastName), 
+        "isWarned": s.academicStatus.warning, 
+        "isSuspended": s.academicStatus.suspension, 
+        "isExpelled": s.academicStatus.expulsion
+    } AS studentStatus
+    FROM students s WHERE s.enrollmentYear = 2018
+    ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+1. In the **Results** pane, observe the results of your query.
+
+    > This query should have returned a JSON array containing the status of all new students.
+
+## Exercise 2: Use .NET SDK to Query Azure Cosmos DB
 
 ### Task I: Query Intra-document Array
 
@@ -228,7 +271,7 @@
 
     > This query should have returned a more useful JSON array of string values.
 
-### Task II: Execute Cross-Platform Query
+### Task II: Execute Cross-Partition Query
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -246,27 +289,7 @@
 
     > This query should have returned all clubs for all students. You will quickly notice that the list of clubs is not unique.
 
-## Exercise 3: Projecting Query Results
-
-### Task I: Modifying Structure of Query Results
-
-1. In the *query editor*, replace the current query with the following query:
-
-    ```sql
-    SELECT {
-        "name": CONCAT(s.firstName, " ", s.lastName), 
-        "isWarned": s.academicStatus.warning, 
-        "isSuspended": s.academicStatus.suspension, 
-        "isExpelled": s.academicStatus.expulsion
-    } AS studentStatus
-    FROM students s WHERE s.enrollmentYear = 2018
-    ```
-
-1. Click the **Execute Query** button in the query tab to run the query. 
-
-1. In the **Results** pane, observe the results of your query.
-
-    > This query should have returned a JSON array containing the status of all new students.
+### Task III: Projecting Query Results
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -304,253 +327,11 @@
 
     > This query should have returned a JSON array containing the unfiltered contact information necessary to welcome new students.
 
-## Exercise 4: Deploy Serverless API
+## Exercise 3: Implement Pagination using the .NET SDK
 
-### Task I: Create Function App
+### Task I: 
 
-1. On the left side of the portal, click the **Create a resource** link.
 
-1. At the top of the **New** blade, locate the **Search the Marketplace** field.
-
-1. Enter the text **Function** into the search field and press **Enter**.
-
-1. In the **Everything** search results blade, select the **Function App** result.
-
-1. In the **Function App** blade, click the **Create** button.
-
-1. In the new **Function App** blade, perform the following actions:
-
-    1. In the **App name** field, enter a globally unique value.
-
-    1. Leave the **Subscription** field set to its default value.
-
-    1. In the **Resource group** section, select the **Use existing** option.
-
-    1. In the **Resource group** list, select the **LABQURY** option.
-
-    1. In the **OS** section, select the **Windows** option.
-
-    1. In the **Hosting Plan** list, select the **Consumption Plan** option.
-    
-    1. In the **Location** field, select the **West US** location.
-
-    1. Leave the **Storage** settings set to their default values.
-
-    1. Click the **Create** button.
-
-1. Wait for the creation task to complete before moving on with this lab. 
- 
-### Task II: Write Function App Code
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group* link.
-
-1. In the **LABQURY** blade, select the **Function App** you recently created.
-
-1. In the **Function Apps** blade, click the **Platform features** tab at the top of the blade.
-
-1. In the **Platform features** tab, click the **Application Settings** link in the **General Settings** section.
-
-1. In the **Application settings** tab, scroll down and locate the **Application Settings** section. Click the **Add new setting** button. Perform the following actions:
-
-    a. In the **Enter a name** field, enter the value **EndpointUrl**.
-
-    a. In the **Enter a value** field, enter the value you previously recorded for the Azure Cosmos DB account's **URI**.
-
-1. Back in the **Application Settings** section, click the **Add new setting** button. Perform the following actions:
-
-    a. In the **Enter a name** field, enter the value **AuthorizationKey**.
-
-    a. In the **Enter a value** field, enter the value you previously recorded for the Azure Cosmos DB account's **PRIMARY KEY**.
-
-1. Back in the **Application Settings** section, click the **Add new setting** button. Perform the following actions:
-
-    a. In the **Enter a name** field, enter the value **DatabaseId**.
-
-    a. In the **Enter a value** field, enter the value **UniversityDatabase**.
-
-1. Back in the **Application Settings** section, click the **Add new setting** button. Perform the following actions:
-
-    a. In the **Enter a name** field, enter the value **CollectionId**.
-
-    a. In the **Enter a value** field, enter the value **StudentCollection**.
-
-1. Click the **Save** button at the top of the **Application settings** tab.
-
-1. Back in the **Function Apps** blade, locate and click the **Functions** link on the left side of the blade.
-
-1. At the top of the **Functions** pane, click the **New function** button.
-
-1. In the *Templates* pane, perform the following actions:
-
-    1. In the **Language** list, select the **C#** option.
-
-    1. In the **Scenario** list, select the **API & Webhooks** option.
-
-    1. Select the **HTTP trigger** template.
-
-1. In the **HTTP trigger** popup that appears, perform the following actions:
-
-    1. In the **Language** list, select the **C#** option.
-
-    1. In the **Name** field, enter the name **RetrieveFilteredStudents**.
-
-    1. In the **Authorization level** list, select the **Function** option.
-
-    1. Click the **Create** button.
-
-1. After the *Function editor* appears, locate the **Functions** list on the left side of the blade. Click the **Integrate** button under the **RetrieveFilteredStudents** node.
-
-1. In the *Integrations* pane, perform the following actions:
-
-    1. In the **Request parameter name** field, enter the value **request**.
-
-    1. In the **Selected HTTP methods** section, ensure only the **GET** option is selected.
-
-    1. Leave all other options set to their default values.
-
-    1. Click the **Save** button.
-
-1. Location the **Functions** list on the left side of the blade again. Click the **Manage** button under the **RetrieveFilteredStudents** node.
-
-1. In the *Manage* pane, perform the following actions:
-
-    1. Click the **Add new function key** button.
-
-    1. In the **NAME** field, enter the name **apiManagementKey**.
-
-    1. In the **VALUE** field, enter the value **f3bSmEgZstlaWqcHlXrX9csLEAAp4NmXDvvzPxHFzMD0ehgnYUbt7l==**.
-
-    1. In the **ACTIONS** section, click the **Save** button.
-
-1. Location the **Functions** list on the left side of the blade again. Click the **RetrieveFilteredStudents** node.
-
-1. In the *Function editor*, click the **View files** link on the right side of the editor.
-
-1. In the **View files** popup that appears, click the **Add** button. Enter the name **project.json** for the new file.
-
-1. In the *open editor for **project.json***, enter the following JSON object:
-
-    ```
-    {
-        "frameworks": {
-            "net46":{
-                "dependencies": {
-                    "Microsoft.Azure.DocumentDB": "1.21.1"
-                }
-            }
-        }
-    }
-    ```
-
-1. Click the **Save** button at the top of the editor.
-
-1. Back in the **View files** popup, click the **run.csx** file.
-
-1. In the *open editor for **run.csx***, replace all existing code with the following C# code:
-
-    ```
-    using System.Configuration;
-    using System.Net;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using Microsoft.Azure.Documents.Linq;
-
-    private static string endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"];
-    private static string authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"];
-    private static string databaseId = ConfigurationManager.AppSettings["DatabaseId"];
-    private static string collectionId = ConfigurationManager.AppSettings["CollectionId"];
-    private static DocumentClient client = new DocumentClient(new Uri(endpointUrl), authorizationKey);
-
-    public static async Task<HttpResponseMessage> Run(HttpRequestMessage request, TraceWriter log)
-    {        
-        Uri collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
-        DocumentCollection collection = await client.ReadDocumentCollectionAsync(collectionUri);
-        
-        string sqlQuery = "SELECT VALUE { 'id': s.id, 'email': { 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018 AND s.age <= 17";
-
-        var docQuery = client.CreateDocumentQuery<dynamic>(collection.SelfLink, sqlQuery, new FeedOptions { MaxItemCount = 50 }).AsDocumentQuery();
-        List<dynamic> results = new List<dynamic>();
-        while (docQuery.HasMoreResults)
-        {
-            results.AddRange(await docQuery.ExecuteNextAsync());
-        }
-        return request.CreateResponse(HttpStatusCode.OK, results);
-    }
-    ```
-
-1. Click the **Save** button at the top of the editor.
-
-### Task III: Generate Function App OpenAPI Specification and Enable CORS
-
-1. Locate the **Function Apps** list on the left side of the blade. Click the node with the name of the *Function App* you created earlier in this lab.
-
-1. Click the **Platform features** tab at the top of the blade.
-
-1. In the **Platform features** tab, click the **API definition** link in the **API** section.
-
-1. In the **API definition** tab, perform the following actions:
-
-    1. In the **API definition source** section, select the **Function** option.
-
-    1. In the editor that appears, click the **Generate API definition template** button. *It can take up to two minutes for the template to generate*.    
-
-    1. Once the OpenAPI definition template is generated in the editor, observe the content of the template.
-    
-    1. Click the **Save** button at the top of the tab.
-
-1. Copy the value of the **API definition URL** field. You will use this value later in this lab.
-
-1. Close the **API definition** tab and return to the **Platform features** tab.
-
-1. Click the **CORS** link in the **API** section.
-
-1. In the **CORS** popup that appears, perform the following actions:
-
-    1. In the **ALLOWED ORIGINS** list, locate the field at the bottom of the list. Enter the value: **\***
-    
-    1. Click the **Save** button at the top of the popup.
-
-    1. Close the **CORS** popup.
-
-### Task IV: Validate Function App
-
-1. Locate the **Function Apps** list on the left side of the blade. Click the **RetrieveFilteredStudents** node.
-
-1. In the *Function editor*, click the **Test** link on the right side of the editor.
-
-1. In the **Test** popup, perform the following actions:
-
-    1. In the **HTTP method** list, select the **GET** option.
-
-    1. Click the **Run** button.
-
-    > This should run your function. If successful, you should see a JSON array in the **Output** pane that contains ~941 records.
-
-1. At the top of the *Function editor*, click the **Get function URL** hyperlink.
-
-1. In the **Get function URL** dialog that appears, perform the following actions:
-
-    1. In the **Key** list, select the **default (Function key)** option.
-
-    1. Copy the entire URL in the **URL** field. You will use this value later in this lab.
-
-    1. Click the **🗙** button to close the dialog.
-
-1. In a new browser tab or window, navigate to <https://www.hurl.it/>.
-
-1. In the **Hurl.it** website, perform the following actions:
-
-    1. In the **Destination** list, select the **GET** option.
-
-    1. In the **Destination** field, enter the Function **URL** you copied eariler in this lab.
-
-    1. Complete the *CAPTCHA* element to prove that you are a human user.
-
-    1. Click the **Launch Request** button.
-
-    1. Observe the results of the request.
 
 ## Lab Cleanup
 
