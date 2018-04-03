@@ -25,11 +25,17 @@
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
+    [![Search the Marketplace](../media/04-search_the_marketplace.png)](../media/04-search_the_marketplace.png)
+
 1. Enter the text **Cosmos** into the search field and press **Enter**.
 
 1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
 
+    [![Cosmos search results](../media/04-cosmos_search_result.png)](../media/cosmos_search_result.png)
+
 1. In the **Azure Cosmos DB** blade, click the **Create** button.
+
+    [![Create Cosmos instance](../media/04-create_cosmos.png)](../media04-create_cosmos.png)
 
 1. In the new **Azure Cosmos DB** blade, perform the following actions:
 
@@ -47,11 +53,15 @@
 
     1. Click the **Create** button.
 
+    [![](../media/)](../media/)
+
 1. Wait for the creation task to complete before moving on with this lab.  
 
 ### Task III: Create Azure Cosmos DB Database and Collection
 
 1. On the left side of the portal, click the **Resource groups** link.
+
+    [![](../media/)](../media/)
 
 1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group* link.
 
