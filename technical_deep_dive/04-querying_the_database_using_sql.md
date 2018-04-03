@@ -21,7 +21,7 @@
 
 1. On the left side of the portal, click the **Create a resource** link.
 
-    ![Create a resource](../media/04-create_a_resource.png)
+    [![Create a resource](../media/04-create_a_resource.png)](../media/04-create_a_resource.png)
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
