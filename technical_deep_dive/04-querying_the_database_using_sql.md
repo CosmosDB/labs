@@ -447,93 +447,676 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 **
 
-1.
+1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
 
-### Task II: Query Intra-document Array
+1. In the new folder, right-click the folder and select the **Open with Code** menu option.
+
+    ![Open with Visual Studio Code](../media/04-open_with_code.png)
+
+    > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
+
+1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+    ![Open in Command Prompt](../media/04-open_command_prompt.png)
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet new console --output .
+    ```
+
+    > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
+    ```
+
+    > This command will add the ``Microsoft.Azure.DocumentDB.Core`` NuGet package as a project dependency.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet restore
+    ```
+
+    > This command will restore all packages specified as dependencies in the project.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet build
+    ```
+
+    > This command will build the project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Observe the **Program.cs** and **vscodetemple.csproj** files created by the .NET Core CLI.
+
+    ![Project files](../media/04-project_files.png)
+
+1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+
+    ![Open editor](../media/04-program_editor.png)
+
+
+### Task II: Create DocumentClient Instance
 
 **
 
-1.
+1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
-    ```sql
-    SELECT s.clubs
-    FROM students s
-    WHERE s.enrollmentYear = 2018
+    ```c#
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
+    using Microsoft.Azure.Documents.Linq;
     ```
 
-    >
+1. Locate the **Program** class and replace it with the following class:
 
-    ```sql
-    SELECT activities
-    FROM students s
-    JOIN activities IN s.clubs
-    WHERE s.enrollmentYear = 2018
+    ```c#
+    public class Program
+    {
+        public static void Main(string[] args)
+        {         
+        }
+
+        private static async Task ExecuteLogic(DocumentClient client)
+        {
+        }
+    }
     ```
 
-    >
+1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```sql
-    SELECT VALUE activities
-    FROM students s
-    JOIN activities IN s.clubs
-    WHERE s.enrollmentYear = 2018
+    ```c#
+    private static readonly Uri _endpointUri = new Uri("https://labqury.documents.azure.com:443/");
+    private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";
+    private static readonly string _databaseId = "UniversityDatabase";
+    private static readonly string _collectionId = "StudentCollection";  
     ```
 
-    >
+1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
-### Task III: Execute Cross-Partition Query
+    > For example, if your **uri** is ``https://labqury.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://labqury.documents.azure.com:443/");``.
+
+1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+
+    > For example, if your **primary key** is ``NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";``.
+    
+1. Locate the **Main** method:
+
+    ```c#
+    public static void Main(string[] args)
+    { 
+    }
+    ```
+
+1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+
+    ```c#
+    using (DocumentClient client = new DocumentClient(endpointUri, primaryKey))
+    {
+        
+    }
+    ```
+
+1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
+
+    ```c#
+    ExecuteLogic(client).Wait();
+    ```
+
+1. Your ``Program`` class definition should now look like this:
+
+    ```c#
+    public class Program
+    { 
+        private static readonly Uri _endpointUri = new Uri("<your uri>");
+        private static readonly string _primaryKey = "<your key>";
+        private static readonly string _databaseId = "UniversityDatabase";
+        private static readonly string _collectionId = "StudentCollection";  
+
+        public static void Main(string[] args)
+        {    
+            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+            {
+                ExecuteLogic(client).Wait();
+            }
+        }
+
+        private static async Task ExecuteLogic(DocumentClient client)
+        {       
+        }
+    }
+    ```
+
+    > We are now going to implement a sample query to make sure our client connection code works.
+
+1. Locate the **ExecuteLogic** method:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+
+    ```    
+
+1. Within the **ExecuteLogic** method, add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
+
+    ```c#
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+    ```
+
+1. Add the following line of code to create a string variable named ``sql`` that contains a sample SQL query:
+
+    ```c#
+    string sql = "SELECT TOP 5 VALUE s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
+    ```
+
+    > This query will get the alias of the top 5 2018-enrollees in the collection sorted by their alias alphabetically
+
+1. Add the following line of code to create a document query:
+
+    ```c#
+    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+1. Add the following lines of code to enumerate over the results and print the strings to the console:
+
+    ```c#
+    foreach(string alias in query)
+    {
+        Console.Out.WriteLine(alias);
+    }
+    ```
+
+1. Your **ExecuteLogic** method should now look like this:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+        Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+
+        string sql = "SELECT TOP 5 VALUE students.studentAlias FROM students WHERE students.enrollmentYear = 2018";
+
+        IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
+        
+        foreach(string alias in query)
+        {
+            Console.Out.WriteLine(alias);
+        }
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see five aliases printed to the console window.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+### Task III: Query Intra-document Array
 
 **
 
-1.
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-    ```sql
-    SELECT VALUE clubs
-    FROM students s
-    JOIN clubs IN s.clubs
+    ![New File](../media/04-new_file.png)
+
+1. Name the new file **Student.cs**. The editor tab will automatically open for the new file.
+
+    ![Student Class File](../media/04-student_class.png)
+
+1. Paste in the following code for the ``Student`` class:
+
+    ```c#
+    public class Student
+    {
+        public string[] Clubs { get; set; }
+    }
     ```
 
-    >
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-### Task IV: Projecting Query Results
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    string sql = "SELECT TOP 5 VALUE students.studentAlias FROM students WHERE students.enrollmentYear = 2018";
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```
+
+    > This new query will select the **clubs** property for each student in the result set. The value of the **clubs** property is a string array.
+
+1. Locate the following line of code: 
+
+    ```c#
+    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+    > The query was updated to return a collection of student entities instead of string values.
+
+1. Locate the following line of code: 
+
+    ```c#
+    foreach(string alias in query)
+    {
+        Console.Out.WriteLine(alias);
+    }
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    foreach(Student student in query)
+    foreach(string club in student.Clubs)
+    {
+        Console.Out.WriteLine(club);
+    }
+    ```
+
+    > Our new query will need to iterate twice. First, we will iterate the collection of students and then we will iterate the collection of clubs for each student instance.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see multiple club names printed to the console window.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+    > Since we only really care about the list of clubs, we want to peform a self-join that applies a cross product across the **club** properties of each student in the result set.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **StudentActivity.cs**. The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``StudentActivity`` class:
+
+    ```c#
+    public class StudentActivity
+    {
+        public string Activity { get; set; }
+    }
+    ```
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";    
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
+    ```
+
+    > Here we are performing an intra-document JOIN to get a projection of all clubs across all matching students.
+
+1. Locate the following line of code: 
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+1. Locate the following line of code: 
+
+    ```c#
+    foreach(Student student in query)
+    foreach(string club in student.Clubs)
+    {
+        Console.Out.WriteLine(club);
+    }
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    foreach(StudentActivity studentActivity in studentActivities)
+    {
+        Console.Out.WriteLine(studentActivity.Activity);
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see multiple club names printed to the console window.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+    > While we did get very useful information with our JOIN query, it would be more useful to get the raw array values instead of a wrapped value. It would also make our query easier to read if we could simply create an array of strings.
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
+    ```
+
+    > Here we are using the ``VALUE`` keyword to flatten our query.
+
+1. Locate the following line of code: 
+
+    ```c#
+    IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
+    ```
+
+1. Locate the following line of code: 
+
+    ```c#
+    foreach(StudentActivity studentActivity in query)
+    {
+        Console.Out.WriteLine(studentActivity.Activity);
+    }
+    ```
+
+    Replace that line of code with the following code:
+
+    ```c#
+    foreach(string activity in query)
+    {
+        Console.Out.WriteLine(activity);
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see multiple club names printed to the console window.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+### Task IV: Execute Cross-Partition Query
 
 **
 
-1.
+1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
 
-    ```sql
-    SELECT {
-        "id": s.id,    
-        "email": {
-            "school": CONCAT(s.studentAlias, '@contoso.edu')
-        }
-    } FROM students s WHERE s.enrollmentYear = 2018
+1. Within the **Student.cs** editor tab, locate the following code: 
+
+    ```c#
+    public class Student
+    {
+        public string[] Clubs { get; set; }
+    }  
     ```
 
-    >
+    Replace that code with the following code:
 
-    ```sql
-    SELECT {
-        "id": s.id,    
-        "email": {
-            "school": CONCAT(s.studentAlias, '@contoso.edu')
-        }
-    } AS studentContact
-    FROM students s WHERE s.enrollmentYear = 2018
+    ```c#
+    public class Student
+    {
+        public string StudentAlias { get; set;}
+        public int EnrollmentYear { get; set; }
+        public int ProjectedGraduationYear { get; set; }
+        public string[] Clubs { get; set; }
+    }
     ```
 
-    >
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-    ```sql
-    SELECT VALUE {
-        "id": s.id,    
-        "email": {
-            "school": CONCAT(s.studentAlias, '@contoso.edu')
-        }
-    } FROM students s WHERE s.enrollmentYear = 2018
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
     ```
 
-    >
+    Comment out the line of code:
+
+    ```c#
+    //string sql = "";
+    ```
+
+1. Locate the following line of code: 
+
+    ```c#
+    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));  
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink);
+    ```
+
+1. Locate the following lines of code: 
+
+    ```c#
+    foreach(string activity in query)
+    {
+        Console.Out.WriteLine(activity);
+    }
+    ```
+
+    Replace that code with the following lines of code:
+
+    ```c#
+    foreach(Student student in query)
+    {
+        Console.Out.WriteLine($"[enrollmentYear: {student.EnrollmentYear}]\talias: {student.StudentAlias}");
+    }
+    ```
+
+    > This code uses the new C# string formatting language features.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe that the execution has failed. 
+
+    > Your error message will indicate that you need to enable cross-partition querying to execute the query.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink); 
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
+    ```
+
+    > First we will restrict our query to a single partition using the ``PartitionKey`` property of the ``FeedOptions`` class.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true});    
+    ```
+
+    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``enrollmentYear`` on the left-hand side of the output.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+### Task V: Projecting Query Results
+
+**
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **StudentProfile.cs**. The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``Student`` class:
+
+    ```c#
+    public class StudentProfile
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public StudentProfileEmailInformation Email { get; set; }
+    }
+
+    public class StudentProfileEmailInformation
+    {
+        public string Home { get; set; }
+        public string School { get; set; }
+    }
+    ```
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    //string sql = "";
+    ```
+
+    Uncomment that line of code and replace it with the following code:
+
+    ```c#
+    string sql = "SELECT VALUE { 'id': s.id, 'name': CONCAT(s.firstName, ' ', s.lastName), 'email': { 'home': s.homeEmailAddress, 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018"; 
+    ```
+
+    > This query will get relevant information about a student and format it to a specific JSON structure that our application expects. For your information, here's the query that we are using:
 
     ```sql
     SELECT VALUE {
@@ -546,7 +1129,55 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
     } FROM students s WHERE s.enrollmentYear = 2018
     ```
 
-    >
+1. Locate the following line of code: 
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true}); 
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));   
+    ```
+
+1. Locate the following line of code: 
+
+    ```c#
+    foreach(Student student in query)
+    {
+        Console.Out.WriteLine($"[enrollmentYear: {student.EnrollmentYear}]\talias: {student.StudentAlias}");
+    }
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    foreach(StudentProfile profile in query)
+    {
+        Console.Out.WriteLine($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
+    }
+    ```
+
+    > This code uses the special alignment features of C# string formatting so you can see all properties of the ``StudentProfile`` instances.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
 
 ## Exercise 3: Implement Pagination using the .NET SDK
 
@@ -554,14 +1185,70 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 **
 
-1.
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-    ```sql
-    SELECT * FROM students s WHERE s.enrollmentYear = 2018
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));  
     ```
 
-    >
+    Replace that code with the following code:
 
+    ```c#
+    IDocumentQuery<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql), new FeedOptions { MaxItemCount = 100 }).AsDocumentQuery();
+    ```
+
+    > The DocumentQuery class will allow us to determine if there are more results available and page through results.
+
+1. Locate the following line of code:
+
+    ```c#
+    foreach(StudentProfile profile in query)
+    {
+        Console.Out.WriteLine($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
+    }  
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    int pageCount = 0;
+    while(query.HasMoreResults)
+    {
+        Console.Out.WriteLine($"---Page #{++pageCount:0000}---");
+        foreach(StudentProfile profile in await query.ExecuteNextAsync())
+        {
+            Console.Out.WriteLine($"\t[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
+        }
+    }
+    ```
+
+    > First we check if there are more results using the ``HasMoreResults`` property of the ``IDocumentQuery<>`` interface. If this value is set to true, we invoke the ``ExecuteNextAsync`` method to get the next batch of results and enumerate them using a ``foreach`` block.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > You can view the current page count by looking at the headers in the console output.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+1. Close the Visual Studio Code application.
 
 ## Lab Cleanup
 
