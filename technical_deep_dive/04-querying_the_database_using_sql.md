@@ -9,33 +9,37 @@
 
 ## Exercise 0: Setup
 
-*Prior to starting this lab, we will create an Azure Cosmos DB account, database and container. We will then populate this account with placeholder data for the lab.*
+Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection and then populate the collection with a collection of JSON documents.
 
 ### Task I: Download Required Files
 
-1. Download the [students.json](../files/students.json) file and save it to your local machine. This file will be used later to import documents into your collection.
+*A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
+
+1. Download the [students.json](../files/students.json) file and save it to your local machine.
 
 ### Task II: Create Azure Cosmos DB Assets
+
+*You will now create an Azure Cosmos DB account to use in this lab.*
 
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 
 1. On the left side of the portal, click the **Create a resource** link.
 
-    [![Create a resource](../media/04-create_a_resource.png)](../media/04-create_a_resource.png)
+    ![Create a resource](../media/04-create_a_resource.png)
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
-    [![Search the Marketplace](../media/04-search_the_marketplace.png)](../media/04-search_the_marketplace.png)
+    ![Search the Marketplace](../media/04-search_the_marketplace.png)
 
 1. Enter the text **Cosmos** into the search field and press **Enter**.
 
 1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
 
-    [![Cosmos search results](../media/04-cosmos_search_result.png)](../media/cosmos_search_result.png)
+    ![Cosmos search results](../media/04-cosmos_search_result.png)
 
 1. In the **Azure Cosmos DB** blade, click the **Create** button.
 
-    [![Create Cosmos instance](../media/04-create_cosmos.png)](../media04-create_cosmos.png)
+    ![Create Cosmos instance](../media/04-create_cosmos.png)
 
 1. In the new **Azure Cosmos DB** blade, perform the following actions:
 
@@ -53,23 +57,33 @@
 
     1. Click the **Create** button.
 
-    [![](../media/)](../media/)
+    ![Create Cosmos instance](../media/04-create_cosmos_settings.png)
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
 ### Task III: Create Azure Cosmos DB Database and Collection
 
+*You will now create a database and collection within your Azure Cosmos DB account.*
+
 1. On the left side of the portal, click the **Resource groups** link.
 
-    [![](../media/)](../media/)
+    ![Resource groups](../media/04-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group* link.
+1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+
+    ![Lab resource group](../media/04-lab_resource_group.png)
 
 1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
 
+    ![Cosmos resource](../media/04-cosmos_resource.png)
+
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
+    ![Overview pane](../media/04-overview_pane.png)
+
 1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
+
+    ![Add collection](../media/04-add_collection.png)
 
 1. In the **Add Collection** popup, perform the following actions:
 
@@ -89,19 +103,31 @@
 
     1. Click the **OK** button.
 
+    ![Add collection](../media/04-add_collection_settings.png)
+
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
 ### Task IV: Retrieve Account Credentials
 
+*The Data Migration Tool and .NET SDKs both require credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
+
 1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
+
+    ![Keys pane](../media/04-keys_pane.png)
 
 1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
+    ![Credentials](../media/04-credentials.png)
+
 ### Task V: Import Lab Data Into Collection
+
+*Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab.*
 
 1. On your local machine, open the **Azure Cosmos DB Data Migration Tool**.
 
 1. In the **Welcome** step of the tool, click the **Next** button to begin the migration wizard.
+
+    ![Data Migration Tool - Welcome](../media/04-dmt_welcome.png)
 
 1. In the **Source Information** step of the tool, perform the following actions:
 
@@ -114,6 +140,8 @@
     1. Select the **Decompress data** checkbox.
 
     1. Click the **Next** button.
+
+    ![Data Migration Tool - Source](../media/04-dmt_source.png)
 
 1. In the **Target Information** step of the tool, perform the following actions:
 
@@ -131,41 +159,73 @@
 
     1. Click the **Advanced Options** button.
 
-    1. 
+    1. In the **Number of Parallel Requests** field, increment the value from ``10`` to ``25``.
 
     1. Click the **Next** button.
 
+    ![Data Migration Tool - Target](../media/04-dmt_target.png)
+
 1. In the **Advanced** step of the tool, leave the existing options set to their default values and click the **Next** button.
+
+    ![Data Migration Tool - Advanced](../media/04-dmt_advanced.png)
 
 1. In the **Summary** step of the tool, review your options and then click the **Import** button.
 
+    ![Data Migration Tool - Summary](../media/04-dmt_summary.png)
+
 1. Wait for the import process to complete.
 
+    ![Data Migration Tool - Progress](../media/04-dmt_progress.png)
+
     > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to five minutes.
+
+    ![Data Migration Tool - Results](../media/04-dmt_results.png)
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
 ## Exercise 1: Executing Simple Queries
 
+The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to query the data stored in our collection.*
+
 ### Task I: Validate Imported Data
+
+*First, you will validate that the data was successfully imported into your collection using the **Documents** view in the **Data Explorer**.*
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group* link.
+    ![Resource groups](../media/04-resource_groups.png)
+
+1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+
+    ![Lab resource group](../media/04-lab_resource_group.png)
 
 1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
 
+    ![Cosmos resource](../media/04-cosmos_resource.png)
+
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+    ![Data Explorer pane](../media/04-data_explorer_pane.png)
 
 1. In the **Data Explorer** section, expand the **UniversityDatabase** database node and then expand the **StudentCollection** collection node. 
 
+    ![Collection node](../media/04-collection_node.png)
+
 1. Within the **StudentCollection** node, click the **Documents** link to view a subset of the various documents in the collection. Select a few of the documents and observe the properties and structure of the documents.
 
-### Task II: Executing SELECT Queries
+    ![Documents](../media/04-documents.png)
+
+    ![Example document](../media/04-example_document.png)
+
+### Task II: Executing a Simple SELECT Queries
+
+*You will now use the query editor in the **Data Explorer** to execute a few simple SELECT queries using SQL syntax.*
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+
+    ![New SQL query](../media/04-new_query.png)
 
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
@@ -173,37 +233,111 @@
     SELECT * FROM students s WHERE s.enrollmentYear = 2017
     ```
 
+    > This first query will select all properties from all documents in the collection where the students where enrolled in 2017. You will notice that we are using the alias ``s`` to refer to the collection.
+
+    ![Query editor](../media/04-query_editor.png)
+
 1. Click the **Execute Query** button in the query tab to run the query. 
+
+    ![Execute query](../media/04-execute_query.png)
 
 1. In the **Results** pane, observe the results of your query.
 
-    > This query should have returned a page of records from a single partition.
+    ![Query results](../media/04-query_results.png)
 
-1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT * FROM students WHERE students.enrollmentYear = 2017
+    ```
+
+    > In this query, we drop the ``s`` alias and use the ``students`` source. When we execute this query, we should see the same results as the previous query.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT * FROM arbitraryname WHERE arbitraryname.enrollmentYear = 2017
+    ```
+
+    > In this query, we will prove that the name used for the source can be any name you choose. We will use the name ``arbitraryname`` for the source. When we execute this query, we should see the same results as the previous query.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT s.studentAlias FROM students s WHERE s.enrollmentYear = 2017
+    ```
+
+    > Going back to ``s`` as an alias, we will now create a query where we only select the ``studentAlias`` property and return the value of that property in our result set.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE s.studentAlias FROM students s WHERE s.enrollmentYear = 2017
+    ```
+
+    > In some scenarios, you may need to return a flattened array as the result of your query. This query uses the ``VALUE`` keyword to flatten the array by taking the single returned (string) property and creating a string array.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+### Task II: Implicitly Executing a Cross-Partition Query
+
+*The Data Explorer will allow you to create a cross-partition query without the need to manually configure any settings. You will now use the query editor in the Data Explorer to perform single or multi-partition queries*
+
+1. Back in the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM students s WHERE s.enrollmentYear = 2016 
+    ```
+
+    > Since we know that our partition key is ``/enrollmentYear``, we know that any query that targets a single valid value for the ``enrollmentYear`` property will be a single partition query.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+    > Observe the Request Charge (in RU/s) for the executed query.
+
+1. In the *query editor*, replace the current query with the following query:
 
     ```sql
     SELECT * FROM students s
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    > If we want to execute a blanket query that will fan-out to all partitions, we simply can drop our ``WHERE`` clause that filters on a single valid value for our partition key path.
 
-1. In the **Results** pane, observe the results of your query.
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
-    > This query should have returned a page of records from a single partition.
+    > Observe the Request Charge (in RU/s) for the executed query. You will notice that the charge is relatively greater for this query.
+
+1. Back in the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM students s WHERE s.enrollmentYear IN (2015, 2016, 2017)
+    ```
+
+    > Observe the Request Charge (in RU/s) for the executed query. You will notice that the charge is greater than a single partition but far less than a fan-out across all partitions.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+    > Observe the Request Charge (in RU/s) for the executed query.
+
+### Task III: Use Built-In Functions
+
+*There are a large variety of built-in functions available in the SQL query syntax for the SQL API in Azure Cosmos DB. We will focus on a single function in this task but you can learn more about the others here: [https://docs.microsoft.com/azure/cosmos-db/sql-api-sql-query-reference](https://docs.microsoft.com/azure/cosmos-db/sql-api-sql-query-reference#bk_built_in_functions)*
 
 1. In the *query editor*, replace the current query with the following query:
 
     ```sql
-    SELECT VALUE s.studentAlias FROM students s WHERE s.enrollmentYear = 2016
+    SELECT s.studentAlias FROM students s WHERE s.enrollmentYear = 2015
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    > Our goal is to get the school-issued e-mail address for all students who enrolled in 2015. We can issue a simple query to start that will return the login alias for each student.
 
-1. In the **Results** pane, observe the results of your query.
-
-    > This query should have returned a JSON array containing the aliases of students in the particular collection.
-
-### Task III: Use Built-In Functions
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -211,23 +345,23 @@
     SELECT CONCAT(s.studentAlias, '@contoso.edu') AS email FROM students s WHERE s.enrollmentYear = 2015
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    > To get the school-issued e-mail address, we will need to concatenate the ``@contoso.edu`` string to the end of each alias. We can perform this action using the ``CONCAT`` built-in function.
 
-1. In the **Results** pane, observe the results of your query.
-
-    > This query should have returned a JSON array containing the e-mail address of students in the particular collection.
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
 1. In the *query editor*, replace the current query with the following query:
 
     ```sql
-    SELECT VALUE CONCAT(s.studentAlias, '@contoso.edu') FROM students s WHERE s.enrollmentYear = 2014
+    SELECT VALUE CONCAT(s.studentAlias, '@contoso.edu') FROM students s WHERE s.enrollmentYear = 2015
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    > In most client-side applications, you likely would only need an array of strings as opposed to an array of objects. We can use the ``VALUE`` keyword here to flatten our result set.
 
-1. In the **Results** pane, observe the results of your query.
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
 ### Task IV: Projecting Query Results
+
+**
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -238,70 +372,95 @@
         "isSuspended": s.academicStatus.suspension, 
         "isExpelled": s.academicStatus.expulsion
     } AS studentStatus
-    FROM students s WHERE s.enrollmentYear = 2018
+    FROM students s WHERE s.enrollmentYear = 2014
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    >
 
-1. In the **Results** pane, observe the results of your query.
-
-    > This query should have returned a JSON array containing the status of all new students.
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
 ## Exercise 2: Use .NET SDK to Query Azure Cosmos DB
 
-### Task I: Query Intra-document Array
+### Task 1: Create a .NET Core Project
 
-1. In the *query editor*, replace the current query with the following query:
+**
+
+1.
+
+### Task II: Query Intra-document Array
+
+**
+
+1.
 
     ```sql
-    SELECT clubs
+    SELECT s.clubs
     FROM students s
-    JOIN clubs IN s.clubs
     WHERE s.enrollmentYear = 2018
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    >
 
-1. In the **Results** pane, observe the results of your query.
+    ```sql
+    SELECT activities
+    FROM students s
+    JOIN activities IN s.clubs
+    WHERE s.enrollmentYear = 2018
+    ```
 
-    > This query should have returned a list of all clubs that new students are participating in.
+    >
 
-1. In the *query editor*, replace the current query with the following query:
+    ```sql
+    SELECT VALUE activities
+    FROM students s
+    JOIN activities IN s.clubs
+    WHERE s.enrollmentYear = 2018
+    ```
+
+    >
+
+### Task III: Execute Cross-Partition Query
+
+**
+
+1.
 
     ```sql
     SELECT VALUE clubs
     FROM students s
     JOIN clubs IN s.clubs
-    WHERE s.enrollmentYear = 2018
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    >
 
-1. In the **Results** pane, observe the results of your query.
+### Task IV: Projecting Query Results
 
-    > This query should have returned a more useful JSON array of string values.
+**
 
-### Task II: Execute Cross-Partition Query
-
-1. In the *query editor*, replace the current query with the following query:
+1.
 
     ```sql
-    SELECT VALUE clubs
-    FROM students s
-    JOIN clubs IN s.clubs
+    SELECT {
+        "id": s.id,    
+        "email": {
+            "school": CONCAT(s.studentAlias, '@contoso.edu')
+        }
+    } FROM students s WHERE s.enrollmentYear = 2018
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+    >
 
-1. In the **Results** pane, observe the amount of time required to fetch the query and the RU charge.
+    ```sql
+    SELECT {
+        "id": s.id,    
+        "email": {
+            "school": CONCAT(s.studentAlias, '@contoso.edu')
+        }
+    } AS studentContact
+    FROM students s WHERE s.enrollmentYear = 2018
+    ```
 
-1. Observe the results of your query.
-
-    > This query should have returned all clubs for all students. You will quickly notice that the list of clubs is not unique.
-
-### Task III: Projecting Query Results
-
-1. In the *query editor*, replace the current query with the following query:
+    >
 
     ```sql
     SELECT VALUE {
@@ -312,13 +471,7 @@
     } FROM students s WHERE s.enrollmentYear = 2018
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
-
-1. In the **Results** pane, observe the results of your query.
-
-    > This query should have returned a JSON array containing the filtered contact information necessary to welcome new students.
-
-1. In the *query editor*, replace the current query with the following query:
+    >
 
     ```sql
     SELECT VALUE {
@@ -331,16 +484,21 @@
     } FROM students s WHERE s.enrollmentYear = 2018
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
-
-1. In the **Results** pane, observe the results of your query.
-
-    > This query should have returned a JSON array containing the unfiltered contact information necessary to welcome new students.
+    >
 
 ## Exercise 3: Implement Pagination using the .NET SDK
 
 ### Task I: 
 
+**
+
+1.
+
+    ```sql
+    SELECT * FROM students s WHERE s.enrollmentYear = 2018
+    ```
+
+    >
 
 
 ## Lab Cleanup
