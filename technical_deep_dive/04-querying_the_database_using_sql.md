@@ -535,8 +535,8 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
     ```c#
-    private static readonly Uri _endpointUri = new Uri("https://labqury.documents.azure.com:443/");
-    private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";
+    private static readonly Uri _endpointUri = new Uri("");
+    private static readonly string _primaryKey = "";
     private static readonly string _databaseId = "UniversityDatabase";
     private static readonly string _collectionId = "StudentCollection";  
     ```
