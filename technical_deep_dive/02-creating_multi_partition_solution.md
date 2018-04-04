@@ -111,10 +111,18 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
-    dotnet
+    dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
     ```
 
-    > This command will add the ``Microsoft.Azure.DocumentDB.Core`` NuGet package as a project dependency.
+    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet add package Bogus --version 22.0.7
+    ```
+
+    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -149,8 +157,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
     ```c#
+    using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
@@ -177,8 +188,6 @@ Before starting any lab in this workshop, you will need to create the various Az
     ```c#
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
-    private static readonly string _databaseId = "MultimediaDatabase";
-    private static readonly string _collectionId = "InteractionCollection";  
     ```
 
 1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
@@ -212,6 +221,20 @@ Before starting any lab in this workshop, you will need to create the various Az
     ExecuteLogic(client).Wait();
     ```
 
+1. Locate the **ExecuteLogic** method:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```
+
+1. Within the **Main** method, add the following line of code to asynchronously open a connection:
+
+    ```c#
+    await client.OpenAsync();
+    ```
+
 1. Your ``Program`` class definition should now look like this:
 
     ```c#
@@ -229,7 +252,8 @@ Before starting any lab in this workshop, you will need to create the various Az
         }
 
         private static async Task ExecuteLogic(DocumentClient client)
-        {       
+        {  
+            await client.OpenAsync();     
         }
     }
     ```
@@ -256,19 +280,253 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 **
 
-1.
+1. Locate the **ExecuteLogic** method and delete any existing code:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```
+
+1. Add the following code to the method to create an asynchronous connection:
+
+    ```c#
+    await client.OpenAsync();
+    ```
+
+1. Add the following code to the method to create a new ``Database`` instance:
+
+    ```c#
+    Database targetDatabase = new Database { Id = "EntertainmentDatabase" };
+    ```
+
+1. Add the following code to create a new database instance if one does not already exist:
+
+    ```c#
+    targetDatabase = await client.CreateDatabaseIfNotExistsAsync(targetDatabase);
+    ```
+
+    > This code will check to see if a database exists in your Azure Cosmos DB account that meets the specified parameters. If a database that matches does not exist, it will create a new database.
+
+1. Add the following code to print out the self-link of the database:
+
+    ```c#
+    await Console.Out.WriteLineAsync($"Database Self-Link:\t{targetDatabase.SelfLink}");
+    ```
+
+    > The ``targetDatabase`` variable will have metadata about the database whether a new database is created or an existing one is read.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the running command.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Again, observe the output of the running command.
+
+    > Since the database already exists, you will see the same self-link on both executions of the console application.
+
+1. Click the **🗙** symbol to close the terminal pane.
 
 ### Task IV: Create a Fixed Collection using the SDK
 
 **
 
-1.
+1. Locate the **ExecuteLogic** method and delete any existing code:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```
+
+1. Add the following code to the method to create an asynchronous connection:
+
+    ```c#
+    await client.OpenAsync();
+    ```
+
+1. Add the following code to the method to create a self-link to an existing database:
+
+    ```c#
+    Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
+    ```
+
+1. Add the following lines of code to create a new ``DocumentCollection`` instance where you only specify a value for the ``Id`` property:
+
+    ```c#
+    DocumentCollection defaultCollection = new DocumentCollection 
+    { 
+        Id = "DefaultCollection" 
+    };
+    ```
+
+    > We are going to rely on the default values set for a collection created using the .NET SDK.
+
+1. Add the following code to create a new collection instance if one does not already exist within your database:
+
+    ```c#
+    defaultCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseSelfLink, defaultCollection);
+    ```
+
+    > This code will check to see if a collection exists in your database that meets the specified parameters. If a collection that matches does not exist, it will create a new collection.
+
+1. Add the following code to print out the self-link of the database:
+
+    ```c#
+    await Console.Out.WriteLineAsync($"Default Collection Self-Link:\t{defaultCollection.SelfLink}"); 
+    ```
+
+    > The ``defaultCollection`` variable will have metadata about the collection whether a new collection is created or an existing one is read.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the running command.
+
+1. Click the **🗙** symbol to close the terminal pane.
 
 ### Task IV: Create an Unlimited Collection using the SDK
 
 **
 
-1.
+1. Locate the **ExecuteLogic** method and delete any existing code:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```
+
+1. Add the following code to the method to create an asynchronous connection:
+
+    ```c#
+    await client.OpenAsync();
+    ```
+
+1. Add the following code to the method to create a self-link to an existing database:
+
+    ```c#
+    Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
+    ```
+
+1. Add the following code to create a new ``IndexingPolicy`` instance with a custom indexing policy configured:
+
+    ```c#
+    IndexingPolicy indexingPolicy = new IndexingPolicy
+    {
+        IndexingMode = IndexingMode.Consistent,
+        Automatic = true,
+        IncludedPaths = new Collection<IncludedPath>
+        {
+            new IncludedPath
+            {
+                Path = "/*",
+                Indexes = new Collection<Index>
+                {
+                    new RangeIndex(DataType.Number, -1),
+                    new RangeIndex(DataType.String, -1)                           
+                }
+            }
+        }
+    };
+    ```
+
+    > This indexing policy is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.
+
+1. Add the following code to create a new ``PartitionKeyDefinition`` instance with a single partition key of ``/Type`` defined:
+
+    ```c#
+    PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition
+    {
+        Paths = new Collection<string> { "/Type" }
+    };
+    ```
+
+    > This definition will create a partition key on the ``/Type`` path. Partition keys are case-sensitive.
+
+1. Add the following lines of code to create a new ``DocumentCollection`` instance where you specify values for multiple properties:
+
+    ```c#
+    DocumentCollection customCollection = new DocumentCollection
+    {
+        Id = "CustomCollection",
+        PartitionKey = partitionKeyDefinition,
+        IndexingPolicy = indexingPolicy
+    };   
+    ```
+
+    > We are going to explicitly specify various values for a collection created using the .NET SDK.
+
+1. Add the following code to create a new ``RequestOptions`` instance seting the **throughput** for the collection:
+
+    ```c#
+    RequestOptions requestOptions = new RequestOptions
+    {
+        OfferThroughput = 10000
+    };
+    ```
+
+    > Here is where we can specify the RU/s allocated for the collection. If this is not specified, the SDK has a default value for RU/s assigned to a collection.
+
+1. Add the following code to create a new collection instance if one does not already exist within your database:
+
+    ```c#
+    customCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseSelfLink, customCollection, requestOptions);         
+    ```
+
+    > This code will check to see if a collection exists in your database that meets all of the specified parameters. If a collection that matches does not exist, it will create a new collection.
+
+1. Add the following code to print out the self-link of the database:
+
+    ```c#
+    await Console.Out.WriteLineAsync($"Custom Collection Self-Link:\t{customCollection.SelfLink}");  
+    ```
+
+    > The ``customCollection`` variable will have metadata about the collection whether a new collection is created or an existing one is read.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the running command.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
 
 ### Task V: Observe Newly Created Database and Collections in the Portal
 
@@ -276,7 +534,35 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1.
 
-## Exercise 3: Implement Cross-Partition Queries
+## Exercise 3: Populate a Collection with Documents using the SDK
+
+
+
+### Task I: Populate Unlimited Collection with Data
+
+**
+
+1. Locate the **ExecuteLogic** method and delete any existing code:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```
+
+1. Add the following code to the method to create an asynchronous connection:
+
+    ```c#
+    await client.OpenAsync();
+    ```
+
+1. Add the following code to the method to create a self-link to an existing database:
+
+    ```c#
+    Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
+    ```
+
+## Exercise 4: Implement Cross-Partition Queries
 
 
 
@@ -407,7 +693,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Task I: Execute Cross-Partition Query
+### Task III: Execute Cross-Partition Query
 
 **
 
