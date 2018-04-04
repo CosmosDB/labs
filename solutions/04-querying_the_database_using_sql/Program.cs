@@ -8,8 +8,8 @@ using Microsoft.Azure.Documents.Linq;
 
 public class Program
 { 
-    private static readonly Uri _endpointUri = new Uri("https://labqury.documents.azure.com:443/");
-    private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";
+    private static readonly Uri _endpointUri = new Uri("");
+    private static readonly string _primaryKey = "";
     private static readonly string _databaseId = "UniversityDatabase";
     private static readonly string _collectionId = "StudentCollection";  
 

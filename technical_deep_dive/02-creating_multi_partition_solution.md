@@ -532,15 +532,211 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 **
 
-1.
+1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+    ![Resource groups](../media/02-resource_groups.png)
+
+1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+
+    ![Lab resource group](../media/02-lab_resource_group.png)
+
+1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+
+    ![Cosmos resource](../media/02-cosmos_resource.png)
+
+1. In the **Azure Cosmos DB** blade, observe the new collections and database displayed in the middle of the blade.
+
+    ![New collections](../media/02-created_collections.png)
+
+1. Locate and click the **Data Explorer** link on the left side of the blade.
+
+    ![Data Explorer pane](../media/02-data_explorer_pane.png)
+
+1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection nodes. 
+
+    ![Database node](../media/02-database_node.png)
+
+1. Expand the **DefaultCollection** node. Within the node, click the **Scale & Settings** link.
+
+    ![Scale and settings](../media/02-scale_and_settings.png)
+
+1. Observe the following properties of the collection:
+
+    - Storage Capacity
+
+    - Assigned Throughput
+
+    - Indexing Policy
+
+    ![Fixed-Size collection configuration](../media/02-fixed_configuration.png)
+
+    > You will quickly notice that this is a fixed-size container that has a limited amount of RU/s. The indexing policy is also interesting as it implements a Hash index on string types and Range index on numeric types.
+
+    ```js
+    {
+        "indexingMode": "consistent",
+        "automatic": true,
+        "includedPaths": [
+            {
+                "path": "/*",
+                "indexes": [
+                    {
+                        "kind": "Range",
+                        "dataType": "Number",
+                        "precision": -1
+                    },
+                    {
+                        "kind": "Hash",
+                        "dataType": "String",
+                        "precision": 3
+                    }
+                ]
+            }
+        ],
+        "excludedPaths": []
+    }
+    ```
+
+1. Back in the **Data Explorer** section, expand the **CustomCollection** node. Within the node, click the **Scale & Settings** link.
+
+1. Observe the following properties of the collection and compare them to the last collection:
+
+    - Storage Capacity
+
+    - Assigned Throughput
+
+    - Partition Key
+
+    - Indexing Policy
+
+    ![Fixed-Size collection configuration](../media/02-fixed_configuration.png)
+
+    > You configured all of these values when you created this collection using the SDK. You should take time to look at the custom indexing policy you created using the SDK.
+
+    ```js
+    {
+        "indexingMode": "consistent",
+        "automatic": true,
+        "includedPaths": [
+            {
+                "path": "/*",
+                "indexes": [
+                    {
+                        "kind": "Range",
+                        "dataType": "Number",
+                        "precision": -1
+                    },
+                    {
+                        "kind": "Range",
+                        "dataType": "String",
+                        "precision": -1
+                    }
+                ]
+            }
+        ],
+        "excludedPaths": []
+    }
+    ```
+    
+1. Close your browser window displaying the Azure Portal.
 
 ## Exercise 3: Populate a Collection with Documents using the SDK
 
 
 
-### Task I: Populate Unlimited Collection with Data
+### Task II: Create Test Data Classes
 
 **
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+    ![New File](../media/02-new_file.png)
+
+1. Name the new file **IInteraction.cs**. The editor tab will automatically open for the new file.
+
+    ![Interaction Interface File](../media/02-interaction_interface.png)
+
+1. Paste in the following code for the ``IInteraction`` interface:
+
+    ```c#
+    public interface IInteraction
+    {
+        string type { get; }
+    }
+    ```
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **PurchaseFoodOrBeverage.cs**. The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``PurchaseFoodOrBeverage`` class:
+
+    ```c#
+    public class PurchaseFoodOrBeverage : IInteraction
+    {
+        public decimal unitPrice { get; set; }
+        public decimal totalPrice { get; set; }
+        public int quantity { get; set; }
+        public string type { get; set; }
+    }
+    ```
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **ViewMap.cs**. The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``ViewMap`` class:
+
+    ```c#
+    public class ViewMap : IInteraction
+    {	
+        public int minutesViewed { get; set; }
+        public string type { get; set; }
+    }
+    ```
+    
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **WatchLiveTelevisionChannel.cs**. The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``WatchLiveTelevisionChannel`` class:
+
+    ```c#
+    public class WatchLiveTelevisionChannel : IInteraction
+    {
+        public string channelName { get; set; }
+        public int minutesViewed { get; set; }
+        public string type { get; set; }
+    }
+    ```
+
+1. Observe your newly created files in the **Explorer** pane.
+
+    ![New files](../media/02-new_classes.png)
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet build
+    ```
+
+    > This command will build the console project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+### Task II: Populate Unlimited Collection with Test Data
+
+**
+
+1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
 1. Locate the **ExecuteLogic** method and delete any existing code:
 
@@ -556,90 +752,71 @@ Before starting any lab in this workshop, you will need to create the various Az
     await client.OpenAsync();
     ```
 
-1. Add the following code to the method to create a self-link to an existing database:
+1. Add the following code to the method to create a self-link to an existing collection:
 
     ```c#
-    Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
+    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
     ```
 
-## Exercise 4: Implement Cross-Partition Queries
+1. Observe the code in the **ExecuteLogic** method.
 
+    > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
 
-
-### Task I: Attempt to Execute Multiple-Partition Query
-
-**
-
-1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
-
-1. Within the **Student.cs** editor tab, locate the following code: 
+1. Add the following code to create a collection of ``PurchaseFoodOrBeverage`` instances:
 
     ```c#
-    public class Student
-    {
-        public string[] Clubs { get; set; }
-    }  
+    var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
+        .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
+        .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
+        .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
+        .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
+        .GenerateLazy(500);
     ```
-
-    Replace that code with the following code:
+    
+1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
     ```c#
-    public class Student
+    foreach(var interaction in foodInteractions)
     {
-        public string StudentAlias { get; set;}
-        public int EnrollmentYear { get; set; }
-        public int ProjectedGraduationYear { get; set; }
-        public string[] Clubs { get; set; }
     }
     ```
 
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
-
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
 
     ```c#
-    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
+    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
     ```
 
-    Comment out the line of code:
+    > The ``CreateDocumentAsync`` method of the ``DocumentClient`` class takes in a self-link for a collection and an object that you would like to serialize into JSON and store as a document within the specified collection.
+
+1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
     ```c#
-    //string sql = "";
+    await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
     ```
 
-1. Locate the following line of code: 
+    > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
+
+1. Your **ExecuteLogic** method should look like this:
 
     ```c#
-    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));  
-    ```
-
-    Replace that code with the following code:
-
-    ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink);
-    ```
-
-1. Locate the following lines of code: 
-
-    ```c#
-    foreach(string activity in query)
-    {
-        Console.Out.WriteLine(activity);
+    private static async Task ExecuteLogic(DocumentClient client)
+    {  
+        await client.OpenAsync();
+        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+        var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
+            .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
+            .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
+            .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
+            .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
+            .GenerateLazy(500);
+        foreach(var interaction in foodInteractions)
+        {
+            ResourceResponse<Document> result = await client.CreateDocumentAsync(customCollection.SelfLink, interaction);
+            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+        }
     }
     ```
-
-    Replace that code with the following lines of code:
-
-    ```c#
-    foreach(Student student in query)
-    {
-        Console.Out.WriteLine($"[enrollmentYear: {student.EnrollmentYear}]\talias: {student.StudentAlias}");
-    }
-    ```
-
-    > This code uses the new C# string formatting language features.
 
 1. Save all of your open editor tabs.
 
@@ -653,29 +830,172 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     > This command will build and execute the console project.
 
-1. Observe that the execution has failed. 
+1. Observe the output of the console application.
 
-    > Your error message will indicate that you need to enable cross-partition querying to execute the query.
+    > You should see a list of document ids associated with new documents that are being created by this tool.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Task II: Execute Single-Partition Query
+### Task III: Populate Unlimited Collection with Data of Different Types
 
 **
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Locate the **ExecuteLogic** method and delete any existing code:
 
     ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink); 
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
     ```
 
-    Replace that code with the following code:
+1. Replace the **ExecuteLogic** method with the following implementation:
 
     ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
+    private static async Task ExecuteLogic(DocumentClient client)
+    {  
+        await client.OpenAsync();
+        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+        var tvInteractions = new Bogus.Faker<WatchLiveTelevisionChannel>()
+            .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
+            .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
+            .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
+            .GenerateLazy(500);
+        foreach(var interaction in tvInteractions)
+        {
+            ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+        }
+    }
     ```
 
-    > First we will restrict our query to a single partition using the ``PartitionKey`` property of the ``FeedOptions`` class.
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see a list of document ids associated with new documents that are being created.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Locate the **ExecuteLogic** method and delete any existing code:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```
+
+1. Replace the **ExecuteLogic** method with the following implementation:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {  
+        await client.OpenAsync();
+        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+        var mapInteractions = new Bogus.Faker<ViewMap>()
+            .RuleFor(i => i.type, (fake) => nameof(ViewMap))
+            .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
+            .GenerateLazy(500);
+        foreach(var interaction in mapInteractions)
+        {
+            ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+        }
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see a list of document ids associated with new documents that are being created.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+## Exercise 4: Implement Cross-Partition Queries
+
+
+
+### Task I: Execute Single-Partition Query
+
+**
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **GeneralInteraction.cs**. The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``GeneralInteraction`` class:
+
+    ```c#
+    public class GeneralInteraction : IInteraction
+    {
+        public string id { get; set; }
+
+        public string type { get; set; }
+    }
+    ```
+
+1. Back in the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method and delete any existing code:
+
+    ```c#
+    private static async Task ExecuteLogic(DocumentClient client)
+    {       
+    }
+    ```   
+
+1. Within the **ExecuteLogic** method, add the following line of code to asynchronously open a connection:
+
+    ```c#
+    await client.OpenAsync();
+    ```
+    
+1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
+
+    ```c#
+    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+    ```
+
+1. Add the following line of code to create a query that is filtered to a single partition key:
+
+    ```c#
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey(nameof(ViewMap)) });
+    ```
+
+    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class.
+
+1. Add the following line of code to print out the results of your query:
+
+    ```c#
+    foreach(GeneralInteraction interaction in query)
+    {
+        Console.Out.WriteLine($"[{interaction.type}]\t{interaction.id}");
+    }
+    ```
+
+    > We are using the C# string formatting features to print out two properties of our interactions.
 
 1. Save all of your open editor tabs.
 
@@ -691,6 +1011,8 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Observe the results of the execution.
 
+    > You should only see records from a single partition.
+
 1. Click the **🗙** symbol to close the terminal pane.
 
 ### Task III: Execute Cross-Partition Query
@@ -700,13 +1022,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
     ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey(nameof(ViewMap)) });
     ```
 
     Replace that code with the following code:
 
     ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true});    
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { EnableCrossPartitionQuery = true });
     ```
 
     > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class.
@@ -725,7 +1047,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Observe the results of the execution.
 
-    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``enrollmentYear`` on the left-hand side of the output.
+    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``type`` on the left-hand side of the output.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
