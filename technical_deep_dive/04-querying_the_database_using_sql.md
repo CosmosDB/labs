@@ -362,7 +362,43 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ### Task IV: Projecting Query Results
 
-**
+*In some use cases, we may need to reshape the structure of our result JSON array to a structure that our libraries or third-party APIs can parse. We will focus on a single query and re-shape the results into various formats using the native JSON capabilities in the SQL query syntax.*
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT 
+        CONCAT(s.firstName, " ", s.lastName), 
+        s.academicStatus.warning, 
+        s.academicStatus.suspension, 
+        s.academicStatus.expulsion,
+        s.enrollmentYear,
+        s.projectedGraduationYear
+    FROM students s WHERE s.enrollmentYear = 2014
+    ```
+
+    > In this first query, we want to determine the current status of every student who enrolled in 2014. Our goal here is to eventually have a flattened, simple-to-understand view of every student and their current academic status.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+    > You will quickly notice that the value representing the name of the student, using the ``CONCAT`` function, has a placeholder property name instead of a simple string.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT 
+        CONCAT(s.firstName, " ", s.lastName) AS name, 
+        s.academicStatus.warning, 
+        s.academicStatus.suspension, 
+        s.academicStatus.expulsion,
+        s.enrollmentYear,
+        s.projectedGraduationYear
+    FROM students s WHERE s.enrollmentYear = 2014
+    ```
+
+    > We will update our previous query by naming our property that uses a built-in function.
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -371,12 +407,37 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
         "name": CONCAT(s.firstName, " ", s.lastName), 
         "isWarned": s.academicStatus.warning, 
         "isSuspended": s.academicStatus.suspension, 
-        "isExpelled": s.academicStatus.expulsion
+        "isExpelled": s.academicStatus.expulsion,
+        "enrollment": {
+            "start": s.enrollmentYear,
+            "end": s.projectedGraduationYear
+        }
     } AS studentStatus
     FROM students s WHERE s.enrollmentYear = 2014
     ```
 
-    >
+    > Another alternative way to specify the structure of our JSON document is to use the curly braces from JSON. At this point, we are defining the structure of the JSON result directly in our query. 
+
+1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
+
+    > You should notice that our JSON object is still "wrapped" in another JSON object. Essentially, we have an array of the parent type with a property named ``studentStatus`` that contains the actual data we want.
+
+1. In the *query editor*, replace the current query with the following query:
+
+    ```sql
+    SELECT VALUE {
+        "name": CONCAT(s.firstName, " ", s.lastName), 
+        "isWarned": s.academicStatus.warning, 
+        "isSuspended": s.academicStatus.suspension, 
+        "isExpelled": s.academicStatus.expulsion,
+        "enrollment": {
+            "start": s.enrollmentYear,
+            "end": s.projectedGraduationYear
+        }
+    } FROM students s WHERE s.enrollmentYear = 2014
+    ```
+
+    > If we want to "unwrap" our JSON data and flatten to a simple array of like-structured objects, we need to use the ``VALUE`` keyword.
 
 1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
