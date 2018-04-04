@@ -443,6 +443,8 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ## Exercise 2: Use .NET SDK to Query Azure Cosmos DB
 
+
+
 ### Task 1: Create a .NET Core Project
 
 **
@@ -500,7 +502,6 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
     ![Open editor](../media/04-program_editor.png)
-
 
 ### Task II: Create DocumentClient Instance
 
@@ -918,163 +919,6 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Close all open editor tabs.
 
-### Task IV: Execute Cross-Partition Query
-
-**
-
-1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
-
-1. Within the **Student.cs** editor tab, locate the following code: 
-
-    ```c#
-    public class Student
-    {
-        public string[] Clubs { get; set; }
-    }  
-    ```
-
-    Replace that code with the following code:
-
-    ```c#
-    public class Student
-    {
-        public string StudentAlias { get; set;}
-        public int EnrollmentYear { get; set; }
-        public int ProjectedGraduationYear { get; set; }
-        public string[] Clubs { get; set; }
-    }
-    ```
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
-
-1. Within the **ExecuteLogic** method, locate the following line of code: 
-
-    ```c#
-    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
-    ```
-
-    Comment out the line of code:
-
-    ```c#
-    //string sql = "";
-    ```
-
-1. Locate the following line of code: 
-
-    ```c#
-    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));  
-    ```
-
-    Replace that code with the following code:
-
-    ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink);
-    ```
-
-1. Locate the following lines of code: 
-
-    ```c#
-    foreach(string activity in query)
-    {
-        Console.Out.WriteLine(activity);
-    }
-    ```
-
-    Replace that code with the following lines of code:
-
-    ```c#
-    foreach(Student student in query)
-    {
-        Console.Out.WriteLine($"[enrollmentYear: {student.EnrollmentYear}]\talias: {student.StudentAlias}");
-    }
-    ```
-
-    > This code uses the new C# string formatting language features.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe that the execution has failed. 
-
-    > Your error message will indicate that you need to enable cross-partition querying to execute the query.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Within the **ExecuteLogic** method, locate the following line of code: 
-
-    ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink); 
-    ```
-
-    Replace that code with the following code:
-
-    ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
-    ```
-
-    > First we will restrict our query to a single partition using the ``PartitionKey`` property of the ``FeedOptions`` class.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the results of the execution.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Within the **ExecuteLogic** method, locate the following line of code: 
-
-    ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
-    ```
-
-    Replace that code with the following code:
-
-    ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true});    
-    ```
-
-    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the results of the execution.
-
-    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``enrollmentYear`` on the left-hand side of the output.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
 ### Task V: Projecting Query Results
 
 **
@@ -1180,6 +1024,8 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Close all open editor tabs.
 
 ## Exercise 3: Implement Pagination using the .NET SDK
+
+
 
 ### Task I: 
 

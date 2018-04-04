@@ -1,22 +1,40 @@
 ## Creating a Multi-Partition Solution using Azure Cosmos DB
 
+## Required Software
 
+| Software | Download Link |
+| --- | --- |
+| .NET Core 2.1 (or greater) SDK | [/download.microsoft.com/dotnet-sdk-2.1](https://download.microsoft.com/download/E/2/6/E266C257-F7AF-4E79-8EA2-DF26031C84E2/dotnet-sdk-2.1.103-win-gs-x64.exe)
+| Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
+| Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
 
-### Setup
+## Exercise 0: Setup
 
-> Prior to starting this lab, we will create an Azure Cosmos DB account.
+Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection.
+
+### Task I: Create Azure Cosmos DB Assets
+
+*You will now create an Azure Cosmos DB account to use in this lab.*
 
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 
 1. On the left side of the portal, click the **Create a resource** link.
 
+    ![Create a resource](../media/02-create_a_resource.png)
+
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
+
+    ![Search the Marketplace](../media/02-search_the_marketplace.png)
 
 1. Enter the text **Cosmos** into the search field and press **Enter**.
 
 1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
 
+    ![Cosmos search results](../media/02-cosmos_search_result.png)
+
 1. In the **Azure Cosmos DB** blade, click the **Create** button.
+
+    ![Create Cosmos instance](../media/02-create_cosmos.png)
 
 1. In the new **Azure Cosmos DB** blade, perform the following actions:
 
@@ -30,55 +48,414 @@
 
     1. In the **Resource group** section, enter the value **LABMPAR**  into the empty field.
 
-    1. In the **Location** field, select the **East US** location.
+    1. In the **Location** field, select the **West US** location.
 
     1. Click the **Create** button.
 
+    ![Create Cosmos instance](../media/02-create_cosmos_settings.png)
+
 1. Wait for the creation task to complete before moving on with this lab.  
+
+### Task II: Retrieve Account Credentials
+
+*The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **LABMPAR** *Resource Group* link.
+    ![Resource groups](../media/02-resource_groups.png)
 
-1. In the **LABMPAR** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
 
-1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
+    ![Lab resource group](../media/02-lab_resource_group.png)
 
-1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
+1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
 
-1. In the **Add Collection** popup, perform the following actions:
+    ![Cosmos resource](../media/02-cosmos_resource.png)
 
-    1. In the **Database id** field, enter the value **FinancialClubDatabase**.
+1. In the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    1. In the **Collection id** field, enter the value **MemberCollection**.
+    ![Keys pane](../media/02-keys_pane.png)
 
-    1. In the **Storage capacity** section, select the **Fixed (10 GB)** option.
+1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    1. In the **Throughput** field, enter thev alue **400**.
+    ![Credentials](../media/02-credentials.png)
 
-    1. Click the **OK** button.
+## Exercise 1: Create Unlimited Container using the .NET SDK
 
-1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
-1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-1. In the **Keys** pane, record the values in the **URI** and **Primary Key** fields. You will use these values later in this lab.
+### Task 1: Create a .NET Core Project
 
-### Task: Create Unlimited Container
+**
+
+1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
+
+1. In the new folder, right-click the folder and select the **Open with Code** menu option.
+
+    ![Open with Visual Studio Code](../media/02-open_with_code.png)
+
+    > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
+
+1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+    ![Open in Command Prompt](../media/02-open_command_prompt.png)
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet new console --output .
+    ```
+
+    > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet
+    ```
+
+    > This command will add the ``Microsoft.Azure.DocumentDB.Core`` NuGet package as a project dependency.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet restore
+    ```
+
+    > This command will restore all packages specified as dependencies in the project.
+
+1. In the terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet build
+    ```
+
+    > This command will build the project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Observe the **Program.cs** and **vscodetemple.csproj** files created by the .NET Core CLI.
+
+    ![Project files](../media/02-project_files.png)
+
+1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+
+    ![Open editor](../media/02-program_editor.png)
+
+### Task II: Create DocumentClient Instance
+
+**
+
+1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
+
+    ```c#
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
+    using Microsoft.Azure.Documents.Linq;
+    ```
+
+1. Locate the **Program** class and replace it with the following class:
+
+    ```c#
+    public class Program
+    {
+        public static void Main(string[] args)
+        {         
+        }
+
+        private static async Task ExecuteLogic(DocumentClient client)
+        {
+        }
+    }
+    ```
+
+1. Within the **Program** class, add the following lines of code to create variables for your connection information:
+
+    ```c#
+    private static readonly Uri _endpointUri = new Uri("");
+    private static readonly string _primaryKey = "";
+    private static readonly string _databaseId = "MultimediaDatabase";
+    private static readonly string _collectionId = "InteractionCollection";  
+    ```
+
+1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+
+    > For example, if your **uri** is ``https://labmpar.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://labmpar.documents.azure.com:443/");``.
+
+1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+
+    > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
+    
+1. Locate the **Main** method:
+
+    ```c#
+    public static void Main(string[] args)
+    { 
+    }
+    ```
+
+1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+
+    ```c#
+    using (DocumentClient client = new DocumentClient(endpointUri, primaryKey))
+    {
+        
+    }
+    ```
+
+1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
+
+    ```c#
+    ExecuteLogic(client).Wait();
+    ```
+
+1. Your ``Program`` class definition should now look like this:
+
+    ```c#
+    public class Program
+    { 
+        private static readonly Uri _endpointUri = new Uri("<your uri>");
+        private static readonly string _primaryKey = "<your key>";
+
+        public static void Main(string[] args)
+        {    
+            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+            {
+                ExecuteLogic(client).Wait();
+            }
+        }
+
+        private static async Task ExecuteLogic(DocumentClient client)
+        {       
+        }
+    }
+    ```
+
+    > We will now execute build the application to make sure our code compiles successfully.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet build
+    ```
+
+    > This command will build the console project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+### Task III: Create Database using the SDK
+
+**
 
 1.
 
-### Task: Execute Cross-Partition Queries
+### Task IV: Create a Fixed Collection using the SDK
+
+**
 
 1.
 
-### Task: Deploy Multi-Partition Web Application
+### Task IV: Create an Unlimited Collection using the SDK
+
+**
 
 1.
 
-### Cleanup
+### Task V: Observe Newly Created Database and Collections in the Portal
+
+**
+
+1.
+
+## Exercise 3: Implement Cross-Partition Queries
+
+
+
+### Task I: Attempt to Execute Multiple-Partition Query
+
+**
+
+1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
+
+1. Within the **Student.cs** editor tab, locate the following code: 
+
+    ```c#
+    public class Student
+    {
+        public string[] Clubs { get; set; }
+    }  
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    public class Student
+    {
+        public string StudentAlias { get; set;}
+        public int EnrollmentYear { get; set; }
+        public int ProjectedGraduationYear { get; set; }
+        public string[] Clubs { get; set; }
+    }
+    ```
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
+    ```
+
+    Comment out the line of code:
+
+    ```c#
+    //string sql = "";
+    ```
+
+1. Locate the following line of code: 
+
+    ```c#
+    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));  
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink);
+    ```
+
+1. Locate the following lines of code: 
+
+    ```c#
+    foreach(string activity in query)
+    {
+        Console.Out.WriteLine(activity);
+    }
+    ```
+
+    Replace that code with the following lines of code:
+
+    ```c#
+    foreach(Student student in query)
+    {
+        Console.Out.WriteLine($"[enrollmentYear: {student.EnrollmentYear}]\talias: {student.StudentAlias}");
+    }
+    ```
+
+    > This code uses the new C# string formatting language features.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe that the execution has failed. 
+
+    > Your error message will indicate that you need to enable cross-partition querying to execute the query.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+### Task II: Execute Single-Partition Query
+
+**
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink); 
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
+    ```
+
+    > First we will restrict our query to a single partition using the ``PartitionKey`` property of the ``FeedOptions`` class.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+### Task I: Execute Cross-Partition Query
+
+**
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016)});
+    ```
+
+    Replace that code with the following code:
+
+    ```c#
+    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true});    
+    ```
+
+    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``enrollmentYear`` on the left-hand side of the output.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+1. Close the Visual Studio Code application.
+
+## Lab Cleanup
+
+### Task I: Open Cloud Shell
 
 1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
+
+    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
+
+### Task 2: Use Azure CLI to Delete Resource Group
 
 1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
 
@@ -93,7 +470,3 @@
     ```
 
 1. Close the **Cloud Shell** prompt at the bottom of the portal.
-
-### Review
-
-In this lab, you
