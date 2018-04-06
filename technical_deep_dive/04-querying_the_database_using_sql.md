@@ -1,6 +1,6 @@
 # Querying An Azure Cosmos DB Database using the SQL API
 
-## Required Software
+**Required Software**
 
 | Software | Download Link |
 | --- | --- |

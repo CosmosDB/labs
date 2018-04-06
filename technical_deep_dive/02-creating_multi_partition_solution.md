@@ -1,6 +1,6 @@
-## Creating a Multi-Partition Solution using Azure Cosmos DB
+# Creating a Multi-Partition Solution using Azure Cosmos DB
 
-## Required Software
+**Required Software**
 
 | Software | Download Link |
 | --- | --- |
