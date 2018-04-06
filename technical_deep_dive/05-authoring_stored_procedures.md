@@ -87,3 +87,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 ### Open Data Explorer
 
 1.
+
+### Create DocumentClient Instance
+
+1.
