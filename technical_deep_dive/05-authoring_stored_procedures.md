@@ -80,4 +80,10 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Credentials](../media/02-credentials.png)
 
-## Exercise
+## Author Simple Stored Procedure
+
+
+
+### Open Data Explorer
+
+1.

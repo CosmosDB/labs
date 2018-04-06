@@ -184,4 +184,10 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
-## Exercise
+## Use .NET SDK to Access Azure Cosmos DB
+
+
+
+### Create a .NET Core Project
+
+1.
