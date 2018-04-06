@@ -191,3 +191,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 ### Create a .NET Core Project
 
 1.
+
+### Create DocumentClient Instance
+
+1.
