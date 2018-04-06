@@ -8,11 +8,11 @@
 | Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
 | Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
 
-## Exercise 0: Setup
+## Setup
 
 Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection.
 
-### Task I: Create Azure Cosmos DB Assets
+### Create Azure Cosmos DB Assets
 
 *You will now create an Azure Cosmos DB account to use in this lab.*
 
@@ -56,7 +56,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
-### Task II: Retrieve Account Credentials
+### Retrieve Account Credentials
 
 *The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
 
@@ -80,11 +80,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Credentials](../media/02-credentials.png)
 
-## Exercise 1: Create Unlimited Container using the .NET SDK
+## Create Unlimited Container using the .NET SDK
 
 
 
-### Task 1: Create a .NET Core Project
+### Create a .NET Core Project
 
 **
 
@@ -150,7 +150,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Open editor](../media/02-program_editor.png)
 
-### Task II: Create DocumentClient Instance
+### Create DocumentClient Instance
 
 **
 
@@ -276,7 +276,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Close all open editor tabs.
 
-### Task III: Create Database using the SDK
+### Create Database using the SDK
 
 **
 
@@ -344,7 +344,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Task IV: Create a Fixed Collection using the SDK
+### Create a Fixed Collection using the SDK
 
 **
 
@@ -411,7 +411,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Task IV: Create an Unlimited Collection using the SDK
+### Create an Unlimited Collection using the SDK
 
 **
 
@@ -528,7 +528,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Close all open editor tabs.
 
-### Task V: Observe Newly Created Database and Collections in the Portal
+### Observe Newly Created Database and Collections in the Portal
 
 **
 
@@ -642,11 +642,11 @@ Before starting any lab in this workshop, you will need to create the various Az
     
 1. Close your browser window displaying the Azure Portal.
 
-## Exercise 3: Populate a Collection with Documents using the SDK
+## Populate a Collection with Documents using the SDK
 
 
 
-### Task II: Create Test Data Classes
+### Create Test Data Classes
 
 **
 
@@ -732,7 +732,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Close all open editor tabs.
 
-### Task II: Populate Unlimited Collection with Test Data
+### Populate Unlimited Collection with Test Data
 
 **
 
@@ -836,7 +836,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Task III: Populate Unlimited Collection with Data of Different Types
+### Populate Unlimited Collection with Data of Different Types
 
 **
 
@@ -933,11 +933,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Close all open editor tabs.
 
-## Exercise 4: Implement Cross-Partition Queries
+## Implement Cross-Partition Queries
 
 
 
-### Task I: Execute Single-Partition Query
+### Execute Single-Partition Query
 
 **
 
@@ -1015,7 +1015,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Task III: Execute Cross-Partition Query
+### Execute Cross-Partition Query
 
 **
 
@@ -1057,13 +1057,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ## Lab Cleanup
 
-### Task I: Open Cloud Shell
+### Open Cloud Shell
 
 1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
 
     > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
 
-### Task 2: Use Azure CLI to Delete Resource Group
+### Use Azure CLI to Delete Resource Group
 
 1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
 

@@ -8,17 +8,17 @@
 | Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
 | Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
 
-## Exercise 0: Setup
+## Setup
 
 Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection and then populate the collection with a collection of JSON documents.
 
-### Task I: Download Required Files
+### Download Required Files
 
 *A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
 
 1. Download the [students.json](../files/students.json) file and save it to your local machine.
 
-### Task II: Create Azure Cosmos DB Assets
+### Create Azure Cosmos DB Assets
 
 *You will now create an Azure Cosmos DB account to use in this lab.*
 
@@ -62,7 +62,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
-### Task III: Create Azure Cosmos DB Database and Collection
+### Create Azure Cosmos DB Database and Collection
 
 *You will now create a database and collection within your Azure Cosmos DB account.*
 
@@ -108,7 +108,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
-### Task IV: Retrieve Account Credentials
+### Retrieve Account Credentials
 
 *The Data Migration Tool and .NET SDKs both require credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
 
@@ -120,7 +120,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Credentials](../media/04-credentials.png)
 
-### Task V: Import Lab Data Into Collection
+### Import Lab Data Into Collection
 
 *Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab.*
 
@@ -184,11 +184,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
-## Exercise 1: Executing Simple Queries
+## Executing Simple Queries
 
 The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to query the data stored in our collection.*
 
-### Task I: Validate Imported Data
+### Validate Imported Data
 
 *First, you will validate that the data was successfully imported into your collection using the **Documents** view in the **Data Explorer**.*
 
@@ -220,7 +220,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     ![Example document](../media/04-example_document.png)
 
-### Task II: Executing a Simple SELECT Queries
+### Executing a Simple SELECT Queries
 
 *You will now use the query editor in the **Data Explorer** to execute a few simple SELECT queries using SQL syntax.*
 
@@ -286,7 +286,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
-### Task II: Implicitly Executing a Cross-Partition Query
+### Implicitly Executing a Cross-Partition Query
 
 *The Data Explorer will allow you to create a cross-partition query without the need to manually configure any settings. You will now use the query editor in the Data Explorer to perform single or multi-partition queries*
 
@@ -326,7 +326,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     > Observe the Request Charge (in RU/s) for the executed query.
 
-### Task III: Use Built-In Functions
+### Use Built-In Functions
 
 *There are a large variety of built-in functions available in the SQL query syntax for the SQL API in Azure Cosmos DB. We will focus on a single function in this task but you can learn more about the others here: [https://docs.microsoft.com/azure/cosmos-db/sql-api-sql-query-reference](https://docs.microsoft.com/azure/cosmos-db/sql-api-sql-query-reference#bk_built_in_functions)*
 
@@ -360,7 +360,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
-### Task IV: Projecting Query Results
+### Projecting Query Results
 
 *In some use cases, we may need to reshape the structure of our result JSON array to a structure that our libraries or third-party APIs can parse. We will focus on a single query and re-shape the results into various formats using the native JSON capabilities in the SQL query syntax.*
 
@@ -441,11 +441,11 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
-## Exercise 2: Use .NET SDK to Query Azure Cosmos DB
+## Use .NET SDK to Query Azure Cosmos DB
 
 
 
-### Task 1: Create a .NET Core Project
+### Create a .NET Core Project
 
 **
 
@@ -503,7 +503,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     ![Open editor](../media/04-program_editor.png)
 
-### Task II: Create DocumentClient Instance
+### Create DocumentClient Instance
 
 **
 
@@ -675,7 +675,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Close all open editor tabs.
 
-### Task III: Query Intra-document Array
+### Query Intra-document Array
 
 **
 
@@ -919,7 +919,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Close all open editor tabs.
 
-### Task V: Projecting Query Results
+### Projecting Query Results
 
 **
 
@@ -1023,11 +1023,11 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Close all open editor tabs.
 
-## Exercise 3: Implement Pagination using the .NET SDK
+## Implement Pagination using the .NET SDK
 
 
 
-### Task I: 
+### 
 
 **
 
@@ -1098,13 +1098,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ## Lab Cleanup
 
-### Task I: Open Cloud Shell
+### Open Cloud Shell
 
 1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
 
     > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
 
-### Task 2: Use Azure CLI to Delete Resource Group
+### Use Azure CLI to Delete Resource Group
 
 1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
 
