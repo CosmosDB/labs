@@ -1,12 +1,3 @@
-# Azure Cosmos DB Workshop
-
-This series of workshops will give you hands-on experience working with Azure Cosmos DB using the SQL API, JavaScript and .NET Core SDK.
-
-- To learn more about the SQL API: <https://docs.microsoft.com/azure/cosmos-db/sql-api-introduction>
-- To learn about the SQL Syntax: <https://docs.microsoft.com/azure/cosmos-db/sql-api-sql-query-reference>
-- To learn about programming using JavaScript in the SQL API: <https://docs.microsoft.com/azure/cosmos-db/programming>
-- To learn more about the .NET SDK: <https://docs.microsoft.com/azure/cosmos-db/tutorial-develop-sql-api-dotnet>
-
 # Prerequisites
 
 Prior to starting these labs, you must have the following operating system and software configured on your local machine:

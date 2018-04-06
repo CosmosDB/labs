@@ -1,4 +1,5 @@
-title: 'Azure Cosmos DB Lab Experience'
+title: 'Azure Cosmos DB Workshop'
+description: 'This series of workshops will give you hands-on experience working with Azure Cosmos DB using the SQL API, JavaScript and .NET Core SDK.'
 remote_theme: azure-immersion/cosmos-jekyll-theme
 exclude:
   - .build/
