@@ -88,6 +88,8 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1.
 
-### Create DocumentClient Instance
+### Create Stored Procedure
 
 1.
+
+### Validate Stored Procedure
