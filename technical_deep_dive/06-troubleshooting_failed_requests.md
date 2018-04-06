@@ -1,4 +1,4 @@
-## Troubleshooting Failed and Throttled Azure Cosmos DB Requests 
+# Troubleshooting Failed and Throttled Azure Cosmos DB Requests 
 
 **Required Software**
 

@@ -1,4 +1,4 @@
-## Authoring Azure Cosmos DB Stored Procedures using JavaScript 
+# Authoring Azure Cosmos DB Stored Procedures using JavaScript 
 
 **Required Software**
 
