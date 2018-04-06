@@ -7,17 +7,17 @@ This series of workshops will give you hands-on experience working with Azure Co
 - To learn about programming using JavaScript in the SQL API: <https://docs.microsoft.com/azure/cosmos-db/programming>
 - To learn more about the .NET SDK: <https://docs.microsoft.com/azure/cosmos-db/tutorial-develop-sql-api-dotnet>
 
-## Prerequisites
+# Prerequisites
 
 Prior to starting these labs, you must have the following operating system and software configured on your local machine:
 
-### Operating System
+**Operating System**
 
 - Windows 10 Operating System
     - 64-bit
     - Microsoft .NET Framework 4.51 or higher
 
-### Software to Install
+**Software to Install**
 
 | Software | Download Link |
 | --- | --- |
@@ -25,7 +25,7 @@ Prior to starting these labs, you must have the following operating system and s
 | Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
 | Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
 
-## Labs
+# Labs
 
 - [Creating a Multi-Partition Solution using Azure Cosmos DB](technical_deep_dive/02-creating_multi_partition_solution.md)
 - [Querying An Azure Cosmos DB Database using the SQL API](technical_deep_dive/04-querying_the_database_using_sql.md)
