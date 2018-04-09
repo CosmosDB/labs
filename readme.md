@@ -20,4 +20,5 @@ Prior to starting these labs, you must have the following operating system and s
 
 - [Creating a Multi-Partition Solution using Azure Cosmos DB](technical_deep_dive/02-creating_multi_partition_solution.md)
 - [Querying An Azure Cosmos DB Database using the SQL API](technical_deep_dive/04-querying_the_database_using_sql.md)
+- [Authoring Azure Cosmos DB Stored Procedures using JavaScript ](technical_deep_dive/05-authoring_stored_procedures.md)
 - [Troubleshooting and Tuning Azure Cosmos DB Requests](technical_deep_dive/06-troubleshooting_failed_requests.md)
