@@ -20,21 +20,21 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. On the left side of the portal, click the **Create a resource** link.
 
-    ![Create a resource](../media/02-create_a_resource.png)
+    ![Create a resource](../media/06-create_a_resource.png)
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
-    ![Search the Marketplace](../media/02-search_the_marketplace.png)
+    ![Search the Marketplace](../media/06-search_the_marketplace.png)
 
 1. Enter the text **Cosmos** into the search field and press **Enter**.
 
 1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
 
-    ![Cosmos search results](../media/02-cosmos_search_result.png)
+    ![Cosmos search results](../media/06-cosmos_search_result.png)
 
 1. In the **Azure Cosmos DB** blade, click the **Create** button.
 
-    ![Create Cosmos instance](../media/02-create_cosmos.png)
+    ![Create Cosmos instance](../media/06-create_cosmos.png)
 
 1. In the new **Azure Cosmos DB** blade, perform the following actions:
 
@@ -52,7 +52,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. Click the **Create** button.
 
-    ![Create Cosmos instance](../media/02-create_cosmos_settings.png)
+    ![Create Cosmos instance](../media/06-create_cosmos_settings.png)
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
@@ -62,23 +62,23 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/02-resource_groups.png)
+    ![Resource groups](../media/06-resource_groups.png)
 
 1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
 
-    ![Lab resource group](../media/02-lab_resource_group.png)
+    ![Lab resource group](../media/06-lab_resource_group.png)
 
 1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/02-cosmos_resource.png)
+    ![Cosmos resource](../media/06-cosmos_resource.png)
 
 1. In the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../media/02-keys_pane.png)
+    ![Keys pane](../media/06-keys_pane.png)
 
 1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/02-credentials.png)
+    ![Credentials](../media/06-credentials.png)
 
 ## Author Simple Stored Procedure
 
@@ -93,3 +93,17 @@ Before starting any lab in this workshop, you will need to create the various Az
 1.
 
 ### Validate Stored Procedure
+
+1.
+
+## Use .NET SDK to Execute Stored Procedure
+
+
+
+### Create a .NET Core Project
+
+1.
+
+### Create DocumentClient Instance
+
+1.

@@ -1,4 +1,4 @@
-# Troubleshooting Failed and Throttled Azure Cosmos DB Requests 
+# Troubleshooting and Tuning Azure Cosmos DB Requests 
 
 **Required Software**
 
@@ -16,7 +16,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 *A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
 
-1. Download the [incidents.json](../files/incidents.json) file and save it to your local machine.
+1. Download the [transactions.json](../files/transactions.json) file and save it to your local machine.
 
 ### Create Azure Cosmos DB Assets
 
@@ -26,21 +26,21 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. On the left side of the portal, click the **Create a resource** link.
 
-    ![Create a resource](../media/04-create_a_resource.png)
+    ![Create a resource](../media/06-create_a_resource.png)
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
-    ![Search the Marketplace](../media/04-search_the_marketplace.png)
+    ![Search the Marketplace](../media/06-search_the_marketplace.png)
 
 1. Enter the text **Cosmos** into the search field and press **Enter**.
 
 1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
 
-    ![Cosmos search results](../media/04-cosmos_search_result.png)
+    ![Cosmos search results](../media/06-cosmos_search_result.png)
 
 1. In the **Azure Cosmos DB** blade, click the **Create** button.
 
-    ![Create Cosmos instance](../media/04-create_cosmos.png)
+    ![Create Cosmos instance](../media/06-create_cosmos.png)
 
 1. In the new **Azure Cosmos DB** blade, perform the following actions:
 
@@ -58,7 +58,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. Click the **Create** button.
 
-    ![Create Cosmos instance](../media/04-create_cosmos_settings.png)
+    ![Create Cosmos instance](../media/06-create_cosmos_settings.png)
 
 1. Wait for the creation task to complete before moving on with this lab.  
 
@@ -68,23 +68,23 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/04-resource_groups.png)
+    ![Resource groups](../media/06-resource_groups.png)
 
 1. In the **Resource groups** blade, locate and select the **LABTRBL** *Resource Group*.
 
-    ![Lab resource group](../media/04-lab_resource_group.png)
+    ![Lab resource group](../media/06-lab_resource_group.png)
 
 1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/04-cosmos_resource.png)
+    ![Cosmos resource](../media/06-cosmos_resource.png)
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
-    ![Overview pane](../media/04-overview_pane.png)
+    ![Overview pane](../media/06-overview_pane.png)
 
 1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
 
-    ![Add collection](../media/04-add_collection.png)
+    ![Add collection](../media/06-add_collection.png)
 
 1. In the **Add Collection** popup, perform the following actions:
 
@@ -104,7 +104,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. Click the **OK** button.
 
-    ![Add collection](../media/04-add_collection_settings.png)
+    ![Add collection](../media/06-add_collection_settings.png)
 
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
@@ -114,11 +114,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../media/04-keys_pane.png)
+    ![Keys pane](../media/06-keys_pane.png)
 
 1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/04-credentials.png)
+    ![Credentials](../media/06-credentials.png)
 
 ### Import Lab Data Into Collection
 
@@ -128,7 +128,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. In the **Welcome** step of the tool, click the **Next** button to begin the migration wizard.
 
-    ![Data Migration Tool - Welcome](../media/04-dmt_welcome.png)
+    ![Data Migration Tool - Welcome](../media/06-dmt_welcome.png)
 
 1. In the **Source Information** step of the tool, perform the following actions:
 
@@ -136,13 +136,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. Click the **Add Files** button.
 
-    1. In the *Windows Explorer* dialog that opens, locate and select the **incidents.json** file you downloaded earlier in this lab. Click the **Open** button to add the file.
+    1. In the *Windows Explorer* dialog that opens, locate and select the **transactions.json** file you downloaded earlier in this lab. Click the **Open** button to add the file.
 
     1. Select the **Decompress data** checkbox.
 
     1. Click the **Next** button.
 
-    ![Data Migration Tool - Source](../media/04-dmt_source.png)
+    ![Data Migration Tool - Source](../media/06-dmt_source.png)
 
 1. In the **Target Information** step of the tool, perform the following actions:
 
@@ -164,27 +164,27 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. Click the **Next** button.
 
-    ![Data Migration Tool - Target](../media/04-dmt_target.png)
+    ![Data Migration Tool - Target](../media/06-dmt_target.png)
 
 1. In the **Advanced** step of the tool, leave the existing options set to their default values and click the **Next** button.
 
-    ![Data Migration Tool - Advanced](../media/04-dmt_advanced.png)
+    ![Data Migration Tool - Advanced](../media/06-dmt_advanced.png)
 
 1. In the **Summary** step of the tool, review your options and then click the **Import** button.
 
-    ![Data Migration Tool - Summary](../media/04-dmt_summary.png)
+    ![Data Migration Tool - Summary](../media/06-dmt_summary.png)
 
 1. Wait for the import process to complete.
 
-    ![Data Migration Tool - Progress](../media/04-dmt_progress.png)
+    ![Data Migration Tool - Progress](../media/06-dmt_progress.png)
 
     > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to five minutes.
 
-    ![Data Migration Tool - Results](../media/04-dmt_results.png)
+    ![Data Migration Tool - Results](../media/06-dmt_results.png)
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
-## Use .NET SDK to Access Azure Cosmos DB
+## Use .NET SDK to Attempt Requests
 
 
 
