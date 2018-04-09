@@ -157,7 +157,6 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
     ```c#
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -229,7 +228,7 @@ Before starting any lab in this workshop, you will need to create the various Az
     }
     ```
 
-1. Within the **Main** method, add the following line of code to asynchronously open a connection:
+1. Within the **ExecuteLogic** method, add the following line of code to asynchronously open a connection:
 
     ```c#
     await client.OpenAsync();
