@@ -52,33 +52,49 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. Click the **Create** button.
 
-    ![Create Cosmos instance](../media/06-create_cosmos_settings.png)
-
 1. Wait for the creation task to complete before moving on with this lab.  
 
-### Retrieve Account Credentials
+### Create Azure Cosmos DB Database and Collection
 
-*The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
+*You will now create a database and collection within your Azure Cosmos DB account.*
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/06-resource_groups.png)
+    ![Resource groups](../media/04-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **LABPROC** *Resource Group*.
 
-    ![Lab resource group](../media/06-lab_resource_group.png)
+1. In the **LABPROC** blade, select the **Azure Cosmos DB** account you recently created.
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
-    ![Cosmos resource](../media/06-cosmos_resource.png)
+1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
 
-1. In the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
+1. In the **Add Collection** popup, perform the following actions:
 
-    ![Keys pane](../media/06-keys_pane.png)
+    1. In the **Database id** field, enter the value **FinancialDatabase**.
+
+    1. In the **Collection id** field, enter the value **InvestorCollection**.
+
+    1. In the **Storage capacity** section, select the **Unlimited** option.
+
+    1. In the **Partition key** field, enter the value ``/company``.
+
+    1. In the **Throughput** field, enter the value ``10000``.
+
+    1. Click the **OK** button.
+
+1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
+
+### Retrieve Account Credentials
+
+*The Data Migration Tool and .NET SDKs both require credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
+
+1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
 1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/06-credentials.png)
+    ![Credentials](../media/04-credentials.png)
 
 ## Author Simple Stored Procedure
 
@@ -86,13 +102,59 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ### Open Data Explorer
 
+**
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then expand the **InvestorCollection** collection node. 
+
+1. Within the **InvestorCollection** node, click the **Documents** link.
+
+### Create Simple Stored Procedure
+
+1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
+
+1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: **greetCaller**.
+
+1. Replace the contents of the *stored procedure editor* with the following JavaScript code:
+
+    ```js
+    function greetCaller(name) {
+        var context = getContext();
+        var response = context.getResponse();
+        response.setBody("Hello " + name);
+    }
+    ```
+
+    > This simple stored procedure will echo the input parameter string with the text ``Hello `` as a prefix.
+
+1. Click the **Save** button at the top of the tab.
+
+1. Click the **Execute** button at the top of the tab.
+
+1. In the **Input parameters** popup that appears, perform the following actions:
+
+    1. In the **Partition key value** field, enter the value: ``example``.
+    
+    1. Click the **Add New Param** button.
+
+    1. In the new field that appears, enter the value: ``Person``.
+
+    1. Click the **Execute** button.
+
+1. In the **Result** pane at the bottom of the tab, observe the results of the stored procedure's execution.
+
+    > The output should be ``"Hello Person"``.
+
+### Create Stored Procedure with Nested Callbacks
+
 1.
 
-### Create Stored Procedure
+### Create Stored Procedure with Callback Functions
 
 1.
 
-### Validate Stored Procedure
+### Create Stored Procedure with Error Handling
 
 1.
 
@@ -107,6 +169,14 @@ Before starting any lab in this workshop, you will need to create the various Az
 ### Create DocumentClient Instance
 
 1.
+
+### Create Stored Procedure using SDK
+
+1.
+
+### Execute Stored Procedure using SDK
+
+1. 
 
 ## Lab Cleanup
 
