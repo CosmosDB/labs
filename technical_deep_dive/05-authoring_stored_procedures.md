@@ -148,13 +148,46 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ### Create Stored Procedure with Nested Callbacks
 
+1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
+
+1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: ****.
+
+1. Replace the contents of the *stored procedure editor* with the following JavaScript code:
+
+    ```js
+    ```
+
+    >
+
 1.
 
 ### Create Stored Procedure with Callback Functions
 
+1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
+
+1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: ****.
+
+1. Replace the contents of the *stored procedure editor* with the following JavaScript code:
+
+    ```js
+    ```
+
+    >
+
 1.
 
 ### Create Stored Procedure with Error Handling
+
+1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
+
+1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: ****.
+
+1. Replace the contents of the *stored procedure editor* with the following JavaScript code:
+
+    ```js
+    ```
+
+    >
 
 1.
 
