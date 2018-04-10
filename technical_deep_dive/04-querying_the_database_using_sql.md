@@ -561,7 +561,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
     ```c#
-    using (DocumentClient client = new DocumentClient(endpointUri, primaryKey))
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
     {
         
     }
@@ -825,7 +825,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
     Replace that line of code with the following code:
 
     ```c#
-    foreach(StudentActivity studentActivity in studentActivities)
+    foreach(StudentActivity studentActivity in query)
     {
         Console.Out.WriteLine(studentActivity.Activity);
     }
@@ -927,7 +927,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Name the new file **StudentProfile.cs**. The editor tab will automatically open for the new file.
 
-1. Paste in the following code for the ``Student`` class:
+1. Paste in the following code for the ``StudentProfile`` and ``StudentProfileEmailInformation`` classes:
 
     ```c#
     public class StudentProfile
@@ -951,10 +951,10 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
     ```c#
-    //string sql = "";
+    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
-    Uncomment that line of code and replace it with the following code:
+    Replace that line of code with the following code:
 
     ```c#
     string sql = "SELECT VALUE { 'id': s.id, 'name': CONCAT(s.firstName, ' ', s.lastName), 'email': { 'home': s.homeEmailAddress, 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018"; 
@@ -976,7 +976,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Locate the following line of code: 
 
     ```c#
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true}); 
+    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that code with the following code:
@@ -988,9 +988,9 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Locate the following line of code: 
 
     ```c#
-    foreach(Student student in query)
+    foreach(string activity in query)
     {
-        Console.Out.WriteLine($"[enrollmentYear: {student.EnrollmentYear}]\talias: {student.StudentAlias}");
+        Console.Out.WriteLine(activity);
     }
     ```
 
@@ -1049,7 +1049,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     > The DocumentQuery class will allow us to determine if there are more results available and page through results.
 
-1. Locate the following line of code:
+1. Locate the following lines of code:
 
     ```c#
     foreach(StudentProfile profile in query)
