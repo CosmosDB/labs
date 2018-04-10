@@ -985,7 +985,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
     IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));   
     ```
 
-1. Locate the following line of code: 
+1. Locate the following lines of code: 
 
     ```c#
     foreach(string activity in query)
