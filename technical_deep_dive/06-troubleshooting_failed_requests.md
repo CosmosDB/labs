@@ -1,6 +1,6 @@
 # Troubleshooting and Tuning Azure Cosmos DB Requests 
 
-**Required Software**
+**Required Software** 
 
 | Software | Download Link |
 | --- | --- |
