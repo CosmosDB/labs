@@ -463,11 +463,11 @@ Before starting any lab in this workshop, you will need to create the various Az
     ```c#
     PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition
     {
-        Paths = new Collection<string> { "/Type" }
+        Paths = new Collection<string> { $"/{nameof(IInteraction.type)}" }
     };
     ```
 
-    > This definition will create a partition key on the ``/Type`` path. Partition keys are case-sensitive.
+    > This definition will create a partition key on the ``/type`` path. Partition keys are case-sensitive.
 
 1. Add the following lines of code to create a new ``DocumentCollection`` instance where you specify values for multiple properties:
 
