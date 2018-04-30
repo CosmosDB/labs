@@ -182,7 +182,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Observe the **Program.cs** and **vscodetemple.csproj** files created by the .NET Core CLI.
+1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
     ![Project files](../media/06-project_files.png)
 
@@ -1019,27 +1019,3 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Observe the output of the console application.
 
     > This change should have decreased your query time by a small amount.
-
-## Lab Cleanup
-
-### Open Cloud Shell
-
-1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
-
-    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
-
-### Use Azure CLI to Delete Resource Group
-
-1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
-
-    ```
-    az group list
-    ```
-
-1. Type in the following command and press **Enter** to delete the **LABTRBL** *Resource Group*:
-
-    ```
-    az group delete --name LABTRBL --no-wait --yes
-    ```
-
-1. Close the **Cloud Shell** prompt at the bottom of the portal.

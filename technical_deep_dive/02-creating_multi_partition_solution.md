@@ -90,11 +90,11 @@
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Observe the **Program.cs** and **[your folder name].csproj** files created by the .NET Core CLI.
+1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
     ![Project files](../media/02-project_files.png)
 
-1. Double-click the **[your folder name].csproj** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
 
 1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
 
@@ -148,7 +148,7 @@
     ```csharp
     public class Program
     {
-        public static async void Main(string[] args)
+        public static async Task Main(string[] args)
         {         
         }
     }
@@ -225,7 +225,7 @@
 
 **
 
-1. Locate the **Main** method and add the following code within the using block inside of the method:
+1. Locate the using block within the **Main** method:
 
     ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))

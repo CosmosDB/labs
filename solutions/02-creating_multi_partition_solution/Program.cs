@@ -10,8 +10,8 @@ using Microsoft.Azure.Documents.Linq;
 
 public class Program
 {  
-    private static readonly Uri _endpointUri = new Uri("https://[account].documents.azure.com:443/");
-    private static readonly string _primaryKey = "[key]";
+    private static readonly Uri _endpointUri = new Uri("");
+    private static readonly string _primaryKey = "";
 
     public static async Task Main(string[] args)    
     {    
