@@ -1,66 +1,14 @@
 # Querying An Azure Cosmos DB Database using the SQL API
 
-**Required Software**
-
-| Software | Download Link |
-| --- | --- |
-| .NET Core 2.1 (or greater) SDK | [/download.microsoft.com/dotnet-sdk-2.1](https://download.microsoft.com/download/E/2/6/E266C257-F7AF-4E79-8EA2-DF26031C84E2/dotnet-sdk-2.1.103-win-gs-x64.exe)
-| Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
-| Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
-
 ## Setup
 
-Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection and then populate the collection with a collection of JSON documents.
+
 
 ### Download Required Files
 
 *A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
 
 1. Download the [students.json](../files/students.json) file and save it to your local machine.
-
-### Create Azure Cosmos DB Assets
-
-*You will now create an Azure Cosmos DB account to use in this lab.*
-
-1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Create a resource** link.
-
-    ![Create a resource](../media/04-create_a_resource.png)
-
-1. At the top of the **New** blade, locate the **Search the Marketplace** field.
-
-    ![Search the Marketplace](../media/04-search_the_marketplace.png)
-
-1. Enter the text **Cosmos** into the search field and press **Enter**.
-
-1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
-
-    ![Cosmos search results](../media/04-cosmos_search_result.png)
-
-1. In the **Azure Cosmos DB** blade, click the **Create** button.
-
-    ![Create Cosmos instance](../media/04-create_cosmos.png)
-
-1. In the new **Azure Cosmos DB** blade, perform the following actions:
-
-    1. In the **ID** field, enter a globally unique value.
-
-    1. In the **API** list, select the **SQL** option.
-
-    1. Leave the **Subscription** field set to its default value.
-
-    1. In the **Resource group** section, select the **Create new** option.
-
-    1. In the **Resource group** section, enter the value **LABQURY**  into the empty field.
-
-    1. In the **Location** field, select the **West US** location.
-
-    1. Click the **Create** button.
-
-    ![Create Cosmos instance](../media/04-create_cosmos_settings.png)
-
-1. Wait for the creation task to complete before moving on with this lab.  
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -509,7 +457,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
-    ```c#
+    ```csharp
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -520,7 +468,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the **Program** class and replace it with the following class:
 
-    ```c#
+    ```csharp
     public class Program
     {
         public static void Main(string[] args)
@@ -535,7 +483,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```c#
+    ```csharp
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
     private static readonly string _databaseId = "UniversityDatabase";
@@ -552,7 +500,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
     
 1. Locate the **Main** method:
 
-    ```c#
+    ```csharp
     public static void Main(string[] args)
     { 
     }
@@ -560,7 +508,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
-    ```c#
+    ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
     {
         
@@ -569,13 +517,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
 
-    ```c#
+    ```csharp
     ExecuteLogic(client).Wait();
     ```
 
 1. Your ``Program`` class definition should now look like this:
 
-    ```c#
+    ```csharp
     public class Program
     { 
         private static readonly Uri _endpointUri = new Uri("<your uri>");
@@ -601,7 +549,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the **ExecuteLogic** method:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {       
     }
@@ -610,13 +558,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **ExecuteLogic** method, add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
 
-    ```c#
+    ```csharp
     Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
 1. Add the following line of code to create a string variable named ``sql`` that contains a sample SQL query:
 
-    ```c#
+    ```csharp
     string sql = "SELECT TOP 5 VALUE s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
     ```
 
@@ -624,13 +572,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Add the following line of code to create a document query:
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
 1. Add the following lines of code to enumerate over the results and print the strings to the console:
 
-    ```c#
+    ```csharp
     foreach(string alias in query)
     {
         Console.Out.WriteLine(alias);
@@ -639,7 +587,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Your **ExecuteLogic** method should now look like this:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {       
         Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
@@ -689,7 +637,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Paste in the following code for the ``Student`` class:
 
-    ```c#
+    ```csharp
     public class Student
     {
         public string[] Clubs { get; set; }
@@ -702,13 +650,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT TOP 5 VALUE students.studentAlias FROM students WHERE students.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
@@ -716,13 +664,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
     ```
 
@@ -730,7 +678,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     foreach(string alias in query)
     {
         Console.Out.WriteLine(alias);
@@ -739,7 +687,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     foreach(Student student in query)
     foreach(string club in student.Clubs)
     {
@@ -775,7 +723,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Paste in the following code for the ``StudentActivity`` class:
 
-    ```c#
+    ```csharp
     public class StudentActivity
     {
         public string Activity { get; set; }
@@ -788,13 +736,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";    
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
@@ -802,19 +750,19 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
     ```
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     foreach(Student student in query)
     foreach(string club in student.Clubs)
     {
@@ -824,7 +772,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     foreach(StudentActivity studentActivity in query)
     {
         Console.Out.WriteLine(studentActivity.Activity);
@@ -857,13 +805,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
@@ -871,19 +819,19 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     foreach(StudentActivity studentActivity in query)
     {
         Console.Out.WriteLine(studentActivity.Activity);
@@ -892,7 +840,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     foreach(string activity in query)
     {
         Console.Out.WriteLine(activity);
@@ -929,7 +877,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Paste in the following code for the ``StudentProfile`` and ``StudentProfileEmailInformation`` classes:
 
-    ```c#
+    ```csharp
     public class StudentProfile
     {
         public string Id { get; set; }
@@ -950,13 +898,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT VALUE { 'id': s.id, 'name': CONCAT(s.firstName, ' ', s.lastName), 'email': { 'home': s.homeEmailAddress, 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018"; 
     ```
 
@@ -975,19 +923,19 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));   
     ```
 
 1. Locate the following lines of code: 
 
-    ```c#
+    ```csharp
     foreach(string activity in query)
     {
         Console.Out.WriteLine(activity);
@@ -996,7 +944,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     foreach(StudentProfile profile in query)
     {
         Console.Out.WriteLine($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
@@ -1037,13 +985,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));  
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     IDocumentQuery<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql), new FeedOptions { MaxItemCount = 100 }).AsDocumentQuery();
     ```
 
@@ -1051,7 +999,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following lines of code:
 
-    ```c#
+    ```csharp
     foreach(StudentProfile profile in query)
     {
         Console.Out.WriteLine($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
@@ -1060,7 +1008,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     int pageCount = 0;
     while(query.HasMoreResults)
     {
