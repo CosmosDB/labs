@@ -14,7 +14,7 @@ public class Program
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {    
         using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
