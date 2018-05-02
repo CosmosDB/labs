@@ -1,60 +1,8 @@
 # Creating a Multi-Partition Solution using Azure Cosmos DB
 
-**Required Software**
-
-| Software | Download Link |
-| --- | --- |
-| .NET Core 2.1 (or greater) SDK | [/download.microsoft.com/dotnet-sdk-2.1](https://download.microsoft.com/download/E/2/6/E266C257-F7AF-4E79-8EA2-DF26031C84E2/dotnet-sdk-2.1.103-win-gs-x64.exe)
-| Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
-| Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
-
 ## Setup
 
-Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection.
 
-### Create Azure Cosmos DB Assets
-
-*You will now create an Azure Cosmos DB account to use in this lab.*
-
-1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Create a resource** link.
-
-    ![Create a resource](../media/02-create_a_resource.png)
-
-1. At the top of the **New** blade, locate the **Search the Marketplace** field.
-
-    ![Search the Marketplace](../media/02-search_the_marketplace.png)
-
-1. Enter the text **Cosmos** into the search field and press **Enter**.
-
-1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
-
-    ![Cosmos search results](../media/02-cosmos_search_result.png)
-
-1. In the **Azure Cosmos DB** blade, click the **Create** button.
-
-    ![Create Cosmos instance](../media/02-create_cosmos.png)
-
-1. In the new **Azure Cosmos DB** blade, perform the following actions:
-
-    1. In the **ID** field, enter a globally unique value.
-
-    1. In the **API** list, select the **SQL** option.
-
-    1. Leave the **Subscription** field set to its default value.
-
-    1. In the **Resource group** section, select the **Create new** option.
-
-    1. In the **Resource group** section, enter the value **LABMPAR**  into the empty field.
-
-    1. In the **Location** field, select the **West US** location.
-
-    1. Click the **Create** button.
-
-    ![Create Cosmos instance](../media/02-create_cosmos_settings.png)
-
-1. Wait for the creation task to complete before moving on with this lab.  
 
 ### Retrieve Account Credentials
 
@@ -64,11 +12,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Resource groups](../media/02-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
     ![Lab resource group](../media/02-lab_resource_group.png)
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
     ![Cosmos resource](../media/02-cosmos_resource.png)
 
@@ -142,9 +90,37 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Observe the **Program.cs** and **vscodetemple.csproj** files created by the .NET Core CLI.
+1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
     ![Project files](../media/02-project_files.png)
+
+1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
+
+1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+
+    ```xml
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    ```
+
+1. Your new XML should look like this:
+
+    ```xml
+    <Project Sdk="Microsoft.NET.Sdk">
+        <PropertyGroup>
+            <LangVersion>latest</LangVersion>
+        </PropertyGroup>
+        <PropertyGroup>
+            <OutputType>Exe</OutputType>
+            <TargetFramework>netcoreapp2.0</TargetFramework>
+        </PropertyGroup>
+        <ItemGroup>
+            <PackageReference Include="Bogus" Version="22.0.7" />
+            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
+        </ItemGroup>
+    </Project>
+    ```
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
@@ -156,7 +132,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
-    ```c#
+    ```csharp
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -169,29 +145,25 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Locate the **Program** class and replace it with the following class:
 
-    ```c#
+    ```csharp
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {         
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
-        {
         }
     }
     ```
 
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```c#
+    ```csharp
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
     ```
 
 1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
-    > For example, if your **uri** is ``https://labmpar.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://labmpar.documents.azure.com:443/");``.
+    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://cosmosacct.documents.azure.com:443/");``.
 
 1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
@@ -199,65 +171,39 @@ Before starting any lab in this workshop, you will need to create the various Az
     
 1. Locate the **Main** method:
 
-    ```c#
-    public static void Main(string[] args)
+    ```csharp
+    public static async Task Main(string[] args)
     { 
     }
     ```
 
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
-    ```c#
-    using (DocumentClient client = new DocumentClient(endpointUri, primaryKey))
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
     {
         
     }
     ```
 
-1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
-
-    ```c#
-    ExecuteLogic(client).Wait();
-    ```
-
-1. Locate the **ExecuteLogic** method:
-
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
-    }
-    ```
-
-1. Within the **ExecuteLogic** method, add the following line of code to asynchronously open a connection:
-
-    ```c#
-    await client.OpenAsync();
-    ```
-
 1. Your ``Program`` class definition should now look like this:
 
-    ```c#
+    ```csharp
     public class Program
     { 
         private static readonly Uri _endpointUri = new Uri("<your uri>");
         private static readonly string _primaryKey = "<your key>";
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {    
             using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
             {
-                ExecuteLogic(client).Wait();
-            }
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
-        {  
-            await client.OpenAsync();     
+            }     
         }
     }
     ```
 
-    > We will now execute build the application to make sure our code compiles successfully.
+    > We will now execute a build of the application to make sure our code compiles successfully.
 
 1. Save all of your open editor tabs.
 
@@ -279,29 +225,24 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 **
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the using block within the **Main** method:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+                        
     }
-    ```
-
-1. Add the following code to the method to create an asynchronous connection:
-
-    ```c#
-    await client.OpenAsync();
     ```
 
 1. Add the following code to the method to create a new ``Database`` instance:
 
-    ```c#
+    ```csharp
     Database targetDatabase = new Database { Id = "EntertainmentDatabase" };
     ```
 
 1. Add the following code to create a new database instance if one does not already exist:
 
-    ```c#
+    ```csharp
     targetDatabase = await client.CreateDatabaseIfNotExistsAsync(targetDatabase);
     ```
 
@@ -309,7 +250,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to print out the self-link of the database:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"Database Self-Link:\t{targetDatabase.SelfLink}");
     ```
 
@@ -347,29 +288,30 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 **
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the using block within the **Main** method and delete any existing code:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+                        
     }
     ```
 
-1. Add the following code to the method to create an asynchronous connection:
+1. Add the following code to the method to open a connection asynchronously:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
 
 1. Add the following code to the method to create a self-link to an existing database:
 
-    ```c#
+    ```csharp
     Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
     ```
 
 1. Add the following lines of code to create a new ``DocumentCollection`` instance where you only specify a value for the ``Id`` property:
 
-    ```c#
+    ```csharp
     DocumentCollection defaultCollection = new DocumentCollection 
     { 
         Id = "DefaultCollection" 
@@ -380,7 +322,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to create a new collection instance if one does not already exist within your database:
 
-    ```c#
+    ```csharp
     defaultCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseSelfLink, defaultCollection);
     ```
 
@@ -388,7 +330,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to print out the self-link of the database:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"Default Collection Self-Link:\t{defaultCollection.SelfLink}"); 
     ```
 
@@ -414,29 +356,30 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 **
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the using block within the **Main** method and delete any existing code:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+                        
     }
     ```
 
 1. Add the following code to the method to create an asynchronous connection:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
 
 1. Add the following code to the method to create a self-link to an existing database:
 
-    ```c#
+    ```csharp
     Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
     ```
 
 1. Add the following code to create a new ``IndexingPolicy`` instance with a custom indexing policy configured:
 
-    ```c#
+    ```csharp
     IndexingPolicy indexingPolicy = new IndexingPolicy
     {
         IndexingMode = IndexingMode.Consistent,
@@ -460,10 +403,10 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to create a new ``PartitionKeyDefinition`` instance with a single partition key of ``/Type`` defined:
 
-    ```c#
+    ```csharp
     PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition
     {
-        Paths = new Collection<string> { $"/{nameof(IInteraction.type)}" }
+        Paths = new Collection<string> { "/type" }
     };
     ```
 
@@ -471,7 +414,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following lines of code to create a new ``DocumentCollection`` instance where you specify values for multiple properties:
 
-    ```c#
+    ```csharp
     DocumentCollection customCollection = new DocumentCollection
     {
         Id = "CustomCollection",
@@ -484,7 +427,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to create a new ``RequestOptions`` instance seting the **throughput** for the collection:
 
-    ```c#
+    ```csharp
     RequestOptions requestOptions = new RequestOptions
     {
         OfferThroughput = 10000
@@ -495,7 +438,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to create a new collection instance if one does not already exist within your database:
 
-    ```c#
+    ```csharp
     customCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseSelfLink, customCollection, requestOptions);         
     ```
 
@@ -503,7 +446,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to print out the self-link of the database:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"Custom Collection Self-Link:\t{customCollection.SelfLink}");  
     ```
 
@@ -537,11 +480,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Resource groups](../media/02-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
     ![Lab resource group](../media/02-lab_resource_group.png)
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
     ![Cosmos resource](../media/02-cosmos_resource.png)
 
@@ -610,8 +553,6 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     - Indexing Policy
 
-    ![Fixed-Size collection configuration](../media/02-fixed_configuration.png)
-
     > You configured all of these values when you created this collection using the SDK. You should take time to look at the custom indexing policy you created using the SDK.
 
     ```js
@@ -659,7 +600,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Paste in the following code for the ``IInteraction`` interface:
 
-    ```c#
+    ```csharp
     public interface IInteraction
     {
         string type { get; }
@@ -672,7 +613,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Paste in the following code for the ``PurchaseFoodOrBeverage`` class:
 
-    ```c#
+    ```csharp
     public class PurchaseFoodOrBeverage : IInteraction
     {
         public decimal unitPrice { get; set; }
@@ -688,7 +629,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Paste in the following code for the ``ViewMap`` class:
 
-    ```c#
+    ```csharp
     public class ViewMap : IInteraction
     {	
         public int minutesViewed { get; set; }
@@ -702,7 +643,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Paste in the following code for the ``WatchLiveTelevisionChannel`` class:
 
-    ```c#
+    ```csharp
     public class WatchLiveTelevisionChannel : IInteraction
     {
         public string channelName { get; set; }
@@ -737,23 +678,24 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the using block within the **Main** method and delete any existing code:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+                        
     }
     ```
 
 1. Add the following code to the method to create an asynchronous connection:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
 
 1. Add the following code to the method to create a self-link to an existing collection:
 
-    ```c#
+    ```csharp
     Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
     ```
 
@@ -763,7 +705,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to create a collection of ``PurchaseFoodOrBeverage`` instances:
 
-    ```c#
+    ```csharp
     var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
         .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
         .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
@@ -774,7 +716,7 @@ Before starting any lab in this workshop, you will need to create the various Az
     
 1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
-    ```c#
+    ```csharp
     foreach(var interaction in foodInteractions)
     {
     }
@@ -782,7 +724,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
 
-    ```c#
+    ```csharp
     ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
     ```
 
@@ -790,30 +732,33 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
     ```
 
     > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
 
-1. Your **ExecuteLogic** method should look like this:
+1. Your **Main** method should look like this:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {  
-        await client.OpenAsync();
-        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-        var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
-            .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
-            .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
-            .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
-            .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
-            .GenerateLazy(500);
-        foreach(var interaction in foodInteractions)
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            ResourceResponse<Document> result = await client.CreateDocumentAsync(customCollection.SelfLink, interaction);
-            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
-        }
+            await client.OpenAsync();
+            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
+                .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
+                .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
+                .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
+                .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
+                .GenerateLazy(500);
+            foreach(var interaction in foodInteractions)
+            {
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+            }
+        }     
     }
     ```
 
@@ -839,30 +784,34 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 **
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the **Main** method and delete any existing code:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+                        
     }
     ```
 
-1. Replace the **ExecuteLogic** method with the following implementation:
+1. Replace the **Main** method with the following implementation:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
+    ```csharp
+    public static async Task Main(string[] args)
     {  
-        await client.OpenAsync();
-        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-        var tvInteractions = new Bogus.Faker<WatchLiveTelevisionChannel>()
-            .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
-            .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-            .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
-            .GenerateLazy(500);
-        foreach(var interaction in tvInteractions)
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
-            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+            await client.OpenAsync();
+            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            var tvInteractions = new Bogus.Faker<WatchLiveTelevisionChannel>()
+                .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
+                .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
+                .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
+                .GenerateLazy(500);
+            foreach(var interaction in tvInteractions)
+            {
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+            }
         }
     }
     ```
@@ -885,29 +834,33 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the **Main** method and delete any existing code:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+                        
     }
     ```
 
-1. Replace the **ExecuteLogic** method with the following implementation:
+1. Replace the **Main** method with the following implementation:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
+    ```csharp
+    public static async Task Main(string[] args)
     {  
-        await client.OpenAsync();
-        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-        var mapInteractions = new Bogus.Faker<ViewMap>()
-            .RuleFor(i => i.type, (fake) => nameof(ViewMap))
-            .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-            .GenerateLazy(500);
-        foreach(var interaction in mapInteractions)
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
-            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+            await client.OpenAsync();
+            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            var mapInteractions = new Bogus.Faker<ViewMap>()
+                .RuleFor(i => i.type, (fake) => nameof(ViewMap))
+                .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
+                .GenerateLazy(500);
+            foreach(var interaction in mapInteractions)
+            {
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+            }
         }
     }
     ```
@@ -946,7 +899,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Paste in the following code for the ``GeneralInteraction`` class:
 
-    ```c#
+    ```csharp
     public class GeneralInteraction : IInteraction
     {
         public string id { get; set; }
@@ -957,29 +910,38 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method and delete any existing code:
+1. Within the **Program.cs** editor tab, locate the **Main** method and delete any existing code:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
+    ```csharp
+    public static async Task Main(string[] args)
     {       
     }
     ```   
 
-1. Within the **ExecuteLogic** method, add the following line of code to asynchronously open a connection:
+1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
-    ```c#
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+        
+    }
+    ```
+
+1. Within the new *using* block, add the following line of code to asynchronously open a connection:
+
+    ```csharp
     await client.OpenAsync();
     ```
     
 1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
-    ```c#
+    ```csharp
     Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
     ```
 
 1. Add the following line of code to create a query that is filtered to a single partition key:
 
-    ```c#
+    ```csharp
     IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey(nameof(ViewMap)) });
     ```
 
@@ -987,7 +949,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following line of code to print out the results of your query:
 
-    ```c#
+    ```csharp
     foreach(GeneralInteraction interaction in query)
     {
         Console.Out.WriteLine($"[{interaction.type}]\t{interaction.id}");
@@ -1020,13 +982,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey(nameof(ViewMap)) });
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { EnableCrossPartitionQuery = true });
     ```
 
@@ -1053,27 +1015,3 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Close all open editor tabs.
 
 1. Close the Visual Studio Code application.
-
-## Lab Cleanup
-
-### Open Cloud Shell
-
-1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
-
-    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
-
-### Use Azure CLI to Delete Resource Group
-
-1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
-
-    ```
-    az group list
-    ```
-
-1. Type in the following command and press **Enter** to delete the **LABMPAR** *Resource Group*:
-
-    ```
-    az group delete --name LABMPAR --no-wait --yes
-    ```
-
-1. Close the **Cloud Shell** prompt at the bottom of the portal.

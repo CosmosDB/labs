@@ -1,13 +1,5 @@
 # Troubleshooting and Tuning Azure Cosmos DB Requests 
 
-**Required Software** 
-
-| Software | Download Link |
-| --- | --- |
-| .NET Core 2.1 (or greater) SDK | [/download.microsoft.com/dotnet-sdk-2.1](https://download.microsoft.com/download/E/2/6/E266C257-F7AF-4E79-8EA2-DF26031C84E2/dotnet-sdk-2.1.103-win-gs-x64.exe)
-| Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
-| Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
-
 ## Setup
 
 Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection and then populate the collection with a collection of JSON documents.
@@ -17,50 +9,6 @@ Before starting any lab in this workshop, you will need to create the various Az
 *A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
 
 1. Download the [transactions.json](../files/transactions.json) file and save it to your local machine.
-
-### Create Azure Cosmos DB Assets
-
-*You will now create an Azure Cosmos DB account to use in this lab.*
-
-1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Create a resource** link.
-
-    ![Create a resource](../media/06-create_a_resource.png)
-
-1. At the top of the **New** blade, locate the **Search the Marketplace** field.
-
-    ![Search the Marketplace](../media/06-search_the_marketplace.png)
-
-1. Enter the text **Cosmos** into the search field and press **Enter**.
-
-1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
-
-    ![Cosmos search results](../media/06-cosmos_search_result.png)
-
-1. In the **Azure Cosmos DB** blade, click the **Create** button.
-
-    ![Create Cosmos instance](../media/06-create_cosmos.png)
-
-1. In the new **Azure Cosmos DB** blade, perform the following actions:
-
-    1. In the **ID** field, enter a globally unique value.
-
-    1. In the **API** list, select the **SQL** option.
-
-    1. Leave the **Subscription** field set to its default value.
-
-    1. In the **Resource group** section, select the **Create new** option.
-
-    1. In the **Resource group** section, enter the value **LABTRBL**  into the empty field.
-
-    1. In the **Location** field, select the **West US** location.
-
-    1. Click the **Create** button.
-
-    ![Create Cosmos instance](../media/06-create_cosmos_settings.png)
-
-1. Wait for the creation task to complete before moving on with this lab.  
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -234,7 +182,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Observe the **Program.cs** and **vscodetemple.csproj** files created by the .NET Core CLI.
+1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
     ![Project files](../media/06-project_files.png)
 
@@ -248,7 +196,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
-    ```c#
+    ```csharp
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -261,7 +209,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Locate the **Program** class and replace it with the following class:
 
-    ```c#
+    ```csharp
     public class Program
     {
         public static void Main(string[] args)
@@ -276,7 +224,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```c#
+    ```csharp
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
     ```
@@ -291,7 +239,7 @@ Before starting any lab in this workshop, you will need to create the various Az
     
 1. Locate the **Main** method:
 
-    ```c#
+    ```csharp
     public static void Main(string[] args)
     { 
     }
@@ -299,7 +247,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
-    ```c#
+    ```csharp
     using (DocumentClient client = new DocumentClient(endpointUri, primaryKey))
     {
         
@@ -308,13 +256,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
 
-    ```c#
+    ```csharp
     ExecuteLogic(client).Wait();
     ```
 
 1. Locate the **ExecuteLogic** method:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {       
     }
@@ -322,13 +270,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the **ExecuteLogic** method, add the following line of code to asynchronously open a connection:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
 
 1. Your ``Program`` class definition should now look like this:
 
-    ```c#
+    ```csharp
     public class Program
     { 
         private static readonly Uri _endpointUri = new Uri("<your uri>");
@@ -383,7 +331,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Paste in the following code for the ``IInteraction`` interface:
 
-    ```c#
+    ```csharp
     public class Transaction
     {
         public double amount { get; set; }
@@ -413,7 +361,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Locate the **ExecuteLogic** method and delete any existing code:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {       
     }
@@ -421,13 +369,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to the method to create an asynchronous connection:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
     
 1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
-    ```c#
+    ```csharp
     Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
     ```
 
@@ -437,7 +385,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to create a collection of ``Transaction`` instances:
 
-    ```c#
+    ```csharp
     var transactions = new Bogus.Faker<Transaction>()
         .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
         .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
@@ -448,7 +396,7 @@ Before starting any lab in this workshop, you will need to create the various Az
     
 1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
-    ```c#
+    ```csharp
     foreach(var transaction in transactions)
     {
     }
@@ -456,7 +404,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
 
-    ```c#
+    ```csharp
     ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, transaction);
     ```
 
@@ -464,7 +412,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
     ```
 
@@ -472,7 +420,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Your **ExecuteLogic** method should look like this:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {
         await client.OpenAsync();  
@@ -511,7 +459,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following lines of code:
 
-    ```c#
+    ```csharp
     foreach(var transaction in transactions)
     {
         ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, transaction);
@@ -521,7 +469,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     Replace those lines of code with the following code:
 
-    ```c#
+    ```csharp
     List<Task<ResourceResponse<Document>>> tasks = new List<Task<ResourceResponse<Document>>>();
     foreach(var transaction in transactions)
     {
@@ -539,7 +487,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Your **ExecuteLogic** method should look like this:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {
         await client.OpenAsync();  
@@ -584,13 +532,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     .GenerateLazy(500);
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     .GenerateLazy(5000);
     ```
 
@@ -628,7 +576,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Locate the **ExecuteLogic** method and delete any existing code:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {       
     }
@@ -636,19 +584,19 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to the method to create an asynchronous connection:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
 
 1. Add the following code to the method to create a self-link to an existing collection:
 
-    ```c#
+    ```csharp
     Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
     ```
 
 1. Add the following lines of code to configure options for a query:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -658,7 +606,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
-    ```c#
+    ```csharp
     string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
@@ -666,13 +614,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following line of code to create a document query instance:
 
-    ```c#
+    ```csharp
     IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionSelfLink, sql, options).AsDocumentQuery();
     ```
 
 1. Add the following line of code to get the first "page" of results:
 
-    ```c#
+    ```csharp
     var result = await query.ExecuteNextAsync();
     ```
 
@@ -680,7 +628,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following lines of code to print out all of the query metrics to the console:
 
-    ```c#
+    ```csharp
     foreach(string key in result.QueryMetrics.Keys)
     {
         await Console.Out.WriteLineAsync($"{key}\t{result.QueryMetrics[key]}");
@@ -707,13 +655,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
@@ -737,13 +685,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT * FROM c";
     ```
 
@@ -767,13 +715,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT * FROM c";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT c.id FROM c";
     ```
 
@@ -801,7 +749,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Locate the **ExecuteLogic** method and delete any existing code:
 
-    ```c#
+    ```csharp
     private static async Task ExecuteLogic(DocumentClient client)
     {       
     }
@@ -809,25 +757,25 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following code to the method to create an asynchronous connection:
 
-    ```c#
+    ```csharp
     await client.OpenAsync();
     ```
 
 1. Add the following code to the method to create a self-link to an existing collection:
 
-    ```c#
+    ```csharp
     Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
     ```
 
 1. Add the following line of code to create a high-precision timer:
 
-    ```c#
+    ```csharp
     Stopwatch timer = new Stopwatch();
     ```
 
 1. Add the following lines of code to configure options for a query:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -839,7 +787,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following lines of code to write various values to the console window:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"MaxItemCount:\t{options.MaxItemCount}");
     await Console.Out.WriteLineAsync($"MaxDegreeOfParallelism:\t{options.MaxDegreeOfParallelism}");
     await Console.Out.WriteLineAsync($"MaxBufferedItemCount:\t{options.MaxBufferedItemCount}");
@@ -847,7 +795,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
-    ```c#
+    ```csharp
     string sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
@@ -855,19 +803,19 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following line of code to start the timer:
 
-    ```c#
+    ```csharp
     timer.Start();
     ```
 
 1. Add the following line of code to create a document query instance:
 
-    ```c#
+    ```csharp
     IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionSelfLink, sql, options).AsDocumentQuery();
     ```
 
 1. Add the following lines of code to enumerate the result set.
 
-    ```c#
+    ```csharp
     while (query.HasMoreResults)  
     {
         var result = await query.ExecuteNextAsync<Document>();
@@ -878,13 +826,13 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Add the following line of code stop the timer:
 
-    ```c#
+    ```csharp
     timer.Stop();
     ```
 
 1. Add the following line of code to write the timer's results to the console window:
 
-    ```c#
+    ```csharp
     await Console.Out.WriteLineAsync($"Elapsed Time:\t{timer.Elapsed.TotalSeconds}");
     ```
 
@@ -906,7 +854,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -918,7 +866,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -948,7 +896,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -960,7 +908,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -990,7 +938,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -1002,7 +950,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -1032,7 +980,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -1044,7 +992,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     FeedOptions options = new FeedOptions
     {
         EnableCrossPartitionQuery = true,
@@ -1071,27 +1019,3 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Observe the output of the console application.
 
     > This change should have decreased your query time by a small amount.
-
-## Lab Cleanup
-
-### Open Cloud Shell
-
-1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
-
-    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
-
-### Use Azure CLI to Delete Resource Group
-
-1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
-
-    ```
-    az group list
-    ```
-
-1. Type in the following command and press **Enter** to delete the **LABTRBL** *Resource Group*:
-
-    ```
-    az group delete --name LABTRBL --no-wait --yes
-    ```
-
-1. Close the **Cloud Shell** prompt at the bottom of the portal.

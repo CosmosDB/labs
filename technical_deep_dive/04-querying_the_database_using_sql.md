@@ -1,66 +1,14 @@
 # Querying An Azure Cosmos DB Database using the SQL API
 
-**Required Software**
-
-| Software | Download Link |
-| --- | --- |
-| .NET Core 2.1 (or greater) SDK | [/download.microsoft.com/dotnet-sdk-2.1](https://download.microsoft.com/download/E/2/6/E266C257-F7AF-4E79-8EA2-DF26031C84E2/dotnet-sdk-2.1.103-win-gs-x64.exe)
-| Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
-| Azure Cosmos DB Data Migration Tool | [/cosmosdb-data-migration-tool](../files/cosmosdt.zip) |
-
 ## Setup
 
-Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection and then populate the collection with a collection of JSON documents.
+
 
 ### Download Required Files
 
 *A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
 
 1. Download the [students.json](../files/students.json) file and save it to your local machine.
-
-### Create Azure Cosmos DB Assets
-
-*You will now create an Azure Cosmos DB account to use in this lab.*
-
-1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Create a resource** link.
-
-    ![Create a resource](../media/04-create_a_resource.png)
-
-1. At the top of the **New** blade, locate the **Search the Marketplace** field.
-
-    ![Search the Marketplace](../media/04-search_the_marketplace.png)
-
-1. Enter the text **Cosmos** into the search field and press **Enter**.
-
-1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
-
-    ![Cosmos search results](../media/04-cosmos_search_result.png)
-
-1. In the **Azure Cosmos DB** blade, click the **Create** button.
-
-    ![Create Cosmos instance](../media/04-create_cosmos.png)
-
-1. In the new **Azure Cosmos DB** blade, perform the following actions:
-
-    1. In the **ID** field, enter a globally unique value.
-
-    1. In the **API** list, select the **SQL** option.
-
-    1. Leave the **Subscription** field set to its default value.
-
-    1. In the **Resource group** section, select the **Create new** option.
-
-    1. In the **Resource group** section, enter the value **LABQURY**  into the empty field.
-
-    1. In the **Location** field, select the **West US** location.
-
-    1. Click the **Create** button.
-
-    ![Create Cosmos instance](../media/04-create_cosmos_settings.png)
-
-1. Wait for the creation task to complete before moving on with this lab.  
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -495,9 +443,37 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Observe the **Program.cs** and **vscodetemple.csproj** files created by the .NET Core CLI.
+1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
     ![Project files](../media/04-project_files.png)
+
+1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
+
+1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+
+    ```xml
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    ```
+
+1. Your new XML should look like this:
+
+    ```xml
+    <Project Sdk="Microsoft.NET.Sdk">
+        <PropertyGroup>
+            <LangVersion>latest</LangVersion>
+        </PropertyGroup>
+        <PropertyGroup>
+            <OutputType>Exe</OutputType>
+            <TargetFramework>netcoreapp2.0</TargetFramework>
+        </PropertyGroup>
+        <ItemGroup>
+            <PackageReference Include="Bogus" Version="22.0.7" />
+            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
+        </ItemGroup>
+    </Project>
+    ```
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
@@ -509,7 +485,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
-    ```c#
+    ```csharp
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -520,22 +496,18 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the **Program** class and replace it with the following class:
 
-    ```c#
+    ```csharp
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {         
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
-        {
         }
     }
     ```
 
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```c#
+    ```csharp
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
     private static readonly string _databaseId = "UniversityDatabase";
@@ -552,71 +524,60 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
     
 1. Locate the **Main** method:
 
-    ```c#
-    public static void Main(string[] args)
+    ```csharp
+    public static async Task Main(string[] args)
     { 
     }
     ```
 
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
-    ```c#
+    ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
     {
         
     }
     ```
 
-1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
-
-    ```c#
-    ExecuteLogic(client).Wait();
-    ```
-
 1. Your ``Program`` class definition should now look like this:
 
-    ```c#
+    ```csharp
     public class Program
     { 
         private static readonly Uri _endpointUri = new Uri("<your uri>");
         private static readonly string _primaryKey = "<your key>";
         private static readonly string _databaseId = "UniversityDatabase";
-        private static readonly string _collectionId = "StudentCollection";  
+        private static readonly string _collectionId = "StudentCollection";
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {    
             using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
             {
-                ExecuteLogic(client).Wait();
-            }
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
-        {       
+            }     
         }
     }
     ```
 
     > We are now going to implement a sample query to make sure our client connection code works.
 
-1. Locate the **ExecuteLogic** method:
+1. Locate the using block within the **Main** method:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+                        
     }
+    ```
 
-    ```    
+1. Add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
 
-1. Within the **ExecuteLogic** method, add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
-
-    ```c#
+    ```csharp
     Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
 1. Add the following line of code to create a string variable named ``sql`` that contains a sample SQL query:
 
-    ```c#
+    ```csharp
     string sql = "SELECT TOP 5 VALUE s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
     ```
 
@@ -624,34 +585,34 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Add the following line of code to create a document query:
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
 1. Add the following lines of code to enumerate over the results and print the strings to the console:
 
-    ```c#
+    ```csharp
     foreach(string alias in query)
     {
-        Console.Out.WriteLine(alias);
+        await Console.Out.WriteLineAsync(alias);
     }
     ```
 
-1. Your **ExecuteLogic** method should now look like this:
+1. Your **Main** method should now look like this:
 
-    ```c#
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
-        Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-
-        string sql = "SELECT TOP 5 VALUE students.studentAlias FROM students WHERE students.enrollmentYear = 2018";
-
-        IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
-        
-        foreach(string alias in query)
+    ```csharp
+    public static async Task Main(string[] args)
+    {         
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            Console.Out.WriteLine(alias);
-        }
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+            string sql = "SELECT TOP 5 VALUE s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
+            IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
+            foreach(string alias in query)
+            {
+                await Console.Out.WriteLineAsync(alias);
+            }
+        }   
     }
     ```
 
@@ -689,7 +650,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Paste in the following code for the ``Student`` class:
 
-    ```c#
+    ```csharp
     public class Student
     {
         public string[] Clubs { get; set; }
@@ -698,17 +659,17 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+1. Within the **Program.cs** editor tab, locate the **Main** method.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT TOP 5 VALUE students.studentAlias FROM students WHERE students.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
@@ -716,13 +677,13 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
     ```
 
@@ -730,20 +691,20 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     foreach(string alias in query)
     {
-        Console.Out.WriteLine(alias);
+        await Console.Out.WriteLineAsync(alias);
     }
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     foreach(Student student in query)
     foreach(string club in student.Clubs)
     {
-        Console.Out.WriteLine(club);
+        await Console.Out.WriteLineAsync(club);
     }
     ```
 
@@ -767,6 +728,79 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Click the **🗙** symbol to close the terminal pane.
 
+1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
+
+1. Within the **Student.cs** editor tab, replace all of the existing code with the following code for the ``Student`` class:
+
+    ```csharp
+    public class Student
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string[] Clubs { get; set; }
+    }
+    ```
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **Main** method.
+
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    string sql = "SELECT s.firstName, s.lastName, s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```
+
+    > We are now including the **firstName** and **lastName** fields in our query.
+
+1. Locate the following block of code: 
+
+    ```csharp
+    foreach(Student student in query)
+    foreach(string club in student.Clubs)
+    {
+        await Console.Out.WriteLineAsync(club);
+    }
+    ```
+
+    Replace that block of code with the following code:
+
+    ```csharp
+    foreach(Student student in query)
+    {
+        await Console.Out.WriteLineAsync($"{student.FirstName} {student.LastName}");
+        foreach(string club in student.Clubs)
+        {
+            await Console.Out.WriteLineAsync($"\t{club}");
+        }
+        await Console.Out.WriteLineAsync();
+    }
+    ```
+
+    > This modification simply prints out more information to the console.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
     > Since we only really care about the list of clubs, we want to peform a self-join that applies a cross product across the **club** properties of each student in the result set.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
@@ -775,7 +809,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Paste in the following code for the ``StudentActivity`` class:
 
-    ```c#
+    ```csharp
     public class StudentActivity
     {
         public string Activity { get; set; }
@@ -784,17 +818,17 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+1. Within the **Program.cs** editor tab, locate the **Main** method.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
-    ```c#
-    string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";    
+    ```csharp
+    string sql = "SELECT s.firstName, s.lastName, s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
@@ -802,32 +836,36 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
     ```
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     foreach(Student student in query)
-    foreach(string club in student.Clubs)
     {
-        Console.Out.WriteLine(club);
+        await Console.Out.WriteLineAsync($"{student.FirstName} {student.LastName}");
+        foreach(string club in student.Clubs)
+        {
+            await Console.Out.WriteLineAsync($"\t{club}");
+        }
+        await Console.Out.WriteLineAsync();
     }
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     foreach(StudentActivity studentActivity in query)
     {
-        Console.Out.WriteLine(studentActivity.Activity);
+        await Console.Out.WriteLineAsync(studentActivity.Activity);
     }
     ```
 
@@ -853,17 +891,17 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+1. Within the **Program.cs** editor tab, locate the **Main** method.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
@@ -871,31 +909,31 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     foreach(StudentActivity studentActivity in query)
     {
-        Console.Out.WriteLine(studentActivity.Activity);
+        await Console.Out.WriteLineAsync(studentActivity.Activity);
     }
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     foreach(string activity in query)
     {
-        Console.Out.WriteLine(activity);
+        await Console.Out.WriteLineAsync(activity);
     }
     ```
 
@@ -929,7 +967,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Paste in the following code for the ``StudentProfile`` and ``StudentProfileEmailInformation`` classes:
 
-    ```c#
+    ```csharp
     public class StudentProfile
     {
         public string Id { get; set; }
@@ -946,17 +984,17 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+1. Within the **Program.cs** editor tab, locate the **Main** method.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```c#
+    ```csharp
     string sql = "SELECT VALUE { 'id': s.id, 'name': CONCAT(s.firstName, ' ', s.lastName), 'email': { 'home': s.homeEmailAddress, 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018"; 
     ```
 
@@ -975,31 +1013,31 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));   
     ```
 
 1. Locate the following lines of code: 
 
-    ```c#
+    ```csharp
     foreach(string activity in query)
     {
-        Console.Out.WriteLine(activity);
+        await Console.Out.WriteLineAsync(activity);
     }
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     foreach(StudentProfile profile in query)
     {
-        Console.Out.WriteLine($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
+        await Console.Out.WriteLineAsync($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
     }
     ```
 
@@ -1033,17 +1071,17 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **ExecuteLogic** method.
+1. Within the **Program.cs** editor tab, locate the **Main** method.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
-    ```c#
+    ```csharp
     IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));  
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     IDocumentQuery<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql), new FeedOptions { MaxItemCount = 100 }).AsDocumentQuery();
     ```
 
@@ -1051,23 +1089,23 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. Locate the following lines of code:
 
-    ```c#
+    ```csharp
     foreach(StudentProfile profile in query)
     {
-        Console.Out.WriteLine($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
+        await Console.Out.WriteLineAsync($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
     }  
     ```
 
     Replace that code with the following code:
 
-    ```c#
+    ```csharp
     int pageCount = 0;
     while(query.HasMoreResults)
     {
-        Console.Out.WriteLine($"---Page #{++pageCount:0000}---");
+        await Console.Out.WriteLineAsync($"---Page #{++pageCount:0000}---");
         foreach(StudentProfile profile in await query.ExecuteNextAsync())
         {
-            Console.Out.WriteLine($"\t[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
+            await Console.Out.WriteLineAsync($"\t[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
         }
     }
     ```
@@ -1095,27 +1133,3 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Close all open editor tabs.
 
 1. Close the Visual Studio Code application.
-
-## Lab Cleanup
-
-### Open Cloud Shell
-
-1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
-
-    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
-
-### Use Azure CLI to Delete Resource Group
-
-1. In the **Cloud Shell** command prompt at the bottom of the portal, type in the following command and press **Enter** to list all resource groups in the subscription:
-
-    ```
-    az group list
-    ```
-
-1. Type in the following command and press **Enter** to delete the **LABQURY** *Resource Group*:
-
-    ```
-    az group delete --name LABQURY --no-wait --yes
-    ```
-
-1. Close the **Cloud Shell** prompt at the bottom of the portal.
