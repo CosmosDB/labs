@@ -4,7 +4,7 @@ In this lab, you will create an Azure Cosmos DB account, database, and multiple 
 
 ### Create Azure Cosmos DB Assets
 
-*You will now create an Azure Cosmos DB account to use in the labs.*
+*You will now create an Azure Cosmos DB account to use in the remaining labs.*
 
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 

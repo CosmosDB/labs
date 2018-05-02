@@ -1,8 +1,10 @@
 # Querying An Azure Cosmos DB Database using the SQL API
 
+In this lab, you will query an Azure Cosmos DB database instance using the SQL language. You will use features common in SQL such as projection using SELECT statements and filtering using WHERE clauses. You will also get to use features unique to Azure Cosmos DB's SQL API such as projection into JSON, intra-document JOIN and filtering to a range of partition keys.
+
 ## Setup
 
-
+*Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.*
 
 ### Download Required Files
 
@@ -70,7 +72,7 @@
 
 ### Import Lab Data Into Collection
 
-*Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab.*
+*Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab. You will use the **Data Migration Tool** to import the JSON array stored in the **students.json** file from your local machine to your Azure Cosmos DB collection.
 
 1. On your local machine, open the **Azure Cosmos DB Data Migration Tool**.
 
@@ -134,7 +136,7 @@
 
 ## Executing Simple Queries
 
-The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to query the data stored in our collection.*
+*The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to query the data stored in our collection.*
 
 ### Validate Imported Data
 
@@ -391,11 +393,9 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ## Use .NET SDK to Query Azure Cosmos DB
 
-
+*After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB collection, you are now going to use the .NET SDK to issue similar queries.*
 
 ### Create a .NET Core Project
-
-**
 
 1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
 
@@ -417,13 +417,15 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
     > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
+1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
     ```
 
-    > This command will add the ``Microsoft.Azure.DocumentDB.Core`` NuGet package as a project dependency.
+    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -469,7 +471,6 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
             <TargetFramework>netcoreapp2.0</TargetFramework>
         </PropertyGroup>
         <ItemGroup>
-            <PackageReference Include="Bogus" Version="22.0.7" />
             <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
         </ItemGroup>
     </Project>
@@ -481,7 +482,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ### Create DocumentClient Instance
 
-**
+*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
@@ -638,13 +639,11 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ### Query Intra-document Array
 
-**
-
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
     ![New File](../media/04-new_file.png)
 
-1. Name the new file **Student.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **Student.cs** . The editor tab will automatically open for the new file.
 
     ![Student Class File](../media/04-student_class.png)
 
@@ -805,7 +804,7 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **StudentActivity.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **StudentActivity.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``StudentActivity`` class:
 
@@ -959,11 +958,9 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ### Projecting Query Results
 
-**
-
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **StudentProfile.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **StudentProfile.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``StudentProfile`` and ``StudentProfileEmailInformation`` classes:
 
@@ -1063,11 +1060,9 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 
 ## Implement Pagination using the .NET SDK
 
+*In an earlier lab, you explored using a continuation token to manually implement paging. YOu will now use the **HasMoreResults** boolean property and **ExecuteNextAsync** method to implement paging in a cleaner fashion. Behind the scenes, these properties still use the continuation token.*
 
-
-### 
-
-**
+### Use the **HasMoreResults** and **ExecuteNextAsync** Members to Implement Pagination
 
 1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
@@ -1133,3 +1128,5 @@ The Azure Cosmos DB Data Explorer allows you to view documents and run queries d
 1. Close all open editor tabs.
 
 1. Close the Visual Studio Code application.
+
+1. Close your browser application.

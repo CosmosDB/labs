@@ -1,8 +1,10 @@
 # Authoring Azure Cosmos DB Stored Procedures using JavaScript 
 
+In this lab, you will author and execute multiple stored procedures within your Azure Cosmos DB instance. You will explore features unique to JavaScript stored procedures such as throwing errors for transaction rollback, logging using the JavaScript console and implementing a continuation model within a bounded execution enviornment.
+
 ## Setup
 
-Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection.
+*Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab.*
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -46,13 +48,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     ![Credentials](../media/04-credentials.png)
 
-## Author Simple Stored Procedure
+## Author Simple Stored Procedures
 
-
+*You will get started in this lab by authoring simple stored procedures that implement common server-side tasks such as adding one or more documents as part of a database transaction.*
 
 ### Open Data Explorer
-
-**
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -425,3 +425,19 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. In the **Results** pane, observe the results of your query.
 
 1. Close the **Query** tab.
+
+## Author Stored Procedures using the Continuation Model
+
+*You will now implement stored procedures that may execute longer than the bounded execution limits on the server. You will implement the continuation model so that the stored procedures can "pick up where they left off" after they ran out of time in a previous execution.*
+
+## Author Bulk Upload Stored Procedure
+
+1.
+
+## Author Bulk Delete Stored Procedure
+
+1.
+
+## Author Bulk Update Stored Procedure
+
+1.
