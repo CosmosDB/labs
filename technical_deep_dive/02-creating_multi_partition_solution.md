@@ -67,10 +67,10 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
-    dotnet add package Bogus --version 22.0.7
+    dotnet add package Bogus --version 22.0.8
     ```
 
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.7`` version of this NuGet package.
+    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
