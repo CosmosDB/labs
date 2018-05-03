@@ -110,7 +110,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. Click the **Advanced Options** button.
 
-    1. In the **Number of Parallel Requests** field, increment the value from ``10`` to ``25``.
+    1. In the **Number of Parallel Requests** field, increment the value from ``10`` to ``100``.
 
     1. Click the **Next** button.
 
@@ -128,7 +128,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ![Data Migration Tool - Progress](../media/04-dmt_progress.png)
 
-    > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to five minutes.
+    > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to three minutes.
 
     ![Data Migration Tool - Results](../media/04-dmt_results.png)
 

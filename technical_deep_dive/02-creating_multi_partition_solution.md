@@ -410,7 +410,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     };
     ```
 
-    > This definition will create a partition key on the ``/type`` path. Partition keys are case-sensitive.
+    > This definition will create a partition key on the ``/type`` path. Partition key paths are case sensitive. This is especially important when you consider JSON property casing in the context of .NET CLR object to JSON object serialization.
 
 1. Add the following lines of code to create a new ``DocumentCollection`` instance where you specify values for multiple properties:
 
@@ -943,7 +943,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
     ```
 
-    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key.
+    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``type``, it will match on the partition key path of ``\type``.
 
 1. Add the following line of code to print out the results of your query:
 
