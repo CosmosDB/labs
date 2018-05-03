@@ -9,25 +9,17 @@ using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 
-namespace Cosmos
+public class Program
 {
-    public class Program
-    {
-        private static readonly Uri _endpointUri = new Uri("https://labtrbl.documents.azure.com:443/");
-        private static readonly string _primaryKey = "yFMff7GiFN7AaGPC2WehNcgnvt8kP2EbkLnuVNWYgKoFmQ5dYyZ94cBXd8wBgV0TCKzmIO3z2y8WoRkViL2waA==";
+    private static readonly Uri _endpointUri = new Uri("");
+    private static readonly string _primaryKey = "";
 
-        public static void Main(string[] args)
-        {    
-            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-            {
-                //PopulateDatabase(client).Wait();
-                ExecuteLogic(client).Wait();
-            }            
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            await client.OpenAsync();  
+            await client.OpenAsync();   
+
             Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
             Stopwatch timer = new Stopwatch();
             FeedOptions options = new FeedOptions
@@ -49,11 +41,7 @@ namespace Cosmos
             }
             timer.Stop();
             await Console.Out.WriteLineAsync($"Elapsed Time:\t{timer.Elapsed.TotalSeconds}");
-        }
 
-        private static async Task PopulateDatabase(DocumentClient client)
-        {  
-            await client.OpenAsync();  
             Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
             var transactions = new Bogus.Faker<Transaction>()
                 .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
@@ -74,4 +62,12 @@ namespace Cosmos
             }     
         }
     }
+}
+
+public class Transaction
+{
+    public double Amount { get; set; }
+    public bool Processed { get; set; }
+    public string PaidBy { get; set; }
+    public string CostCenter { get; set; }
 }

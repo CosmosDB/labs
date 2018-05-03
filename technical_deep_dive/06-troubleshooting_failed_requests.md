@@ -1,8 +1,10 @@
 # Troubleshooting and Tuning Azure Cosmos DB Requests 
 
+In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to optimize performance of your application.
+
 ## Setup
 
-Before starting any lab in this workshop, you will need to create the various Azure resources necessary to complete the lab. In this exercise, you will create an Azure Cosmos DB account, database and collection and then populate the collection with a collection of JSON documents.
+*Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.*
 
 ### Download Required Files
 
@@ -40,15 +42,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     1. In the **Collection id** field, enter the value **TransactionCollection**.
 
-    1. In the **Storage capacity** section, select the **Unlimited** option.
+    1. In the **Storage capacity** section, select the **Fixed-Size** option.
 
-    1. In the **Partition key** field, enter the value ``/costCenter``.
-
-    1. In the **Throughput** field, enter the value ``1000``.
+    1. In the **Throughput** field, enter the value ``10000``.
 
     1. Click the **OK** button.
-
-    ![Add collection](../media/06-add_collection_settings.png)
 
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
@@ -66,7 +64,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ### Import Lab Data Into Collection
 
-*Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab.*
+*Finally, you will import the JSON documents contained in the **transactions.json** file you downloaded earlier in this lab. You will use the **Data Migration Tool** to import the JSON array stored in the **transactions.json** file from your local machine to your Azure Cosmos DB collection.
 
 1. On your local machine, open the **Azure Cosmos DB Data Migration Tool**.
 
@@ -126,8 +124,6 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ### Create a .NET Core Project
 
-**
-
 1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
@@ -148,13 +144,15 @@ Before starting any lab in this workshop, you will need to create the various Az
 
     > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
+1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
     ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency.
+    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -162,7 +160,7 @@ Before starting any lab in this workshop, you will need to create the various Az
     dotnet add package Bogus --version 22.0.7
     ```
 
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency.
+    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.7`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -192,7 +190,7 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ### Create DocumentClient Instance
 
-**
+*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
@@ -317,17 +315,19 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 ## Troubleshooting Requests
 
+*First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. You will then observe the throttling of your requests directly in an example application.*
 
+### Reducing R/U Throughput for a Collection
 
-### Handling 429 Errors
+1.
 
-**
+### Observing Throttling (HTTP 429)
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
     ![New File](../media/06-new_file.png)
 
-1. Name the new file **Transaction.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **Transaction.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``IInteraction`` interface:
 
@@ -393,6 +393,8 @@ Before starting any lab in this workshop, you will need to create the various Az
         .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
         .GenerateLazy(1000);
     ```
+
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 1000 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
     
 1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
@@ -438,6 +440,8 @@ Before starting any lab in this workshop, you will need to create the various Az
         }            
     }
     ```
+
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
 
 1. Save all of your open editor tabs.
 
@@ -512,6 +516,8 @@ Before starting any lab in this workshop, you will need to create the various Az
     }
     ```
 
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your collection does not have enough assigned throughput to handle the volume of requests.
+
 1. Save all of your open editor tabs.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
@@ -562,17 +568,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-## Use .NET SDK to Attempt Requests
+## Use .NET SDK to Tune Request Performance
 
-
-
-## Tuning Requests
-
-
+*You will now tune your requests to Azure Cosmos DB by manipulating properties of the **FeedOptions** class in the .NET SDK.*
 
 ### Measuing RU Charge
-
-**
 
 1. Locate the **ExecuteLogic** method and delete any existing code:
 
@@ -744,8 +744,6 @@ Before starting any lab in this workshop, you will need to create the various Az
     > Observe the slight differences in the various metric values.
 
 ### Managing SDK Query Options
-
-**
 
 1. Locate the **ExecuteLogic** method and delete any existing code:
 
@@ -1019,3 +1017,11 @@ Before starting any lab in this workshop, you will need to create the various Az
 1. Observe the output of the console application.
 
     > This change should have decreased your query time by a small amount.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Close all open editor tabs.
+
+1. Close the Visual Studio Code application.
+
+1. Close your browser application.

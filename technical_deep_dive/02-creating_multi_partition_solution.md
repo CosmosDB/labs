@@ -1,12 +1,12 @@
 # Creating a Multi-Partition Solution using Azure Cosmos DB
 
+In this lab, you will create multiple Azure Cosmos DB containers. Some of the containers will be unlimited and configured with a partition key, while others will be fixed-sized. You will then use the SQL API and .NET SDK to query specific containers using a single partition key or across multiple partition keys.
+
 ## Setup
 
-
+*The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
 
 ### Retrieve Account Credentials
-
-*The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -28,13 +28,11 @@
 
     ![Credentials](../media/02-credentials.png)
 
-## Create Unlimited Container using the .NET SDK
+## Create Containers using the .NET SDK
 
-
+*You will start by using the .NET SDK to create both fixed-size and unlimited containers to use in the lab.*
 
 ### Create a .NET Core Project
-
-**
 
 1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
 
@@ -56,13 +54,15 @@
 
     > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
+1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
     ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency.
+    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -70,7 +70,7 @@
     dotnet add package Bogus --version 22.0.7
     ```
 
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency.
+    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.7`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -128,7 +128,7 @@
 
 ### Create DocumentClient Instance
 
-**
+*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
@@ -223,8 +223,6 @@
 
 ### Create Database using the SDK
 
-**
-
 1. Locate the using block within the **Main** method:
 
     ```csharp
@@ -270,6 +268,8 @@
 
 1. Observe the output of the running command.
 
+    > In the console window, you will see the self-link string for the database resource in your Azure Cosmos DB account.
+
 1. In the open terminal pane, enter and execute the following command:
 
     ```sh
@@ -280,13 +280,13 @@
 
 1. Again, observe the output of the running command.
 
-    > Since the database already exists, you will see the same self-link on both executions of the console application.
+    > Since the database already exists, you will see the same self-link on both executions of the console application. This simply means that the SDK detected that the database already exists and used the existing database instance instead of creating a new instance of the database.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
 ### Create a Fixed Collection using the SDK
 
-**
+*Azure Cosmos DB containers can be created as fixed or unlimited in the Azure portal. Fixed-size containers have a maximum limit of 10 GB and 10,000 RU/s throughput. You will create a fixed-size container in this task.*
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
@@ -354,7 +354,7 @@
 
 ### Create an Unlimited Collection using the SDK
 
-**
+*Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 1,000 RU/s. You will specify those values when creating a container in this task.*
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
@@ -401,7 +401,7 @@
 
     > This indexing policy is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.
 
-1. Add the following code to create a new ``PartitionKeyDefinition`` instance with a single partition key of ``/Type`` defined:
+1. Add the following code to create a new ``PartitionKeyDefinition`` instance with a single partition key of ``/type`` defined:
 
     ```csharp
     PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition
@@ -471,8 +471,6 @@
 1. Close all open editor tabs.
 
 ### Observe Newly Created Database and Collections in the Portal
-
-**
 
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -584,17 +582,15 @@
 
 ## Populate a Collection with Documents using the SDK
 
+*You will now use the .NET SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple C# classes that you will create in your project.*
 
-
-### Create Test Data Classes
-
-**
+### Create Classes
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
     ![New File](../media/02-new_file.png)
 
-1. Name the new file **IInteraction.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **IInteraction.cs** . The editor tab will automatically open for the new file.
 
     ![Interaction Interface File](../media/02-interaction_interface.png)
 
@@ -609,7 +605,7 @@
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **PurchaseFoodOrBeverage.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **PurchaseFoodOrBeverage.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``PurchaseFoodOrBeverage`` class:
 
@@ -625,7 +621,7 @@
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **ViewMap.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **ViewMap.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``ViewMap`` class:
 
@@ -639,7 +635,7 @@
     
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **WatchLiveTelevisionChannel.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **WatchLiveTelevisionChannel.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``WatchLiveTelevisionChannel`` class:
 
@@ -672,9 +668,7 @@
 
 1. Close all open editor tabs.
 
-### Populate Unlimited Collection with Test Data
-
-**
+### Populate Unlimited Collection with Data
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
@@ -713,6 +707,8 @@
         .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
         .GenerateLazy(500);
     ```
+
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
     
 1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
@@ -762,6 +758,8 @@
     }
     ```
 
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
+
 1. Save all of your open editor tabs.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
@@ -781,8 +779,6 @@
 1. Click the **🗙** symbol to close the terminal pane.
 
 ### Populate Unlimited Collection with Data of Different Types
-
-**
 
 1. Locate the **Main** method and delete any existing code:
 
@@ -815,6 +811,8 @@
         }
     }
     ```
+
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
 
 1. Save all of your open editor tabs.
 
@@ -865,6 +863,8 @@
     }
     ```
 
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
+
 1. Save all of your open editor tabs.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
@@ -887,15 +887,13 @@
 
 ## Implement Cross-Partition Queries
 
-
+*With an unlimited container, you may wish to perform queries that are filtered to a partition key or perform queries across multiple partition keys. You will now implement both types of queries using the various options available in the **FeedOptions** class.*
 
 ### Execute Single-Partition Query
 
-**
-
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **GeneralInteraction.cs**. The editor tab will automatically open for the new file.
+1. Name the new file **GeneralInteraction.cs** . The editor tab will automatically open for the new file.
 
 1. Paste in the following code for the ``GeneralInteraction`` class:
 
@@ -942,10 +940,10 @@
 1. Add the following line of code to create a query that is filtered to a single partition key:
 
     ```csharp
-    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey(nameof(ViewMap)) });
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
     ```
 
-    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class.
+    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key.
 
 1. Add the following line of code to print out the results of your query:
 
@@ -978,12 +976,10 @@
 
 ### Execute Cross-Partition Query
 
-**
-
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
     ```csharp
-    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey(nameof(ViewMap)) });
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
     ```
 
     Replace that code with the following code:
@@ -992,7 +988,7 @@
     IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { EnableCrossPartitionQuery = true });
     ```
 
-    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class.
+    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class. You must explicitly opt-in using the SDK classes if you wish to perform a cross-partition query from the SDK.
 
 1. Save all of your open editor tabs.
 
@@ -1012,6 +1008,73 @@
 
 1. Click the **🗙** symbol to close the terminal pane.
 
+### Implement Continuation Token
+
+1. Locate the **Main** method and delete any existing code:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+                        
+    }
+    ```
+
+1. Replace the **Main** method with the following implementation:
+
+    ```csharp
+    public static async Task Main(string[] args)    
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        { 
+            await client.OpenAsync();   
+
+            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            
+            string continuationToken = String.Empty;
+            do
+            {
+                FeedOptions options = 
+                new FeedOptions { EnableCrossPartitionQuery = true, RequestContinuation = continuationToken };
+                IDocumentQuery<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, options).AsDocumentQuery();
+
+                FeedResponse<GeneralInteraction> results = await query.ExecuteNextAsync<GeneralInteraction>();
+                continuationToken = results.ResponseContinuation;
+
+                await Console.Out.WriteLineAsync($"ContinuationToken:\t{continuationToken}");
+                foreach(GeneralInteraction result in results)
+                {
+                    await Console.Out.WriteLineAsync($"[{result.type}]\t{result.id}");
+                }
+                await Console.Out.WriteLineAsync();
+
+            } 
+            while (!String.IsNullOrEmpty(continuationToken));
+        }
+    }
+    ```
+
+    > A continuation token allows us to resume a paginated query either immediately or later. When creating a query, the results are automatically paged. If there are more results, the returned page of results will also include a continuation token. This token should be passed back in    This implementation creates a **do-while** loop that will continue to get pages of results as long as the continuation token is not null.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see a list of documents grouped by "pages" of results. You should also see a continuation token associated with each page of results. This token can be used if you are in a client-server scenario where you need to continue a query that was executed earlier.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
 1. Close all open editor tabs.
 
 1. Close the Visual Studio Code application.
+
+1. Close your browser application.
