@@ -67,10 +67,10 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
-    dotnet add package Bogus --version 22.0.7
+    dotnet add package Bogus --version 22.0.8
     ```
 
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.7`` version of this NuGet package.
+    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -410,7 +410,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     };
     ```
 
-    > This definition will create a partition key on the ``/type`` path. Partition keys are case-sensitive.
+    > This definition will create a partition key on the ``/type`` path. Partition key paths are case sensitive. This is especially important when you consider JSON property casing in the context of .NET CLR object to JSON object serialization.
 
 1. Add the following lines of code to create a new ``DocumentCollection`` instance where you specify values for multiple properties:
 
@@ -943,7 +943,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
     ```
 
-    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key.
+    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``type``, it will match on the partition key path of ``\type``.
 
 1. Add the following line of code to print out the results of your query:
 
