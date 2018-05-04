@@ -437,7 +437,3 @@ In this lab, you will author and execute multiple stored procedures within your 
 ## Author Bulk Delete Stored Procedure
 
 1.
-
-## Author Bulk Update Stored Procedure
-
-1.
