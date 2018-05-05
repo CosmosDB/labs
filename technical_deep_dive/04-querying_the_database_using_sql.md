@@ -1125,6 +1125,195 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Click the **🗙** symbol to close the terminal pane.
 
+
+## Implement Cross-Partition Queries
+
+*With an unlimited container, you may wish to perform queries that are filtered to a partition key or perform queries across multiple partition keys. You will now implement both types of queries using the various options available in the **FeedOptions** class.*
+
+### Execute Single-Partition Query
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+
+1. Name the new file **GeneralInteraction.cs** . The editor tab will automatically open for the new file.
+
+1. Paste in the following code for the ``GeneralInteraction`` class:
+
+    ```csharp
+    public class GeneralInteraction : IInteraction
+    {
+        public string id { get; set; }
+
+        public string type { get; set; }
+    }
+    ```
+
+1. Back in the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **Main** method and delete any existing code:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {       
+    }
+    ```   
+
+1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+        
+    }
+    ```
+
+1. Within the new *using* block, add the following line of code to asynchronously open a connection:
+
+    ```csharp
+    await client.OpenAsync();
+    ```
+    
+1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
+
+    ```csharp
+    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+    ```
+
+1. Add the following line of code to create a query that is filtered to a single partition key:
+
+    ```csharp
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
+    ```
+
+    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``type``, it will match on the partition key path of ``\type``.
+
+1. Add the following line of code to print out the results of your query:
+
+    ```csharp
+    foreach(GeneralInteraction interaction in query)
+    {
+        Console.Out.WriteLine($"[{interaction.type}]\t{interaction.id}");
+    }
+    ```
+
+    > We are using the C# string formatting features to print out two properties of our interactions.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > You should only see records from a single partition.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+### Execute Cross-Partition Query
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```csharp
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
+    ```
+
+    Replace that code with the following code:
+
+    ```csharp
+    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { EnableCrossPartitionQuery = true });
+    ```
+
+    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class. You must explicitly opt-in using the SDK classes if you wish to perform a cross-partition query from the SDK.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``type`` on the left-hand side of the output.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+### Implement Continuation Token
+
+1. Locate the **Main** method and delete any existing code:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+                        
+    }
+    ```
+
+1. Replace the **Main** method with the following implementation:
+
+    ```csharp
+    public static async Task Main(string[] args)    
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        { 
+            await client.OpenAsync();   
+
+            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            
+            string continuationToken = String.Empty;
+            do
+            {
+                FeedOptions options = 
+                new FeedOptions { EnableCrossPartitionQuery = true, RequestContinuation = continuationToken };
+                IDocumentQuery<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, options).AsDocumentQuery();
+
+                FeedResponse<GeneralInteraction> results = await query.ExecuteNextAsync<GeneralInteraction>();
+                continuationToken = results.ResponseContinuation;
+
+                await Console.Out.WriteLineAsync($"ContinuationToken:\t{continuationToken}");
+                foreach(GeneralInteraction result in results)
+                {
+                    await Console.Out.WriteLineAsync($"[{result.type}]\t{result.id}");
+                }
+                await Console.Out.WriteLineAsync();
+
+            } 
+            while (!String.IsNullOrEmpty(continuationToken));
+        }
+    }
+    ```
+
+    > A continuation token allows us to resume a paginated query either immediately or later. When creating a query, the results are automatically paged. If there are more results, the returned page of results will also include a continuation token. This token should be passed back in    This implementation creates a **do-while** loop that will continue to get pages of results as long as the continuation token is not null.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see a list of documents grouped by "pages" of results. You should also see a continuation token associated with each page of results. This token can be used if you are in a client-server scenario where you need to continue a query that was executed earlier.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
 1. Close all open editor tabs.
 
 1. Close the Visual Studio Code application.
