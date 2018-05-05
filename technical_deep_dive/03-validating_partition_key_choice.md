@@ -78,7 +78,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
     > This file will show you a sample of the types of JSON documents that will be uploaded to your collection. Pay close attention to the **Submit\*** fields, the **DeviceId** field and the **LocationId** field.
 
-## Update the Application's Settings
+### Update the Application's Settings
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -102,7 +102,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
     > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new property will look like this: ``"primaryKey": "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ=="``.
 
-## Configure a Simple Collection for Benchmarking
+### Configure a Simple Collection for Benchmarking
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -132,7 +132,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Save all of your open editor tabs.
 
-## Run the Benchmark Application
+### Run the Benchmark Application
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
@@ -175,7 +175,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
-## Update the Application's Settings
+### Update the Application's Settings
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -193,7 +193,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Save all of your open editor tabs.
 
-## Run the Benchmark Application
+### Run the Benchmark Application
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
@@ -213,7 +213,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 *Now you will use multiple collections and partition key options to compare various strategies for partitioning a large dataset.*
 
-## Configure Multiple Collections for Benchmarking
+### Configure Multiple Collections for Benchmarking
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -249,7 +249,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Save all of your open editor tabs.
 
-## Run the Benchmark Application
+### Run the Benchmark Application
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
@@ -287,7 +287,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
-## Configure A New Collection for Benchmarking
+### Configure A New Collection for Benchmarking
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -328,7 +328,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Save all of your open editor tabs.
 
-## Run the Benchmark Application
+### Run the Benchmark Application
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
@@ -353,7 +353,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
-## Configure A Collection With a Composite Key for Benchmarking
+### Configure A Collection With a Composite Key for Benchmarking
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -395,7 +395,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Save all of your open editor tabs.
 
-## Observe How the Composite Key is Created
+### Observe How the Composite Key is Created
 
 1. Double-click the **Benchmark.cs** link in the **Explorer** pane to open the file in the editor.
 
@@ -407,7 +407,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
     > This line of code concatenates the **DeviceId** and **LocationId** fields before setting the result as the value of the **DeviceLocationComposite** property.
 
-## Run the Benchmark Application
+### Run the Benchmark Application
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
@@ -423,7 +423,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
-## Increase the Amount of Documents Used in the Test
+### Increase the Amount of Documents Used in the Test
 
 1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
 
@@ -494,7 +494,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Save all of your open editor tabs.
 
-## Run the Benchmark Application
+### Run the Benchmark Application
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
@@ -530,7 +530,7 @@ In this lab, you will compare various partition key choices for a large dataset 
 
 1. Close the Visual Studio Code application.
 
-## Observe the New Collections and Database in the Azure Portal
+### Observe the New Collections and Database in the Azure Portal
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
