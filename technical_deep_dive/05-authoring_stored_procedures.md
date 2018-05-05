@@ -848,7 +848,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-## Observe the Uploaded Documents in the Azure Portal
+### Observe the Uploaded Documents in the Azure Portal
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -969,7 +969,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. Close the Visual Studio Code application.
 
-## Query for Documents Within a Partition Key in the Azure Portal
+### Query for Documents Within a Partition Key in the Azure Portal
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
