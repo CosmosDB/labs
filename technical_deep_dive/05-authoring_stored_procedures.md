@@ -774,7 +774,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. Still within the **using** block, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is *less than* the amount of items in the **people** collection:
 
-    ```
+    ```js
     while(pointer < people.Count)
     {
     }
