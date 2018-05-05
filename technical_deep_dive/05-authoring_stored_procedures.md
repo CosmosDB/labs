@@ -830,6 +830,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     }
     ```
 
+    >
+
 1. Save all of your open editor tabs.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
@@ -870,6 +872,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     SELECT * FROM investors i WHERE i.company = "contosofinancial"
     ```
 
+    >
+
 1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
@@ -880,6 +884,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     SELECT * FROM investors i WHERE IS_DEFINED(i.firstName) AND IS_DEFINED(i.lastName)
     ```
 
+    >
+
 1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
@@ -889,6 +895,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```sql
     SELECT VALUE COUNT(1) FROM investors
     ```
+
+    >
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
@@ -909,6 +917,8 @@ In this lab, you will author and execute multiple stored procedures within your 
         public bool Continuation { get; set; }
     }
     ```
+
+    >
 
 1. Save all of your open editor tabs.
 
@@ -946,6 +956,8 @@ In this lab, you will author and execute multiple stored procedures within your 
         }   
     }
     ```
+
+    >
 
 1. Save all of your open editor tabs.
 
@@ -990,6 +1002,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```sql
     SELECT COUNT(1) FROM investors i WHERE i.company = "contosofinancial"
     ```
+
+    >
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
