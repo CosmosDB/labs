@@ -185,7 +185,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     }
     ```
 
-    >
+    > This stored procedure will use the **console.log** feature that's normally used in browser-based JavaScript to write output to the console. In the context of Azure Cosmos DB, this feature can be used to capture diagnostics logging information that can be returned after the stored procedure is executed.
 
 1. Click the **Save** button at the top of the tab.
 
@@ -780,23 +780,31 @@ In this lab, you will author and execute multiple stored procedures within your 
     }
     ```
 
+    > We are going to create a while loop that will keep uploading documents until the pointer's value greater than or equal to the amount of people in our object set.
+
 1. Within the **while** block, add the following lines of code to create an object of type **RequestOptions** that specified **contosofinancial** as the partition key for the request:
 
     ```csharp
     RequestOptions options = new RequestOptions { PartitionKey = new PartitionKey("contosofinancial") };
     ```
 
+    > If you are executing a stored procedure in an unlimited container, you must specify the partition key to use as the context of the stored procedure's execution.
+
 1. Still within the **while** block, add the following lines of code to execute the stored procedure:
 
     ```csharp
-    StoredProcedureResponse<int> result = await client.ExecuteStoredProcedureAsync<int>(sprocLink, options, people);
+    StoredProcedureResponse<int> result = await client.ExecuteStoredProcedureAsync<int>(sprocLink, options, people.Skip(pointer));
     ```
+
+    > This line of code will execute the stored procedure using three parameters; a self-link to the stored procedure to execute, an instance of the RequestOptions class, and then a dynamic list of parameters for the stored procedure. In this example, we are passing in an array of objects as the first parameter for the stored procedure.
 
 1. Still within the **while** block, add the following line of code to store the number returned by the stored procedure in the **pointer** variable:
 
     ```csharp
     pointer += result.Response;
     ```
+
+    > Everytime the stored procedure returns how many documents were processed, we will increment the counter.
 
 1. Still within the **while** block, add the following line of code to print out the amount of documents uploaded in the current iteration:
 
@@ -829,6 +837,8 @@ In this lab, you will author and execute multiple stored procedures within your 
         }   
     }
     ```
+
+    > You will notice that our C# code using the **Skip** method of the LINQ library to submit only the subset of our documents that are not yet uploaded. On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents. When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **5000** documents were uploaded. The pointer will now be incremented to a value of **5000**. On the next check of the while loop's condition, **5000** will be evaluated to be less than **25000** causing another execution of the code in the while loop. The LINQ method will now skip **5000** documents and send the remaining **20000** documents to the stored procedure to upload. This loop will continue until all documents are uploaded.
 
 1. Save all of your open editor tabs.
 
@@ -870,15 +880,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     SELECT * FROM investors i WHERE i.company = "contosofinancial"
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
-
-1. In the **Results** pane, observe the results of your query.
-
-1. In the query tab, replace the contents of the *query editor* with the following SQL query:
-
-    ```sql
-    SELECT * FROM investors i WHERE IS_DEFINED(i.firstName) AND IS_DEFINED(i.lastName)
-    ```
+    > To validate that our documents were uploaded, we will issue a query to select all documents with the partition key we used earlier for the stored procedure's execution.
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
@@ -887,8 +889,10 @@ In this lab, you will author and execute multiple stored procedures within your 
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT VALUE COUNT(1) FROM investors
+    SELECT COUNT(1) FROM investors i WHERE i.company = "contosofinancial"
     ```
+
+    > This query will return a count of the documents that are in the **contosofinancial** partition key.
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
@@ -909,6 +913,8 @@ In this lab, you will author and execute multiple stored procedures within your 
         public bool Continuation { get; set; }
     }
     ```
+
+    > The next stored procedure returns a complex JSON object instead of a simple typed value. We will need to create a C# class to deserialize the JSON object so we can use it's data in our C# code.
 
 1. Save all of your open editor tabs.
 
@@ -946,6 +952,8 @@ In this lab, you will author and execute multiple stored procedures within your 
         }   
     }
     ```
+
+    > This code will execute the stored procedure that deletes documents as long as the **resume** variable is set to true. The stored procedure itself always returns an object, serialized as **DeleteStatus**, that has a boolean indicating whether we should continue deleting documents and a number indicating how many documents were deleted as part of this execution. Within the do-while loop, we simply store the value of the boolean returned from the stored procedure in our **resume** variable and continue executing the stored procedure until it returns a false value indicating that all documents were deleted.
 
 1. Save all of your open editor tabs.
 
@@ -990,6 +998,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```sql
     SELECT COUNT(1) FROM investors i WHERE i.company = "contosofinancial"
     ```
+
+    > This query will return a count of the documents that are in the **contosofinancial** partition key. This count should verify that all documents were deleted.
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 

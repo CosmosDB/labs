@@ -705,7 +705,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
         .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
         .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
-        .GenerateLazy(500);
+        .Generate(500);
     ```
 
     > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
@@ -729,7 +729,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
     ```csharp
-    await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+    await Console.Out.WriteLineAsync($"Document #{tvInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
     ```
 
     > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
@@ -748,11 +748,11 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
                 .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
                 .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
-                .GenerateLazy(500);
+                .Generate(500);
             foreach(var interaction in foodInteractions)
             {
                 ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
-                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+                await Console.Out.WriteLineAsync($"Document #{foodInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
             }
         }     
     }
@@ -802,11 +802,11 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
                 .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
                 .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
-                .GenerateLazy(500);
+                .Generate(500);
             foreach(var interaction in tvInteractions)
             {
                 ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
-                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+                await Console.Out.WriteLineAsync($"Document #{tvInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
             }
         }
     }
@@ -853,11 +853,11 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             var mapInteractions = new Bogus.Faker<ViewMap>()
                 .RuleFor(i => i.type, (fake) => nameof(ViewMap))
                 .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-                .GenerateLazy(500);
+                .Generate(500);
             foreach(var interaction in mapInteractions)
             {
                 ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
-                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+                await Console.Out.WriteLineAsync($"Document #{mapInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
             }
         }
     }
@@ -883,13 +883,17 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Click the **🗙** symbol to close the terminal pane.
 
+1. Close all open editor tabs.
+
+1. Close the Visual Studio Code application.
+
 ## Benchmark A Simple Collection using a .NET Core Application
 
 *In the next part of this lab, you will compare various partition key choices for a large dataset using a special benchmarking tool available on GitHub.com. First, you will learn how to use the benchmarking tool using a simple collection and partition key.*
 
 ### Clone Existing .NET Core Project
 
-1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
+1. On your local machine, create a new folder that will be used to contain the content of your new .NET Core project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
