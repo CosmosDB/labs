@@ -46,7 +46,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. In the **Partition key** field, enter the value ``/enrollmentYear``.
 
-    1. In the **Throughput** field, enter the value ``10000``.
+    1. In the **Throughput** field, enter the value ``11000``.
 
     1. Click the **+ Add Unique Key** link.
 
@@ -106,7 +106,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. In the **Partition Key** field, enter the value ``/enrollmentYear``.
 
-    1. In the **Collection Throughput** field, enter the value ``10000``.
+    1. In the **Collection Throughput** field, enter the value ``11000``.
 
     1. Click the **Advanced Options** button.
 
@@ -1132,22 +1132,21 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ### Execute Single-Partition Query
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
 
-1. Name the new file **GeneralInteraction.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``GeneralInteraction`` class:
+1. Replace the existing **Student** class implementation with the following code:
 
     ```csharp
-    public class GeneralInteraction : IInteraction
+    public class Student
     {
-        public string id { get; set; }
-
-        public string type { get; set; }
+        public string studentAlias { get; set; }
+        public int age { get; set; }
+        public int enrollmentYear { get; set; }
+        public int projectedGraduationYear { get; set; }
     }
     ```
 
-1. Back in the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
 
 1. Within the **Program.cs** editor tab, locate the **Main** method and delete any existing code:
 
@@ -1175,27 +1174,29 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
     ```csharp
-    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
-1. Add the following line of code to create a query that is filtered to a single partition key:
+1. Add the following block of code to create a query that is filtered to a single partition key:
 
     ```csharp
-    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
+    IEnumerable<Student> query = client
+        .CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016) })
+        .Where(student => student.projectedGraduationYear == 2020);
     ```
 
-    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``\type`` path is ``ViewMap``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``type``, it will match on the partition key path of ``\type``.
+    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``/enrollmentYear`` path is ``2016``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``enrollmentYear``, it will match on the partition key path of ``/enrollmentYear``.
 
-1. Add the following line of code to print out the results of your query:
+1. Add the following block of code to print out the results of your query:
 
     ```csharp
-    foreach(GeneralInteraction interaction in query)
+    foreach(Student student in query)
     {
-        Console.Out.WriteLine($"[{interaction.type}]\t{interaction.id}");
-    }
+        Console.Out.WriteLine($"Enrolled: {student.enrollmentYear}\tGraduation: {student.projectedGraduationYear}\t{student.studentAlias}");
+    }      
     ```
 
-    > We are using the C# string formatting features to print out two properties of our interactions.
+    > We are using the C# string formatting features to print out two properties of our student instances.
 
 1. Save all of your open editor tabs.
 
@@ -1220,13 +1221,17 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 1. Within the **ExecuteLogic** method, locate the following line of code: 
 
     ```csharp
-    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { PartitionKey = new PartitionKey("ViewMap")) });
+    IEnumerable<Student> query = client
+        .CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016) })
+        .Where(student => student.projectedGraduationYear == 2020);
     ```
 
     Replace that code with the following code:
 
     ```csharp
-    IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { EnableCrossPartitionQuery = true });
+    IEnumerable<Student> query = client
+        .CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true })
+        .Where(student => student.projectedGraduationYear == 2020);
     ```
 
     > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class. You must explicitly opt-in using the SDK classes if you wish to perform a cross-partition query from the SDK.
@@ -1263,33 +1268,38 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 1. Replace the **Main** method with the following implementation:
 
     ```csharp
-    public static async Task Main(string[] args)    
-    {    
+    public static async Task Main(string[] args)
+    {         
         using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        { 
-            await client.OpenAsync();   
+        {
+            await client.OpenAsync();
 
-            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-            
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+
             string continuationToken = String.Empty;
             do
             {
-                FeedOptions options = 
-                new FeedOptions { EnableCrossPartitionQuery = true, RequestContinuation = continuationToken };
-                IDocumentQuery<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, options).AsDocumentQuery();
+                FeedOptions options = new FeedOptions 
+                { 
+                    EnableCrossPartitionQuery = true, 
+                    RequestContinuation = continuationToken 
+                };
+                IDocumentQuery<Student> query = client
+                    .CreateDocumentQuery<Student>(collectionLink, options)
+                    .Where(student => student.age < 18)
+                    .AsDocumentQuery();
 
-                FeedResponse<GeneralInteraction> results = await query.ExecuteNextAsync<GeneralInteraction>();
+                FeedResponse<Student> results = await query.ExecuteNextAsync<Student>();                
                 continuationToken = results.ResponseContinuation;
 
                 await Console.Out.WriteLineAsync($"ContinuationToken:\t{continuationToken}");
-                foreach(GeneralInteraction result in results)
+                foreach(Student result in results)
                 {
-                    await Console.Out.WriteLineAsync($"[{result.type}]\t{result.id}");
+                    await Console.Out.WriteLineAsync($"[Age: {result.age}]\t{result.studentAlias}@consoto.edu");
                 }
-                await Console.Out.WriteLineAsync();
-
+                await Console.Out.WriteLineAsync(); 
             } 
-            while (!String.IsNullOrEmpty(continuationToken));
+            while (!String.IsNullOrEmpty(continuationToken));          
         }
     }
     ```
@@ -1311,6 +1321,223 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 1. Observe the output of the console application.
 
     > You should see a list of documents grouped by "pages" of results. You should also see a continuation token associated with each page of results. This token can be used if you are in a client-server scenario where you need to continue a query that was executed earlier.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+### Observe How Partitions Are Accessed in a Cross-Partition Query
+
+1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
+
+1. Replace the existing **Student** class implementation with the following code:
+
+    ```csharp
+    public class Student
+    {
+        public string studentAlias { get; set; }
+        public int age { get; set; }
+        public int enrollmentYear { get; set; }
+        public int projectedGraduationYear { get; set; }
+
+        public FinancialInfo financialData { get; set; }
+
+        public class FinancialInfo
+        {
+            public double tuitionBalance { get; set; }
+        }
+    }
+    ```
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Locate the **Main** method and delete any existing code:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+                        
+    }
+    ```
+
+1. Replace the **Main** method with the following implementation:
+
+    ```csharp
+        public static async Task Main(string[] args)
+        {         
+            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+            {
+                await client.OpenAsync();
+
+                Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+
+                FeedOptions options = new FeedOptions 
+                { 
+                    EnableCrossPartitionQuery = true
+                };
+
+                string sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
+
+                IDocumentQuery<Student> query = client
+                    .CreateDocumentQuery<Student>(collectionLink, sql, options)
+                    .AsDocumentQuery();
+
+                int pageCount = 0;
+                while(query.HasMoreResults)
+                {
+                    await Console.Out.WriteLineAsync($"---Page #{++pageCount:0000}---");
+                    foreach(Student result in await query.ExecuteNextAsync())
+                    {
+                        await Console.Out.WriteLineAsync($"Enrollment: {result.enrollmentYear}\tBalance: {result.financialData.tuitionBalance}\t{result.studentAlias}@consoto.edu");
+                    }
+                }        
+            }
+        }
+    ```
+
+    > We are creating a cross-partition query here that may (or may not) have results for each partition key. Since this is a server-side fan-out and we are not filtering on a partition key, the search will be forced to check each partition. You can potentially have pages returned that have no results for partition keys that do not have any matching data.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see a list of documents grouped by "pages" of results. Scroll up and look at the results for **every page**. You should also notice that there is at least one page that does not have any results. This page occurs because the server-side fan-out is forced to check every partition since you are not filtering by partition keys. The next few examples will illustrate this even more.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
+    ```
+
+    Replace that code with the following code:
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
+    ```
+
+    > This new query should return results for most partition keys.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > You will notice in the results that one page exists that does not have any relevant data. This occurs because there's at least one partition that does not have any data that matches the query specified above. Since we are not filtering on partition keys, all partitions much be checked as part of the server-side fan-out.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
+    ```
+
+    Replace that code with the following code:
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
+    ```
+
+    > This new query should return results for most partition keys.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > Now only 54 records will match your query. They are pretty evenly distributed across the partition keys, so you will only see one page without results.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
+    ```
+
+    Replace that code with the following code:
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";
+    ```
+
+    > This new query should return results for most partition keys.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > Only 3 records match this query. You should see more empty pages.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **ExecuteLogic** method, locate the following line of code: 
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";
+    ```
+
+    Replace that code with the following code:
+
+    ```csharp
+    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14998";
+    ```
+
+    > This new query should return results for most partition keys.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the execution.
+
+    > Only 1 record matches this query. You should see every multiple empty pages.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
