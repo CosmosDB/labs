@@ -977,7 +977,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     "collectionSettings": [
         {
             "id": "CollectionWithHourKey",
-            "throughput": 1000,
+            "throughput": 20000,
             "partitionKeys": [ "/SubmitHour" ]
         }
     ],
@@ -987,7 +987,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     | Collection Name | Throughput | Partition Key |
     | --- | --- | --- |
-    | CollectionWithHourKey | 1000 | /SubmitHour |
+    | CollectionWithHourKey | 20000 | /SubmitHour |
 
 1. Save all of your open editor tabs.
 
@@ -1013,20 +1013,17 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     Database                IoTDeviceData
     Collection              CollectionWithHourKey
     Partition Key:          /SubmitHour
-    Throughput:             1000 Request Units per Second (RU/s)
-    Insert Operation:       10 Tasks Inserting 1000 Documents Total
+    Throughput:             20000 Request Units per Second (RU/s)
+    Insert Operation:       200 Tasks Inserting 1000 Documents Total
     ---------------------------------------------------------------------
 
-    Starting Inserts with 10 tasks
-    Inserted 272 docs @ 272 writes/s, 1968 RU/s (5B max monthly 1KB reads)
-    Inserted 616 docs @ 307 writes/s, 2220 RU/s (6B max monthly 1KB reads)
-    Inserted 962 docs @ 319 writes/s, 2309 RU/s (6B max monthly 1KB reads)
-    Inserted 1000 docs @ 249 writes/s, 1802 RU/s (5B max monthly 1KB reads)
+    Starting Inserts with 200 tasks
+    Inserted 1000 docs @ 1000 writes/s, 7237 RU/s (19B max monthly 1KB reads)
 
     Summary:
     ---------------------------------------------------------------------
-    Total Time Elapsed:     00:00:04.0209549
-    Inserted 1000 docs @ 249 writes/s, 1801 RU/s (5B max monthly 1KB reads)
+    Total Time Elapsed:     00:00:01.0022338
+    Inserted 1000 docs @ 998 writes/s, 7225 RU/s (19B max monthly 1KB reads)
     ---------------------------------------------------------------------
     ```
 
@@ -1047,7 +1044,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     Update the **numberOfDocumentsToInsert** property by setting it's value to **10,000**:
 
     ```js
-    "numberOfDocumentsToInsert": 10000
+    "numberOfDocumentsToInsert": 50000
     ```
 
 1. Save all of your open editor tabs.
@@ -1064,7 +1061,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Observe the results of the application's execution. 
 
-    > You may notice at this point that the results don't scale linearly. In our testing, we observed that **1,000** records needed **4-7** seconds to import while **10,000** records needed **20-30** seconds to import.
+    > You may notice at this point that the results don't scale linearly. In our testing, we observed that **1,000** records needed **1-2** seconds to import while **50,000** records needed **30-40** seconds to import.
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
@@ -1088,13 +1085,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     "collectionSettings": [
         {
             "id": "CollectionWithMinuteKey",
-            "throughput": 5000,
+            "throughput": 20000,
             "partitionKeys": [ "/SubmitMinute" ]
         },
         {
-            "id": "CollectionWithSecondKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/SubmitSecond" ]
+            "id": "CollectionWithDeviceKey",
+            "throughput": 20000,
+            "partitionKeys": [ "/DeviceId" ]
         }
     ],
     ```
@@ -1103,8 +1100,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     | Collection Name | Throughput | Partition Key |
     | --- | --- | --- |
-    | CollectionWithMinuteKey | 5000 | /SubmitMinute |
-    | CollectionWithSecondKey | 5000 | /SubmitSecond |
+    | CollectionWithMinuteKey | 20000 | /SubmitMinute |
+    | CollectionWithDeviceKey | 20000 | /DeviceId |
 
 1. Save all of your open editor tabs.
 
@@ -1126,268 +1123,25 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     ---------------------------------------------------------------------
     Collection              CollectionWithMinuteKey
     Partition Key:          /SubmitMinute
-    Total Time Elapsed:     00:00:22.1209042
-    Inserted 10000 docs @ 452 writes/s, 3273 RU/s (8B max monthly 1KB reads)
+    Total Time Elapsed:     00:00:34.5233434
+    Inserted 50000 docs @ 1448 writes/s, 10487 RU/s (27B max monthly 1KB reads)
     ---------------------------------------------------------------------
     ```
 
-    > The **SubmitMinute** partition key will most likely take longer to execute than the **SubmitSecond** partition key. The **SubmitSecond** partition key "spreads" the records across more partition keys because the records are being submitted at different seconds within the minute. If you are ingesting documents at enough volume, you could potentially see a bottleneck with the second-based partition key too. In this demo, you should expect a total time of >10 seconds.
+    > The **SubmitMinute** partition key will most likely take longer to execute than the **DeviceId** partition key. Using the **DeviceId** partition key creates a more even distribution of requests across your various partition keys. Because of this behavior, you should notice drastically improved performance.
 
     ```sh
     ---------------------------------------------------------------------
-    Collection              CollectionWithSecondKey
-    Partition Key:          /SubmitSecond
-    Total Time Elapsed:     00:00:13.1317735
-    Inserted 10000 docs @ 761 writes/s, 5515 RU/s (14B max monthly 1KB reads)
+    Collection              CollectionWithDeviceKey
+    Partition Key:          /DeviceId
+    Total Time Elapsed:     00:00:19.6402879
+    Inserted 50000 docs @ 2546 writes/s, 18437 RU/s (48B max monthly 1KB reads)
     ---------------------------------------------------------------------
     ```
 
 1. Compare the RU/s and total time for both collections.
 
 1. Press the **ENTER** key to complete the execution of the console application.
-
-### Configure A New Collection for Benchmarking
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/collectionSettings** JSON path:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithMinuteKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/SubmitMinute" ]
-        },
-        {
-            "id": "CollectionWithSecondKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/SubmitSecond" ]
-        }
-    ],
-    ```
-
-    Update the **collectionSettings** property by setting it's value to the following array of JSON objects:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithDeviceKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/DeviceId" ]
-        }
-    ],
-    ```
-
-    > The object above will instruct the benchmark tool to create a new collection and set it's throughput and partition key to the specified values. For this demo, we are adding a container using a new partition key that partitions based on the device sending the request.
-
-    | Collection Name | Throughput | Partition Key |
-    | --- | --- | --- |
-    | CollectionWithDeviceKey | 5000 | /DeviceId |
-
-1. Save all of your open editor tabs.
-
-### Run the Benchmark Application
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-1. Observe the results of the application's execution.
-
-    > Using the **DeviceId** partition key creates a "more even" distribution of requests across your various partition keys. Because of this behavior, you should notice drastically improved performance. In this demo, you should expect a total time of <10 seconds.
-
-    ```sh
-    ---------------------------------------------------------------------
-    Collection              CollectionWithDeviceKey
-    Partition Key:          /DeviceId
-    Total Time Elapsed:     00:00:07.0502822
-    Inserted 10000 docs @ 1418 writes/s, 10270 RU/s (27B max monthly 1KB reads)
-    ---------------------------------------------------------------------
-    ```
-
-1. Press the **ENTER** key to complete the execution of the console application.
-
-### Configure A Collection With a Composite Key for Benchmarking
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/collectionSettings** JSON path:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithDeviceKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/DeviceId" ]
-        }
-    ],
-    ```
-
-    Update the **collectionSettings** property by setting it's value to the following array of JSON objects:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithDeviceKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/DeviceId" ]
-        },    
-        {
-            "id": "CollectionWithCompositeDeviceAndLocationKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/DeviceLocationComposite" ]
-        }
-    ],
-    ```
-
-    > The object above will instruct the benchmark tool to create multiple collections and set their throughput and partition key to the specified values. For this demo, we are adding another container using a new partition key that is based on a composite of two existing values.
-
-    | Collection Name | Throughput | Partition Key |
-    | --- | --- | --- |
-    | CollectionWithDeviceKey | 5000 | /DeviceId |
-    | CollectionWithCompositeDeviceAndLocationKey | 5000 | /DeviceLocationComposite |
-
-1. Save all of your open editor tabs.
-
-### Observe How the Composite Key is Created
-
-1. Double-click the **Benchmark.cs** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate **Line 29** of the C# code in the **Benchmark.cs** file:
-
-    ```csharp
-    recording.DeviceLocationComposite = $"{recording.DeviceId}_{recording.LocationId}";
-    ```
-
-    > This line of code concatenates the **DeviceId** and **LocationId** fields before setting the result as the value of the **DeviceLocationComposite** property.
-
-### Run the Benchmark Application
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-1. Observe the results of the application's execution.
-
-    > You will quickly notice that there's little difference between the two partition key choices in this example. This is most likely because the sample data set is too small.
-
-1. Press the **ENTER** key to complete the execution of the console application.
-
-### Increase the Amount of Documents Used in the Test
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/cosmosSettings.degreeOfParallelism** JSON path:
-
-    ```js
-    "degreeOfParallelism": -1
-    ```
-
-    Update the **degreeOfParallelism** property by setting it's value to **200**:
-
-    ```js
-    "degreeOfParallelism": 200
-    ```
-
-1. Locate the **/cosmosSettings.numberOfDocumentsToInsert** JSON path:
-
-    ```js
-    "numberOfDocumentsToInsert": 10000
-    ```
-
-    Update the **numberOfDocumentsToInsert** property by setting it's value to **200,000**:
-
-    ```js
-    "numberOfDocumentsToInsert": 200000
-    ```
-
-1. Locate the **/collectionSettings** JSON path:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithDeviceKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/DeviceId" ]
-        },    
-        {
-            "id": "CollectionWithCompositeDeviceAndLocationKey",
-            "throughput": 5000,
-            "partitionKeys": [ "/DeviceLocationComposite" ]
-        }
-    ],
-    ```
-
-    Update the **collectionSettings** property by setting it's value to the following array of JSON objects:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithDeviceKey",
-            "throughput": 10000,
-            "partitionKeys": [ "/DeviceId" ]
-        },    
-        {
-            "id": "CollectionWithCompositeDeviceAndLocationKey",
-            "throughput": 10000,
-            "partitionKeys": [ "/DeviceLocationComposite" ]
-        }
-    ],
-    ```
-
-    > For this demo, we are increasing the number of documents being created and increasing the assigned RU/s throughput.
-
-    | Collection Name | Throughput | Partition Key |
-    | --- | --- | --- |
-    | CollectionWithDeviceKey | 10000 | /DeviceId |
-    | CollectionWithCompositeDeviceAndLocationKey | 10000 | /DeviceLocationComposite |
-
-1. Save all of your open editor tabs.
-
-### Run the Benchmark Application
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-1. Observe the results of the application's execution. This execution may take a couple of minutes to complete.
-
-    > Even though we are at greater scale, you will still see that there are few differences between the key choices here. This is most likely due to physical constraints of the local machine you are using to do the tests. In testing, our four-core processor (Intel i7 6700k) didn't get too many benefits from increasing the **Maximum Degree of Parallelism** and **RU/s** beyond these values.
-
-    ```sh
-    ---------------------------------------------------------------------
-    Collection              CollectionWithDeviceKey
-    Partition Key:          /DeviceId
-    Total Time Elapsed:     00:00:52.5756688
-    Inserted 200000 docs @ 3804 writes/s, 27542 RU/s (71B max monthly 1KB reads)
-    ---------------------------------------------------------------------
-
-    ---------------------------------------------------------------------
-    Collection              CollectionWithCompositeDeviceAndLocationKey
-    Partition Key:          /DeviceLocationComposite
-    Total Time Elapsed:     00:01:00.7347998
-    Inserted 200000 docs @ 3293 writes/s, 23842 RU/s (62B max monthly 1KB reads)
-    ---------------------------------------------------------------------
-    ```
-
-1. Press the **ENTER** key to complete the execution of the console application.
-
-1. Close all open editor tabs.
-
-1. Close the Visual Studio Code application.
 
 ### Observe the New Collections and Database in the Azure Portal
 
