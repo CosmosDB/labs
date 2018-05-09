@@ -729,7 +729,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
     ```csharp
-    await Console.Out.WriteLineAsync($"Document #{tvInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
+    await Console.Out.WriteLineAsync($"Document #{foodInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
     ```
 
     > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
@@ -977,7 +977,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     "collectionSettings": [
         {
             "id": "CollectionWithHourKey",
-            "throughput": 20000,
+            "throughput": 10000,
             "partitionKeys": [ "/SubmitHour" ]
         }
     ],
@@ -987,7 +987,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     | Collection Name | Throughput | Partition Key |
     | --- | --- | --- |
-    | CollectionWithHourKey | 20000 | /SubmitHour |
+    | CollectionWithHourKey | 10000 | /SubmitHour |
 
 1. Save all of your open editor tabs.
 
@@ -1013,17 +1013,17 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     Database                IoTDeviceData
     Collection              CollectionWithHourKey
     Partition Key:          /SubmitHour
-    Throughput:             20000 Request Units per Second (RU/s)
-    Insert Operation:       200 Tasks Inserting 1000 Documents Total
+    Throughput:             10000 Request Units per Second (RU/s)
+    Insert Operation:       100 Tasks Inserting 1000 Documents Total
     ---------------------------------------------------------------------
 
-    Starting Inserts with 200 tasks
-    Inserted 1000 docs @ 1000 writes/s, 7237 RU/s (19B max monthly 1KB reads)
+    Starting Inserts with 100 tasks
+    Inserted 1000 docs @ 997 writes/s, 7220 RU/s (19B max monthly 1KB reads)
 
     Summary:
     ---------------------------------------------------------------------
-    Total Time Elapsed:     00:00:01.0022338
-    Inserted 1000 docs @ 998 writes/s, 7225 RU/s (19B max monthly 1KB reads)
+    Total Time Elapsed:     00:00:01.0047125
+    Inserted 1000 docs @ 995 writes/s, 7209 RU/s (19B max monthly 1KB reads)
     ---------------------------------------------------------------------
     ```
 
@@ -1041,7 +1041,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     "numberOfDocumentsToInsert": 1000
     ```
 
-    Update the **numberOfDocumentsToInsert** property by setting it's value to **10,000**:
+    Update the **numberOfDocumentsToInsert** property by setting it's value to **50,000**:
 
     ```js
     "numberOfDocumentsToInsert": 50000
@@ -1061,7 +1061,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Observe the results of the application's execution. 
 
-    > You may notice at this point that the results don't scale linearly. In our testing, we observed that **1,000** records needed **1-2** seconds to import while **50,000** records needed **30-40** seconds to import.
+    > You may notice at this point that the results don't scale linearly. In our testing, we observed that **1,000** records needed **1-2** seconds to import while **50,000** records needed **30-60** seconds to import.
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
@@ -1085,12 +1085,12 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     "collectionSettings": [
         {
             "id": "CollectionWithMinuteKey",
-            "throughput": 20000,
+            "throughput": 10000,
             "partitionKeys": [ "/SubmitMinute" ]
         },
         {
             "id": "CollectionWithDeviceKey",
-            "throughput": 20000,
+            "throughput": 10000,
             "partitionKeys": [ "/DeviceId" ]
         }
     ],
@@ -1100,8 +1100,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     | Collection Name | Throughput | Partition Key |
     | --- | --- | --- |
-    | CollectionWithMinuteKey | 20000 | /SubmitMinute |
-    | CollectionWithDeviceKey | 20000 | /DeviceId |
+    | CollectionWithMinuteKey | 10000 | /SubmitMinute |
+    | CollectionWithDeviceKey | 10000 | /DeviceId |
 
 1. Save all of your open editor tabs.
 
@@ -1123,8 +1123,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     ---------------------------------------------------------------------
     Collection              CollectionWithMinuteKey
     Partition Key:          /SubmitMinute
-    Total Time Elapsed:     00:00:34.5233434
-    Inserted 50000 docs @ 1448 writes/s, 10487 RU/s (27B max monthly 1KB reads)
+    Total Time Elapsed:     00:00:57.4233616
+    Inserted 50000 docs @ 871 writes/s, 6304 RU/s (16B max monthly 1KB reads)
     ---------------------------------------------------------------------
     ```
 
@@ -1134,8 +1134,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     ---------------------------------------------------------------------
     Collection              CollectionWithDeviceKey
     Partition Key:          /DeviceId
-    Total Time Elapsed:     00:00:19.6402879
-    Inserted 50000 docs @ 2546 writes/s, 18437 RU/s (48B max monthly 1KB reads)
+    Total Time Elapsed:     00:00:27.2769234
+    Inserted 50000 docs @ 1833 writes/s, 13272 RU/s (34B max monthly 1KB reads)
     ---------------------------------------------------------------------
     ```
 
