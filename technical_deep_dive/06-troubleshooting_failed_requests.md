@@ -324,7 +324,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 ## Examining Response Headers
 
-**
+*Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occured on the server-side. The .NET SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.*
 
 ### Observe RU Charge for Large Document
 
@@ -1972,11 +1972,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-## Observe the ETag Property and it's Relation to Optimistic Concurrency
+## Viewing the ETag Property of a Requested Resource
 
-**
+*The SQL API supports optimistic concurrency control (OCC) through HTTP entity tags, or ETags. Every SQL API resource has an ETag, and the ETag is set on the server every time a document is updated. In this exercise, we will view the ETag property of a resource that is requested using the SDK.*
 
-###
+### Observe the ETag Property 
 
 1. Locate the *using* block within the **Main** method:
 
@@ -1998,7 +1998,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     await Console.Out.WriteLineAsync($"ETag: {response.Resource.ETag}");    
     ```
 
-    > The SQL API supports optimistic concurrency control (OCC) through HTTP entity tags, or ETags. Every SQL API resource has an ETag, and the ETag is set on the server every time a document is updated. The ETag header and the current value are included in all response messages.
+    > The ETag header and the current value are included in all response messages.
    
 1. Save all of your open editor tabs.
 
