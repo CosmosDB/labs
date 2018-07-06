@@ -306,7 +306,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Add the following code to the method to create a self-link to an existing database:
 
     ```csharp
-    Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
+    Uri databaseLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
     ```
 
 1. Add the following lines of code to create a new ``DocumentCollection`` instance where you only specify a value for the ``Id`` property:
@@ -323,7 +323,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Add the following code to create a new collection instance if one does not already exist within your database:
 
     ```csharp
-    defaultCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseSelfLink, defaultCollection);
+    defaultCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseLink, defaultCollection);
     ```
 
     > This code will check to see if a collection exists in your database that meets the specified parameters. If a collection that matches does not exist, it will create a new collection.
@@ -374,7 +374,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Add the following code to the method to create a self-link to an existing database:
 
     ```csharp
-    Uri databaseSelfLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
+    Uri databaseLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
     ```
 
 1. Add the following code to create a new ``IndexingPolicy`` instance with a custom indexing policy configured:
@@ -439,7 +439,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Add the following code to create a new collection instance if one does not already exist within your database:
 
     ```csharp
-    customCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseSelfLink, customCollection, requestOptions);         
+    customCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseLink, customCollection, requestOptions);         
     ```
 
     > This code will check to see if a collection exists in your database that meets all of the specified parameters. If a collection that matches does not exist, it will create a new collection.
@@ -690,10 +690,10 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Add the following code to the method to create a self-link to an existing collection:
 
     ```csharp
-    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
     ```
 
-1. Observe the code in the **ExecuteLogic** method.
+1. Observe the code in the **Main** method.
 
     > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
 
@@ -721,7 +721,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
 
     ```csharp
-    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
     ```
 
     > The ``CreateDocumentAsync`` method of the ``DocumentClient`` class takes in a self-link for a collection and an object that you would like to serialize into JSON and store as a document within the specified collection.
@@ -742,7 +742,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
             await client.OpenAsync();
-            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
             var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
                 .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
                 .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
@@ -751,7 +751,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 .Generate(500);
             foreach(var interaction in foodInteractions)
             {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
                 await Console.Out.WriteLineAsync($"Document #{foodInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
             }
         }     
@@ -797,7 +797,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
             await client.OpenAsync();
-            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
             var tvInteractions = new Bogus.Faker<WatchLiveTelevisionChannel>()
                 .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
                 .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
@@ -805,7 +805,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 .Generate(500);
             foreach(var interaction in tvInteractions)
             {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
                 await Console.Out.WriteLineAsync($"Document #{tvInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
             }
         }
@@ -849,14 +849,14 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
             await client.OpenAsync();
-            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
             var mapInteractions = new Bogus.Faker<ViewMap>()
                 .RuleFor(i => i.type, (fake) => nameof(ViewMap))
                 .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
                 .Generate(500);
             foreach(var interaction in mapInteractions)
             {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, interaction);
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
                 await Console.Out.WriteLineAsync($"Document #{mapInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
             }
         }

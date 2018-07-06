@@ -14,9 +14,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     ![Resource groups](../media/04-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABPROC** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
-1. In the **LABPROC** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
@@ -864,9 +864,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -983,9 +983,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 

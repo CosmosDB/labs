@@ -20,21 +20,13 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     ![Resource groups](../media/06-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABTRBL** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
-    ![Lab resource group](../media/06-lab_resource_group.png)
-
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
-
-    ![Cosmos resource](../media/06-cosmos_resource.png)
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
-    ![Overview pane](../media/06-overview_pane.png)
-
 1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
-
-    ![Add collection](../media/06-add_collection.png)
 
 1. In the **Add Collection** popup, perform the following actions:
 
@@ -96,9 +88,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     1. In the **Collection** field, enter the value **TransactionCollection**.
 
-    1. In the **Partition Key** field, enter the value ``/costCenter``.
-
-    1. In the **Collection Throughput** field, enter the value ``1000``.
+    1. In the **Collection Throughput** field, enter the value ``10000``.
 
     1. Click the **Next** button.
 
@@ -184,6 +174,34 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     ![Project files](../media/06-project_files.png)
 
+1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
+
+1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+
+    ```xml
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    ```
+
+1. Your new XML should look like this:
+
+    ```xml
+    <Project Sdk="Microsoft.NET.Sdk">
+        <PropertyGroup>
+            <LangVersion>latest</LangVersion>
+        </PropertyGroup>
+        <PropertyGroup>
+            <OutputType>Exe</OutputType>
+            <TargetFramework>netcoreapp2.0</TargetFramework>
+        </PropertyGroup>
+        <ItemGroup>
+            <PackageReference Include="Bogus" Version="22.0.8" />
+            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
+        </ItemGroup>
+    </Project>
+    ```
+
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
     ![Open editor](../media/06-program_editor.png)
@@ -197,6 +215,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     ```csharp
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
@@ -210,12 +229,8 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     ```csharp
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {         
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
-        {
         }
     }
     ```
@@ -225,6 +240,8 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     ```csharp
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
+    private static readonly string _databaseId = "FinancialDatabase";
+    private static readonly string _collectionId = "TransactionCollection";  
     ```
 
 1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
@@ -233,12 +250,12 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
-    > For example, if your **primary key** is ``yFMff7GiFN7AaGPC2WehNcgnvt8kP2EbkLnuVNWYgKoFmQ5dYyZ94cBXd8wBgV0TCKzmIO3z2y8WoRkViL2waA==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "yFMff7GiFN7AaGPC2WehNcgnvt8kP2EbkLnuVNWYgKoFmQ5dYyZ94cBXd8wBgV0TCKzmIO3z2y8WoRkViL2waA==";``.
+    > For example, if your **primary key** is ``NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";``.
     
 1. Locate the **Main** method:
 
     ```csharp
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     { 
     }
     ```
@@ -246,30 +263,25 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
     ```csharp
-    using (DocumentClient client = new DocumentClient(endpointUri, primaryKey))
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
     {
         
     }
     ```
 
-1. Within the *using* block, add the following line of code to call the static ``ExecuteLogic`` method passing in the ``DocumentClient`` instance and waiting for the asynchronous execution to complete.
+1. Locate the using block within the **Main** method:
 
     ```csharp
-    ExecuteLogic(client).Wait();
-    ```
-
-1. Locate the **ExecuteLogic** method:
-
-    ```csharp
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+                        
     }
     ```
 
-1. Within the **ExecuteLogic** method, add the following line of code to asynchronously open a connection:
+1. Add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
 
     ```csharp
-    await client.OpenAsync();
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
 1. Your ``Program`` class definition should now look like this:
@@ -279,18 +291,15 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     { 
         private static readonly Uri _endpointUri = new Uri("<your uri>");
         private static readonly string _primaryKey = "<your key>";
+        private static readonly string _databaseId = "FinancialDatabase";
+        private static readonly string _collectionId = "TransactionCollection";
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {    
             using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
             {
-                ExecuteLogic(client).Wait();
-            }
-        }
-
-        private static async Task ExecuteLogic(DocumentClient client)
-        {  
-            await client.OpenAsync();     
+                Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+            }     
         }
     }
     ```
@@ -313,15 +322,736 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Close all open editor tabs.
 
+## Examining Response Headers
+
+**
+
+### Observe RU Charge for Large Document
+
+1. Locate the using block within the **Main** method:
+
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {                        
+    }
+    ```
+    
+1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named **doc**:
+
+    ```csharp
+    object doc = new Bogus.Person();
+    ```
+
+    > The **Bogus** library has a special helper class (``Bogus.Person``) that will generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
+    
+    ```js
+    {
+        "Gender": 1,
+        "FirstName": "Rosalie",
+        "LastName": "Dach",
+        "FullName": "Rosalie Dach",
+        "UserName": "Rosalie_Dach",
+        "Avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/mastermindesign/128.jpg",
+        "Email": "Rosalie27@gmail.com",
+        "DateOfBirth": "1962-02-22T21:48:51.9514906-05:00",
+        "Address": {
+            "Street": "79569 Wilton Trail",
+            "Suite": "Suite 183",
+            "City": "Caramouth",
+            "ZipCode": "85941-7829",
+            "Geo": {
+                "Lat": -62.1607,
+                "Lng": -123.9278
+            }
+        },
+        "Phone": "303.318.0433 x5168",
+        "Website": "gerhard.com",
+        "Company": {
+            "Name": "Mertz - Gibson",
+            "CatchPhrase": "Focused even-keeled policy",
+            "Bs": "architect mission-critical markets"
+        }
+    }
+    ```
+
+1. Add a new line of code to invoke the **CreateDocumentAsync** method of the **DocumentClient** instance using the **collectionLink** and **doc** variables as parameters:
+
+    ```csharp
+    await client.CreateDocumentAsync(collectionLink, doc);
+    ```
+
+1. Your **Main** method should now look like this:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+            object doc = new Bogus.Person();
+            await client.CreateDocumentAsync(collectionLink, doc);
+        }   
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see five aliases printed to the console window.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **Program.cs** editor tab, locate the **Main** method.
+
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    await client.CreateDocumentAsync(collectionLink, doc);
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
+    ```
+
+    > The ``CreateDocumentAsync`` method returns a **ResourceResponse<>** instance with various metadata about the create operation.
+
+1. After the last line of code in the using block, add a new line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see the document creation operation use approximately 10 RUs.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **TransactionCollection** node.
+
+1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT TOP 2 * FROM coll ORDER BY coll._ts DESC
+    ```
+
+    > This query will return the latest two documents added to your collection.
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+1. In the **Results** pane, observe the results of your query.
+
+1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. To view the RU charge for inserting a very large document, we will use the **Bogus** library to create a fictional family. To create a fictional family, we will generate two fictional parents and an array of 4 fictional children:
+
+    ```js
+    {
+        "FirstParent":  { ... }, 
+        "SecondParent": { ... }, 
+        "Children": [
+            { ... }, 
+            { ... }, 
+            { ... }, 
+            { ... }
+        ]
+    }
+    ```
+
+    Each property will have a **Bogus**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
+
+1. Within the **Program.cs** editor tab, locate the **Main** method.
+
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    object doc = new Bogus.Person();
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    object doc = new {
+        FirstParent = new Bogus.Person(),
+        SecondParent = new Bogus.Person(),
+        Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+    };
+    ```
+
+    > This new block of code will create the large JSON object discussed above.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see this new operation require far more RUs than the simple JSON document.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **TransactionCollection** node.
+
+1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Children)
+    ```
+
+    > This query will return the only document in your collection with a property named **Children**.
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+1. In the **Results** pane, observe the results of your query.
+
+### Tune Index Policy
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+
+1. In the **Settings** section, locate the **Indexing Policy** field and observe the current default indexing policy:
+
+    ```js
+    {
+        "indexingMode": "consistent",
+        "automatic": true,
+        "includedPaths": [
+            {
+                "path": "/*",
+                "indexes": [
+                    {
+                        "kind": "Range",
+                        "dataType": "Number",
+                        "precision": -1
+                    },
+                    {
+                        "kind": "Range",
+                        "dataType": "String",
+                        "precision": -1
+                    },
+                    {
+                        "kind": "Spatial",
+                        "dataType": "Point"
+                    }
+                ]
+            }
+        ],
+        "excludedPaths": []
+    }
+    ```
+
+    > This policy will index all paths in your JSON document. This policy implements maximum percision (-1) for both numbers (max 8) and strings (max 100) paths. This policy will also index spatial data.
+
+1. Replace the indexing policy with a new policy that removes the ``/SecondParent/*`` path from the index:
+
+    ```js
+    {
+        "indexingMode": "consistent",
+        "automatic": true,
+        "includedPaths": [
+            {
+                "path":"/*",
+                "indexes":[
+                    {
+                        "kind": "Range",
+                        "dataType": "String",
+                        "precision": 3
+                    },
+                    {
+                        "kind": "Range",
+                        "dataType": "Number",
+                        "precision": 7
+                    }
+                ]
+            }
+        ],
+        "excludedPaths": [
+            {
+                "path":"/SecondParent/*"
+            }
+        ]
+    }
+    ```
+
+    > This new policy will lower the precision on both string and number types down from their maximum value. It will also exclude the ``/SecondParent/*`` path effectively removing the **SecondParent** property of your large JSON document from the index.
+
+1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
+
+1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Children)
+    ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+    > You will see immediately that you can still determine if the **/Children** path is defined.
+
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Children) ORDER BY coll.SecondParent.Gender
+    ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+    > This query will fail immediately since this property is not indexed.
+
+1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see a difference in the number of RUs required to create this document. This is due to the indexer skipping the paths you excluded.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+
+1. In the **Settings** section, locate the **Indexing Policy** field and replace the indexing policy with a new policy:
+
+    ```js
+    {
+        "indexingMode": "consistent",
+        "automatic": true,
+        "includedPaths": [
+            {
+                "path":"/*",
+                "indexes":[
+                    {
+                        "kind": "Range",
+                        "dataType": "String",
+                        "precision": 3
+                    },
+                    {
+                        "kind": "Range",
+                        "dataType": "Number",
+                        "precision": 7
+                    }
+                ]
+            }
+        ],
+        "excludedPaths": [
+            {
+                "path":"/Children/*"
+            }
+        ]
+    }
+    ```
+
+    > This new policy adds the ``/Children/*`` path to the excluded path list.
+
+1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
+
+1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the results of the console project.
+
+    > You should see a much larger difference in the number of RUs required to create this document. This is due to the **Children** property containing a lot more data that would normally need to be indexed.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+
+1. In the **Settings** section, locate the **Indexing Policy** field and replace the indexing policy with a new policy:
+
+    ```js
+    {
+        "indexingMode": "consistent",
+        "automatic": true,
+        "includedPaths": [
+            {
+                "path":"/*",
+                "indexes":[
+                    {
+                        "kind": "Range",
+                        "dataType": "String",
+                        "precision": -1
+                    },
+                    {
+                        "kind": "Range",
+                        "dataType": "Number",
+                        "precision": -1
+                    }
+                ]
+            }
+        ]
+    }
+    ```
+
+    > This new policy removes the ``/SecondParent/*`` path from the excluded path list and increases the precision for each data type.
+
+1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
+
+1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+
+1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+
+    ```sql
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Children) ORDER BY coll.SecondParent.Gender
+    ```
+
+1. Click the **Execute Query** button in the query tab to run the query. 
+
+    > This query should now work. If you see an empty result set, this is because the indexer has not finished indexing all of the documents in the collection. Simply rerun the query until you see a non-empty result set.
+
+### Implement Upsert using Response Status Codes
+
+1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+
+1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+
+1. Within the **Program.cs** editor tab, locate the **Main** method.
+
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
+    ```
+
+    > Instead of having a Uri that references a collection, we will create a Uri that references a specific document. To create this Uri, you will need a third parameter specifying the unique string identifier for the document. In this example, our string id is ``example.document``.
+
+1. Locate the following block of code:
+
+    ```csharp
+    object doc = new {
+        FirstParent = new Bogus.Person(),
+        SecondParent = new Bogus.Person(),
+        Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+    };
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    object doc = new {
+        id: "example.document",
+        FirstName: "Example",
+        LastName: "Person"
+    };
+    ```
+
+    > Here we are creating a new document that has an **id** property set to a value of ``example.document``.
+
+1. Locate the following line of code:
+
+    ```csharp
+    ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
+    ```
+
+    > We will now use the **ReadDocumentAsync** method of the **DocumentClient** class to retrieve a document using the unique id.
+
+1. Locate the following line of code:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
+    ```
+
+    > This will print out the status code that was returned as a response for your operation.
+
+1. Your ``Main`` method should now look like this:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+            Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
+            object doc = new {
+                id = "example.document",
+                FirstName = "Example",
+                LastName = "Person"
+            };
+            ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
+            await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
+        }  
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the exception message.
+
+    > You should see that an exception was thrown since a document was not found that matches the specified id.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Within the **Main** method, locate the following block of code: 
+
+    ```csharp
+    ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
+    await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    try
+    {
+        ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
+        await Console.Out.WriteLineAsync($"Success: {readResponse.StatusCode}");
+    }
+    catch (DocumentClientException dex)
+    {
+        await Console.Out.WriteLineAsync($"Exception: {dex.StatusCode}");
+    }
+    ```
+
+    > This try-catch block will handle a **DocumentClientException** throw by printing out the status code related to the exception.
+
+1. Your ``Main`` method should now look like this:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+            Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
+            object doc = new {
+                id = "example.document",
+                FirstName = "Example",
+                LastName = "Person"
+            };
+            try
+            {
+                ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
+                await Console.Out.WriteLineAsync($"Success: {readResponse.StatusCode}");
+            }
+            catch (DocumentClientException dex)
+            {
+                await Console.Out.WriteLineAsync($"Exception: {dex.StatusCode}");
+            }
+        }  
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the exception message.
+
+    > You should see a status code indicating that a document was not found. The catch block worked successfully.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+    > While you could manually implement upsert logic, the .NET SDK contains a useful method to implement this logic for you.
+
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+    ```
+
+1. Locate the following block of code: 
+
+    ```csharp
+    try
+    {
+        ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
+        await Console.Out.WriteLineAsync($"Success: {readResponse.StatusCode}");
+    }
+    catch (DocumentClientException dex)
+    {
+        await Console.Out.WriteLineAsync($"Exception: {dex.StatusCode}");
+    }
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    ResourceResponse<Document> readResponse = await client.UpsertDocumentAsync(collectionLink, doc);
+    await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the exception message.
+
+    > You should see a status code indicating that a document was successfully created.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
 ## Troubleshooting Requests
 
 *First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. You will then observe the throttling of your requests directly in an example application.*
 
 ### Reducing R/U Throughput for a Collection
 
-1.
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+
+1. In the **Settings** section, locate the **Throughput** field and update it's value to **400**.
+
+    > This is the minimum throughput that you can allocate to a fixed-size collection.
+
+1. Click the **Save** button at the top of the section to persist your new throughput allocation.
 
 ### Observing Throttling (HTTP 429)
+
+1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
@@ -359,11 +1089,14 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the *using* block within the **Main** method and delete any existing code:
 
     ```csharp
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+        }
     }
     ```
 
@@ -376,10 +1109,10 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
     ```csharp
-    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
-1. Observe the code in the **ExecuteLogic** method.
+1. Observe the code in the **Main** method.
 
     > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
 
@@ -407,7 +1140,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
 
     ```csharp
-    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, transaction);
+    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, transaction);
     ```
 
     > The ``CreateDocumentAsync`` method of the ``DocumentClient`` class takes in a self-link for a collection and an object that you would like to serialize into JSON and store as a document within the specified collection.
@@ -420,24 +1153,27 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
 
-1. Your **ExecuteLogic** method should look like this:
+1. Your **Main** method should look like this:
 
     ```csharp
-    private static async Task ExecuteLogic(DocumentClient client)
-    {
-        await client.OpenAsync();  
-        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
-        var transactions = new Bogus.Faker<Transaction>()
-            .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-            .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-            .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-            .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-            .GenerateLazy(500);
-        foreach(var transaction in transactions)
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, transaction);
-            await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
-        }            
+            await client.OpenAsync();
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+            var transactions = new Bogus.Faker<Transaction>()
+                .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
+                .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
+                .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
+                .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
+                .GenerateLazy(100);
+            foreach(var transaction in transactions)
+            {
+                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, transaction);    
+                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+            }
+        }  
     }
     ```
 
@@ -477,7 +1213,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     List<Task<ResourceResponse<Document>>> tasks = new List<Task<ResourceResponse<Document>>>();
     foreach(var transaction in transactions)
     {
-        Task<ResourceResponse<Document>> resultTask = client.CreateDocumentAsync(collectionSelfLink, transaction);
+        Task<ResourceResponse<Document>> resultTask = client.CreateDocumentAsync(collectionLink, transaction);
         tasks.Add(resultTask);
     }    
     Task.WaitAll(tasks.ToArray());
@@ -489,30 +1225,33 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > We are going to attempt to run as many of these creation tasks in parallel as possible. Remember, our collection is configured at 1,000 RU/s.
 
-1. Your **ExecuteLogic** method should look like this:
+1. Your **Main** method should look like this:
 
     ```csharp
-    private static async Task ExecuteLogic(DocumentClient client)
-    {
-        await client.OpenAsync();  
-        Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
-        var transactions = new Bogus.Faker<Transaction>()
-            .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-            .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-            .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-            .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-            .GenerateLazy(500);
-        List<Task<ResourceResponse<Document>>> tasks = new List<Task<ResourceResponse<Document>>>();
-        foreach(var transaction in transactions)
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
         {
-            Task<ResourceResponse<Document>> resultTask = client.CreateDocumentAsync(collectionSelfLink, transaction);
-            tasks.Add(resultTask);
-        }    
-        Task.WaitAll(tasks.ToArray());
-        foreach(var task in tasks)
-        {
-            await Console.Out.WriteLineAsync($"Document Created\t{task.Result.Resource.Id}");
-        }             
+            await client.OpenAsync();
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+            var transactions = new Bogus.Faker<Transaction>()
+                .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
+                .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
+                .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
+                .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
+                .GenerateLazy(100);
+            List<Task<ResourceResponse<Document>>> tasks = new List<Task<ResourceResponse<Document>>>();
+            foreach(var transaction in transactions)
+            {
+                Task<ResourceResponse<Document>> resultTask = client.CreateDocumentAsync(collectionLink, transaction);
+                tasks.Add(resultTask);
+            }    
+            Task.WaitAll(tasks.ToArray());
+            foreach(var task in tasks)
+            {
+                await Console.Out.WriteLineAsync($"Document Created\t{task.Result.Resource.Id}");
+            } 
+        }  
     }
     ```
 
@@ -532,14 +1271,14 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Observe the output of the console application.
 
-    > This query should execute successfully. We are only creating 500 documents and we most likely will not run into any throughput issues here.
+    > This query should execute successfully. We are only creating 100 documents and we most likely will not run into any throughput issues here.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
 1. Back in the code editor tab, locate the following line of code:
 
     ```csharp
-    .GenerateLazy(500);
+    .GenerateLazy(100);
     ```
 
     Replace that line of code with the following code:
@@ -562,23 +1301,26 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > This command will build and execute the console project.
 
-1. Observe that the application will crash.
+1. Observe that the application will crash after some time.
 
     > This query will most likely hit our throughput limit. You will see multiple error messages indicating that specific requests have failed.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-## Use .NET SDK to Tune Request Performance
+## Tuning Queries and Reads
 
 *You will now tune your requests to Azure Cosmos DB by manipulating properties of the **FeedOptions** class in the .NET SDK.*
 
 ### Measuing RU Charge
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the *using* block within the **Main** method and delete any existing code:
 
     ```csharp
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+        }
     }
     ```
 
@@ -587,11 +1329,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     ```csharp
     await client.OpenAsync();
     ```
-
-1. Add the following code to the method to create a self-link to an existing collection:
+    
+1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
     ```csharp
-    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
 1. Add the following lines of code to configure options for a query:
@@ -615,7 +1357,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Add the following line of code to create a document query instance:
 
     ```csharp
-    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionSelfLink, sql, options).AsDocumentQuery();
+    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionLink, sql, options).AsDocumentQuery();
     ```
 
 1. Add the following line of code to get the first "page" of results:
@@ -745,11 +1487,14 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 ### Managing SDK Query Options
 
-1. Locate the **ExecuteLogic** method and delete any existing code:
+1. Locate the *using* block within the **Main** method and delete any existing code:
 
     ```csharp
-    private static async Task ExecuteLogic(DocumentClient client)
-    {       
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+        }
     }
     ```
 
@@ -758,11 +1503,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     ```csharp
     await client.OpenAsync();
     ```
-
-1. Add the following code to the method to create a self-link to an existing collection:
+    
+1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
     ```csharp
-    Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("FinancialDatabase", "TransactionCollection");
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
 1. Add the following line of code to create a high-precision timer:
@@ -778,7 +1523,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     {
         EnableCrossPartitionQuery = true,
         MaxItemCount = 100,
-        MaxDegreeOfParallelism = 0,
+        MaxDegreeOfParallelism = 1,
         MaxBufferedItemCount = 0
     }; 
     ```
@@ -808,7 +1553,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Add the following line of code to create a document query instance:
 
     ```csharp
-    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionSelfLink, sql, options).AsDocumentQuery();
+    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionLink, sql, options).AsDocumentQuery();
     ```
 
 1. Add the following lines of code to enumerate the result set.
@@ -857,7 +1602,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     {
         EnableCrossPartitionQuery = true,
         MaxItemCount = 100,
-        MaxDegreeOfParallelism = 0,
+        MaxDegreeOfParallelism = 1,
         MaxBufferedItemCount = 0
     }; 
     ```
@@ -869,12 +1614,12 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     {
         EnableCrossPartitionQuery = true,
         MaxItemCount = 100,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
+        MaxDegreeOfParallelism = 5,
+        MaxBufferedItemCount = 0
     };   
     ```
 
-    > Setting the ``MaxDegreeOfParallelism`` and ``MaxBufferedItemCount`` properties to a value of ``-1`` effectively tells the SDK to manage these settings.
+    > Setting the ``MaxDegreeOfParallelism`` property to a value of ``1`` effectively creates eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
 
 1. Save all of your open editor tabs.
 
@@ -890,7 +1635,90 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Observe the output of the console application.
 
-    > Depending on your system, the elapsed time may be unchanged.
+    > You shouldn't see a slight difference considering you now have some form of parallelism.
+
+1. Back in the code editor tab, locate the following line of code:
+
+    ```csharp
+    FeedOptions options = new FeedOptions
+    {
+        EnableCrossPartitionQuery = true,
+        MaxItemCount = 100,
+        MaxDegreeOfParallelism = 5,
+        MaxBufferedItemCount = 0
+    }; 
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    FeedOptions options = new FeedOptions
+    {
+        EnableCrossPartitionQuery = true,
+        MaxItemCount = 100,
+        MaxDegreeOfParallelism = 5,
+        MaxBufferedItemCount = -1
+    };   
+    ```
+
+    > Setting the ``MaxBufferedItemCount`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > Again, this should have a slight impact on your performance time.
+1. Back in the code editor tab, locate the following line of code:
+
+    ```csharp
+    FeedOptions options = new FeedOptions
+    {
+        EnableCrossPartitionQuery = true,
+        MaxItemCount = 100,
+        MaxDegreeOfParallelism = 5,
+        MaxBufferedItemCount = -1
+    }; 
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    FeedOptions options = new FeedOptions
+    {
+        EnableCrossPartitionQuery = true,
+        MaxItemCount = 100,
+        MaxDegreeOfParallelism = -1,
+        MaxBufferedItemCount = -1
+    };   
+    ```
+
+    > Setting the ``MaxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > Again, this should have a slight impact on your performance time.
 
 1. Back in the code editor tab, locate the following line of code:
 
@@ -1017,6 +1845,271 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Observe the output of the console application.
 
     > This change should have decreased your query time by a small amount.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+### Reading and Querying Documents
+
+1. Locate the *using* block within the **Main** method and delete any existing code:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+        }
+    }
+    ```
+
+1. Add the following code to the method to create an asynchronous connection:
+
+    ```csharp
+    await client.OpenAsync();
+    ```
+    
+1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
+
+    ```csharp
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+    ```
+
+1. Add the following line of code that will store a SQL query in a string variable:
+
+    ```csharp
+    string sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
+    ```
+
+    > This query will find a single document matching the specified unique id
+
+1. Add the following line of code to create a document query instance:
+
+    ```csharp
+    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionLink, sql).AsDocumentQuery();
+    ```
+
+1. Add the following line of code to get the first page of results and then store them in a variable of type **FeedResponse<>**:
+
+    ```csharp
+    FeedResponse<Document> response = await query.ExecuteNextAsync<Document>();
+    ```
+
+    > We only need to retrieve a single page since we are getting the ``TOP 1`` documents from the collection.
+
+1. Add the following line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see the amount of RUs used to query for the document in your collection.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Locate the *using* block within the **Main** method and delete any existing code:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+        }
+    }
+    ```
+
+1. Add the following code to the method to create an asynchronous connection:
+
+    ```csharp
+    await client.OpenAsync();
+    ```
+
+1. Add the following code to create a Uri referencing the document you wish to search for:
+
+    ```csharp
+    Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");   
+    ```
+
+1. Add the following code to use the **ReadDocumentAsync** method of the **DocumentClient** class to retrieve a document using the unique id:
+
+    ```csharp
+    ResourceResponse<Document> response = await client.ReadDocumentAsync(documentLink);
+    ```
+
+1. Add the following line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    ```
+   
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see that it took fewer RUs to obtain the document directly if you have it's unique id.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+## Observe the ETag Property and it's Relation to Optimistic Concurrency
+
+**
+
+###
+
+1. Locate the *using* block within the **Main** method:
+
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+    }
+    ```
+
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"ETag: {response.Resource.ETag}");    
+    ```
+
+    > The SQL API supports optimistic concurrency control (OCC) through HTTP entity tags, or ETags. Every SQL API resource has an ETag, and the ETag is set on the server every time a document is updated. The ETag header and the current value are included in all response messages.
+   
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see an ETag for the document.
+
+1. Enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > The ETag should remain unchanged since the document has not been changed.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. Locate the *using* block within the **Main** method:
+
+    ```csharp
+    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    {
+    }
+    ```
+    
+1. Within the **Main** method, locate the following line of code: 
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
+    ```
+
+    Replace that line of code with the following code:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"Existing ETag:\t{response.Resource.ETag}");    
+    ```
+
+1. Within the **using** block, add a new line of code to create a Uri referencing the document collection:
+
+    ```csharp
+    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId); 
+    ```
+
+1. Add a new line of code to 
+
+    ```csharp
+    response.Resource.SetPropertyValue("FirstName", "Demo");
+    ```
+
+    > This line of code will modify a property of the document. Here we are modifying the **FirstName** property and changing it's value from **Example** to **Demo**.
+
+1. Add a new line of code to 
+
+    ```csharp
+    response = await client.UpsertDocumentAsync(collectionLink, response.Resource);
+    ```
+
+1. Add a new line of code to 
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"New ETag:\t{response.Resource.ETag}"); 
+    ```
+
+1. Your **Main** method should now look like this:
+
+    ```csharp
+    public static async Task Main(string[] args)
+    {    
+        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+        {
+            await client.OpenAsync();
+            Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");            
+            ResourceResponse<Document> response = await client.ReadDocumentAsync(documentLink);
+            await Console.Out.WriteLineAsync($"Existing ETag:\t{response.Resource.ETag}"); 
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);            
+            response.Resource.SetPropertyValue("FirstName", "Demo");
+            response = await client.UpsertDocumentAsync(collectionLink, response.Resource);
+            await Console.Out.WriteLineAsync($"New ETag:\t{response.Resource.ETag}"); 
+        }
+    }
+    ```
+
+1. Save all of your open editor tabs.
+
+1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the output of the console application.
+
+    > You should see that the value of the ETag property has changed. To implement optimistic concurrency, we can use the If-Match header to allow the server to decide whether a resource should be updated. The If-Match value is the ETag value to be checked against. If the ETag value matches the server ETag value, the resource is updated. If the ETag is no longer current, the server rejects the operation with an "HTTP 412 Precondition failure" response code. The client then re-fetches the resource to acquire the current ETag value for the resource. In addition, ETags can be used with the If-None-Match header to determine whether a re-fetch of a resource is needed.
 
 1. Click the **🗙** symbol to close the terminal pane.
 

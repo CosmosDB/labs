@@ -1218,7 +1218,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ### Execute Cross-Partition Query
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
     ```csharp
     IEnumerable<Student> query = client
@@ -1413,7 +1413,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
     ```csharp
     string sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
@@ -1445,7 +1445,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
     ```csharp
     string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
@@ -1477,7 +1477,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
     ```csharp
     string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
@@ -1509,7 +1509,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Within the **ExecuteLogic** method, locate the following line of code: 
+1. Within the **Main** method, locate the following line of code: 
 
     ```csharp
     string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";

@@ -100,8 +100,8 @@ public class Program
                 await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
             }
             
-            Uri collectionSelfLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection"); 
-            IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionSelfLink, new FeedOptions { EnableCrossPartitionQuery = true });
+            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection"); 
+            IQueryable<GeneralInteraction> query = client.CreateDocumentQuery<GeneralInteraction>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true });
             foreach(GeneralInteraction interaction in query)
             {
                 Console.Out.WriteLine($"[{interaction.type}]\t{interaction.id}");
