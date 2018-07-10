@@ -1167,8 +1167,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     - Indexing Policy
 
-1. Back in the **Data Explorer** section, expand and select the **CollectionWithCompositeKey** node. 
-
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:

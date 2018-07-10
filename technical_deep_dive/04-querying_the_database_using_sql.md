@@ -8,7 +8,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ### Download Required Files
 
-*A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection.*
+*A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection. This is a compressed JSON file, it will not be human-readable. The tool will decompress it. Please remember to check the decompress box.*
 
 1. Download the [students.json](../files/students.json) file and save it to your local machine.
 
