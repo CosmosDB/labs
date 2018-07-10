@@ -627,6 +627,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
     ```csharp
+    using Bogus;
     using System.Threading.Tasks;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;

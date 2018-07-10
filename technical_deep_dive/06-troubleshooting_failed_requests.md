@@ -34,9 +34,27 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     1. In the **Collection id** field, enter the value **TransactionCollection**.
 
-    1. In the **Storage capacity** section, select the **Fixed-Size** option.
+    1. In the **Storage capacity** section, select the **Unlimited** option.
+
+    1. In the **Partition key** field, enter the value ``/costCenter``.
 
     1. In the **Throughput** field, enter the value ``10000``.
+
+    1. Click the **OK** button.
+
+1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
+
+1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
+
+1. In the **Add Collection** popup, perform the following actions:
+
+    1. In the **Database id** field, select the **Existing database** option and then enter the value **FinancialDatabase**.
+
+    1. In the **Collection id** field, enter the value **PeopleCollection**.
+
+    1. In the **Storage capacity** section, select the **Fixed-Size** option.
+
+    1. In the **Throughput** field, enter the value ``1000``.
 
     1. Click the **OK** button.
 
@@ -241,7 +259,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     private static readonly Uri _endpointUri = new Uri("");
     private static readonly string _primaryKey = "";
     private static readonly string _databaseId = "FinancialDatabase";
-    private static readonly string _collectionId = "TransactionCollection";  
+    private static readonly string _collectionId = "PeopleCollection";  
     ```
 
 1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
@@ -292,7 +310,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
         private static readonly Uri _endpointUri = new Uri("<your uri>");
         private static readonly string _primaryKey = "<your key>";
         private static readonly string _databaseId = "FinancialDatabase";
-        private static readonly string _collectionId = "TransactionCollection";
+        private static readonly string _collectionId = "PeopleCollection";
 
         public static async Task Main(string[] args)
         {    
@@ -462,7 +480,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **TransactionCollection** node.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **PeopleCollection** node.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -486,14 +504,16 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     ```js
     {
-        "FirstParent":  { ... }, 
-        "SecondParent": { ... }, 
-        "Children": [
-            { ... }, 
-            { ... }, 
-            { ... }, 
-            { ... }
-        ]
+        "Person":  { ... }, 
+        "Relatives": {
+            "Spouse": { ... }, 
+            "Children": [
+                { ... }, 
+                { ... }, 
+                { ... }, 
+                { ... }
+            ]
+        }
     }
     ```
 
@@ -510,10 +530,14 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     Replace that line of code with the following code:
 
     ```csharp
-    object doc = new {
-        FirstParent = new Bogus.Person(),
-        SecondParent = new Bogus.Person(),
-        Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+    object doc = new
+    {
+        Person = new Bogus.Person(),
+        Relatives = new
+        {
+            Spouse = new Bogus.Person(), 
+            Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+        }
     };
     ```
 
@@ -547,14 +571,14 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **TransactionCollection** node.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **PeopleCollection** node.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.Children)
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Relatives)
     ```
 
     > This query will return the only document in your collection with a property named **Children**.
@@ -567,7 +591,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Indexing Policy** field and observe the current default indexing policy:
 
@@ -602,7 +626,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > This policy will index all paths in your JSON document. This policy implements maximum percision (-1) for both numbers (max 8) and strings (max 100) paths. This policy will also index spatial data.
 
-1. Replace the indexing policy with a new policy that removes the ``/SecondParent/*`` path from the index:
+1. Replace the indexing policy with a new policy that removes the ``/Relatives/*`` path from the index:
 
     ```js
     {
@@ -615,25 +639,25 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
                     {
                         "kind": "Range",
                         "dataType": "String",
-                        "precision": 3
+                        "precision": -1
                     },
                     {
                         "kind": "Range",
                         "dataType": "Number",
-                        "precision": 7
+                        "precision": -1
                     }
                 ]
             }
         ],
         "excludedPaths": [
             {
-                "path":"/SecondParent/*"
+                "path":"/Relatives/*"
             }
         ]
     }
     ```
 
-    > This new policy will lower the precision on both string and number types down from their maximum value. It will also exclude the ``/SecondParent/*`` path effectively removing the **SecondParent** property of your large JSON document from the index.
+    > This new policy will exclude the ``/Relatives/*`` path from indexing effectively removing the **Children** property of your large JSON document from the index.
 
 1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
 
@@ -642,7 +666,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.Children)
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Relatives)
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
@@ -652,7 +676,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.Children) ORDER BY coll.SecondParent.Gender
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Relatives) ORDER BY coll.Relatives.Spouse.FirstName
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
@@ -687,72 +711,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
-
-1. In the **Settings** section, locate the **Indexing Policy** field and replace the indexing policy with a new policy:
-
-    ```js
-    {
-        "indexingMode": "consistent",
-        "automatic": true,
-        "includedPaths": [
-            {
-                "path":"/*",
-                "indexes":[
-                    {
-                        "kind": "Range",
-                        "dataType": "String",
-                        "precision": 3
-                    },
-                    {
-                        "kind": "Range",
-                        "dataType": "Number",
-                        "precision": 7
-                    }
-                ]
-            }
-        ],
-        "excludedPaths": [
-            {
-                "path":"/Children/*"
-            }
-        ]
-    }
-    ```
-
-    > This new policy adds the ``/Children/*`` path to the excluded path list.
-
-1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
-
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the results of the console project.
-
-    > You should see a much larger difference in the number of RUs required to create this document. This is due to the **Children** property containing a lot more data that would normally need to be indexed.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
-
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
-
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Indexing Policy** field and replace the indexing policy with a new policy:
 
@@ -780,7 +739,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     }
     ```
 
-    > This new policy removes the ``/SecondParent/*`` path from the excluded path list and increases the precision for each data type.
+    > This new policy removes the ``/Relatives/*`` path from the excluded path list so that the path can be indexed again.
 
 1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
 
@@ -789,7 +748,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.Children) ORDER BY coll.SecondParent.Gender
+    SELECT * FROM coll WHERE IS_DEFINED(coll.Relatives) ORDER BY coll.Relatives.Spouse.FirstName
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
@@ -821,10 +780,14 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Locate the following block of code:
 
     ```csharp
-    object doc = new {
-        FirstParent = new Bogus.Person(),
-        SecondParent = new Bogus.Person(),
-        Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+    object doc = new
+    {
+        Person = new Bogus.Person(),
+        Relatives = new
+        {
+            Spouse = new Bogus.Person(), 
+            Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+        }
     };
     ```
 
@@ -1021,7 +984,19 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Observe the exception message.
 
-    > You should see a status code indicating that a document was successfully created.
+    > Since we are "upserting" a document with a unique **id**, the server-side operation will be to create a new document. You should see the status code ``Created`` indicating that the create operation was completed successfully.
+
+1. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    dotnet run
+    ```
+
+    > This command will build and execute the console project.
+
+1. Observe the exception message.
+
+    > Since we are "upserting" a document with the same **id**, the server-side operation will be to update the existing document with the same **id**. You should see the status code ``OK`` indicating that the update operation was completed successfully.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -1043,9 +1018,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
 
-1. In the **Settings** section, locate the **Throughput** field and update it's value to **400**.
+1. In the **Settings** section, locate the **Throughput** field and update it's value to **1000**.
 
-    > This is the minimum throughput that you can allocate to a fixed-size collection.
+    > This is the minimum throughput that you can allocate to an *unlimited* collection.
 
 1. Click the **Save** button at the top of the section to persist your new throughput allocation.
 
@@ -1089,6 +1064,20 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
+1. Locate the following line of code that identifies the collection that will be used by the application:
+
+    ```csharp
+    private static readonly string _collectionId = "PeopleCollection";  
+    ```
+
+    Replace the line of code with the following line of code:
+
+    ```csharp
+    private static readonly string _collectionId = "TransactionCollection";
+    ```
+
+    > We will use a different collection for the next section of the lab.
+
 1. Locate the *using* block within the **Main** method and delete any existing code:
 
     ```csharp
@@ -1124,10 +1113,10 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
         .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
         .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
         .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-        .GenerateLazy(1000);
+        .GenerateLazy(100);
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 1000 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 1000 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
     
 1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
@@ -1177,7 +1166,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
 
 1. Save all of your open editor tabs.
 
@@ -1255,7 +1244,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your collection does not have enough assigned throughput to handle the volume of requests.
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your collection does not have enough assigned throughput to handle the volume of requests.
 
 1. Save all of your open editor tabs.
 
@@ -2050,13 +2039,13 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     await Console.Out.WriteLineAsync($"Existing ETag:\t{response.Resource.ETag}");    
     ```
 
-1. Within the **using** block, add a new line of code to create a Uri referencing the document collection:
+1. Within the **using** block, add a new line of code to create an **AccessCondition** instance that will use the **ETag** from the document and specify an **If-Match** header:
 
     ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId); 
+    AccessCondition cond = new AccessCondition { Condition = response.Resource.ETag, Type = AccessConditionType.IfMatch };
     ```
 
-1. Add a new line of code to 
+1. Add a new line of code to update a property of the document using the **SetPropertyValue** method:
 
     ```csharp
     response.Resource.SetPropertyValue("FirstName", "Demo");
@@ -2064,13 +2053,19 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > This line of code will modify a property of the document. Here we are modifying the **FirstName** property and changing it's value from **Example** to **Demo**.
 
-1. Add a new line of code to 
+1. Add a new line of code to create an instance of the **RequestOptions** class using the **AccessCondition** created earlier:
 
     ```csharp
-    response = await client.UpsertDocumentAsync(collectionLink, response.Resource);
+    RequestOptions options = new RequestOptions { AccessCondition = cond };
     ```
 
-1. Add a new line of code to 
+1. Add a new line of code to invoke the **ReplaceDocumentAsync** method passing in both the document and the options:
+
+    ```csharp
+    response = await client.ReplaceDocumentAsync(response.Resource, options);
+    ```
+
+1. Add a new line of code to print out the **ETag** of the newly updated document:
 
     ```csharp
     await Console.Out.WriteLineAsync($"New ETag:\t{response.Resource.ETag}"); 
@@ -2087,9 +2082,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
             Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");            
             ResourceResponse<Document> response = await client.ReadDocumentAsync(documentLink);
             await Console.Out.WriteLineAsync($"Existing ETag:\t{response.Resource.ETag}"); 
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);            
+
+            AccessCondition cond = new AccessCondition { Condition = response.Resource.ETag, Type = AccessConditionType.IfMatch };
             response.Resource.SetPropertyValue("FirstName", "Demo");
-            response = await client.UpsertDocumentAsync(collectionLink, response.Resource);
+            RequestOptions options = new RequestOptions { AccessCondition = cond };
+            response = await client.ReplaceDocumentAsync(response.Resource, options);
             await Console.Out.WriteLineAsync($"New ETag:\t{response.Resource.ETag}"); 
         }
     }
@@ -2109,7 +2106,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Observe the output of the console application.
 
-    > You should see that the value of the ETag property has changed. To implement optimistic concurrency, we can use the If-Match header to allow the server to decide whether a resource should be updated. The If-Match value is the ETag value to be checked against. If the ETag value matches the server ETag value, the resource is updated. If the ETag is no longer current, the server rejects the operation with an "HTTP 412 Precondition failure" response code. The client then re-fetches the resource to acquire the current ETag value for the resource. In addition, ETags can be used with the If-None-Match header to determine whether a re-fetch of a resource is needed.
+    > You should see that the value of the ETag property has changed. The **AccessCondition** class helped us implement optimistic concurrency by specifying that we wanted the SDK to use the If-Match header to allow the server to decide whether a resource should be updated. The If-Match value is the ETag value to be checked against. If the ETag value matches the server ETag value, the resource is updated. If the ETag is no longer current, the server rejects the operation with an "HTTP 412 Precondition failure" response code. The client then re-fetches the resource to acquire the current ETag value for the resource.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
