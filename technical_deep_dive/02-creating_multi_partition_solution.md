@@ -108,17 +108,21 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ```xml
     <Project Sdk="Microsoft.NET.Sdk">
+        
         <PropertyGroup>
             <LangVersion>latest</LangVersion>
         </PropertyGroup>
+        
         <PropertyGroup>
             <OutputType>Exe</OutputType>
             <TargetFramework>netcoreapp2.0</TargetFramework>
         </PropertyGroup>
+        
         <ItemGroup>
             <PackageReference Include="Bogus" Version="22.0.7" />
             <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
         </ItemGroup>
+        
     </Project>
     ```
 

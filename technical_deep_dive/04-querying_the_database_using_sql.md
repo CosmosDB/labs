@@ -20,11 +20,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ![Resource groups](../media/04-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
     ![Lab resource group](../media/04-lab_resource_group.png)
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
     ![Cosmos resource](../media/04-cosmos_resource.png)
 
@@ -148,11 +148,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ![Resource groups](../media/04-resource_groups.png)
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
     ![Lab resource group](../media/04-lab_resource_group.png)
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
     ![Cosmos resource](../media/04-cosmos_resource.png)
 
@@ -463,16 +463,20 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ```xml
     <Project Sdk="Microsoft.NET.Sdk">
+
         <PropertyGroup>
             <LangVersion>latest</LangVersion>
         </PropertyGroup>
+
         <PropertyGroup>
             <OutputType>Exe</OutputType>
             <TargetFramework>netcoreapp2.0</TargetFramework>
         </PropertyGroup>
+
         <ItemGroup>
             <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
         </ItemGroup>
+        
     </Project>
     ```
 
