@@ -10,7 +10,9 @@ In this lab, you will remove the resource group containing your Azure Cosmos DB 
 
 1. At the top of the portal, click the **Cloud Shell** icon to open a new shell instance.
 
-    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share.
+    ![Cloud Shell Icon](../media/07-shell.png)
+
+    > If this is your first time using the cloud shell, you may need to configure the default Storage account and SMB file share. For this lab, you should select **Bash (Linux)** as your environment and your default subscription for the mounted storage share. Once you click **Create storage**, a new **Azure Storage** account will be created with a SMB file share for any files you may create in the Bash shell. TO learn more about the Cloud Shell, refer to [/docs.microsoft.com/azure/cloud-shell/overview](https://docs.microsoft.com/en-us/azure/cloud-shell/overview).
 
 ### Use Azure CLI to Delete Resource Group
 

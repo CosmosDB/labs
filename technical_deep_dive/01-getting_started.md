@@ -40,6 +40,18 @@ In this lab, you will create an Azure Cosmos DB account, database, and multiple 
 
     1. In the **Location** field, select the **West US** location.
 
+    1. Ensure the **Enable geo-redundancy** option is selected.
+
+        > This option creates a replicated version of your database in a second (paired) region.
+
+    1. Ensure the **Enable Multi Master** option is not selected.
+
+        > With Azure Cosmos DB multi-master support, you can perform writes on containers of data (for example, collections, graphs, tables) distributed anywhere in the world. You can update data in any region that is associated with your database account. These data updates can propagate asynchronously. 
+
+    1. In the **Virtual networks** section, select the **Disabled** option.
+
+        > Azure CosmosDB accounts can be configured to allow access only from specific subnet of an Azure Virtual Network. By enabling a Service Endpoint for Azure CosmosDB from a Virtual Network and its subnet, traffic is ensured an optimal and secure route to the Azure Cosmos DB.
+
     1. Click the **Create** button.
 
     ![Create Cosmos instance](../media/02-create_cosmos_settings.png)
