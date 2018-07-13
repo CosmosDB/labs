@@ -38,7 +38,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. In the **Add Collection** popup, perform the following actions:
 
-    1. In the **Database id** field, enter the value **UniversityDatabase**.
+    1. In the **Database id** field, select the **Create new** option and enter the value **UniversityDatabase**.
+
+    1. Ensure the **Provision database throughput** option is not selected.
+
+        > Provisioning throughput for a database allows you to share the throughput among all the containers that belong to that database. Within an Azure Cosmos DB database, you can have a set of containers which shares the throughput as well as containers, which have dedicated throughput.
 
     1. In the **Collection id** field, enter the value **StudentCollection**.
 
@@ -66,7 +70,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ![Keys pane](../media/04-keys_pane.png)
 
-1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
+1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
     ![Credentials](../media/04-credentials.png)
 
@@ -75,6 +79,8 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 *Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab. You will use the **Data Migration Tool** to import the JSON array stored in the **students.json** file from your local machine to your Azure Cosmos DB collection.
 
 1. On your local machine, open the **Azure Cosmos DB Data Migration Tool**.
+
+    > To learn more about the Data Migration Tool, refer to [/docs.microsoft.com/azure/cosmos-db/import-data](https://docs.microsoft.com/en-us/azure/cosmos-db/import-data).
 
 1. In the **Welcome** step of the tool, click the **Next** button to begin the migration wizard.
 
@@ -98,19 +104,21 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. In the **Export to** list, select the **Azure Cosmos DB - Sequential record import (partitioned collection)** option.
 
-    1. In the **Connection String** field, enter a newly constructed connection string replacing the placeholders with values from your Azure Cosmos DB account recorded earlier in this lab: ```AccountEndpoint=[uri];AccountKey=[key];Database=[database name];```. *Make sure you replace the **[uri]**, **[key]**, and **[database name]** placeholders with the corresponding values from your Azure Cosmos DB account. For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your **key** is ``Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==`` and your **database's name** is ``UniversityDatabase``, then your connection string will look like this: ```AccountEndpoint=https://cosmosacct.documents.azure.com:443/;AccountKey=Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==;Database=UniversityDatabase;```*
+    1. In the **Connection String** field, enter a newly constructed connection string replacing the placeholders with values from your Azure Cosmos DB account recorded earlier in this lab: ```AccountEndpoint=[uri];AccountKey=[key];Database=[database name];```. *Make sure you replace the **[uri]**, **[key]**, and **[database name]** placeholders with the corresponding values from your Azure Cosmos DB account. For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your **key** is ``Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==`` and your **database's name** is ``UniversityDatabase``, then your connection string will look like this: ```AccountEndpoint=https://cosmosacct.documents.azure.com:443/;AccountKey=Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==;Database=UniversityDatabase;```. If you have followed the instructions up to this point, your database name is **UniversityDatabase**.*
 
     1. Click the **Verify** button to validate your connection string.
+
+        > If you receive an error, proofread to make sure you properly replaced the placeholders.
 
     1. In the **Collection** field, enter the value **StudentCollection**.
 
     1. In the **Partition Key** field, enter the value ``/enrollmentYear``.
 
-    1. In the **Collection Throughput** field, enter the value ``11000``.
+    1. In the **Collection Throughput** field, enter the value ``10000``.
 
     1. Click the **Advanced Options** button.
 
-    1. In the **Number of Parallel Requests** field, increment the value from ``10`` to ``100``.
+    1. In the **Number of Parallel Requests** field, increment the value from ``10`` to ``25``.
 
     1. Click the **Next** button.
 
@@ -1060,7 +1068,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ## Implement Pagination using the .NET SDK
 
-*In an earlier lab, you explored using a continuation token to manually implement paging. YOu will now use the **HasMoreResults** boolean property and **ExecuteNextAsync** method to implement paging in a cleaner fashion. Behind the scenes, these properties still use the continuation token.*
+*You will use the **HasMoreResults** boolean property and **ExecuteNextAsync** method of the **ResourceResponse** class to implement paging of your query results. Behind the scenes, these properties use a continuation token. A continuation token enables a client to retrieve the ‘next’ set of data in a follow-up query.*
 
 ### Use the **HasMoreResults** and **ExecuteNextAsync** Members to Implement Pagination
 

@@ -24,7 +24,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Keys pane](../media/02-keys_pane.png)
 
-1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
+1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
     ![Credentials](../media/02-credentials.png)
 
@@ -96,7 +96,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
 
-1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+1. We will now add a new **PropertyGroup** XML element to the project configuration within the **Project** element. To add a new **PropertyGroup**, insert the following lines of code under the line that reads ``<Project Sdk="Microsoft.NET.Sdk">``:
 
     ```xml
     <PropertyGroup>
@@ -165,9 +165,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://cosmosacct.documents.azure.com:443/");``.
 
+    > Keep the **URI** value recorded, you will use it again later in this lab.
+
 1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
     > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
+
+    > Keep the **PRIMARY KEY** value recorded, you will use it again later in this lab.
     
 1. Locate the **Main** method:
 
@@ -286,7 +290,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ### Create a Fixed Collection using the SDK
 
-*Azure Cosmos DB containers can be created as fixed or unlimited in the Azure portal. Fixed-size containers have a maximum limit of 10 GB and 10,000 RU/s throughput. You will create a fixed-size container in this task.*
+*Azure Cosmos DB containers can be created as fixed or unlimited in the Azure portal. Fixed-size containers have a maximum limit of 10 GB and 10,000 RU/s throughput. Throughput is the rate at which the database takes in and processes data. A request unit is a normalized quantity that represents the amount of computation required to serve a request. In Cosmos DB, you reserve a guaranteed amount of throughput on a collection or across the database, measured in RU/s. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/request-units](https://docs.microsoft.com/en-us/azure/cosmos-db/request-units). You will create a fixed-size container in this task.*
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
@@ -354,7 +358,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ### Create an Unlimited Collection using the SDK
 
-*Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 1,000 RU/s. You will specify those values when creating a container in this task.*
+*Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 1,000 RU/s. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).*
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
@@ -365,11 +369,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     }
     ```
 
-1. Add the following code to the method to create an asynchronous connection:
+1. Add the following code to the method to open a connection to the database asynchronously:
 
     ```csharp
     await client.OpenAsync();
     ```
+
+    > By default, the first request has a higher latency because it has to fetch the address routing table. To avoid this startup latency on the first request, you should call ``OpenAsync()`` once during initialization as follows.
 
 1. Add the following code to the method to create a self-link to an existing database:
 
@@ -399,7 +405,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     };
     ```
 
-    > This indexing policy is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.
+    > By default, all Azure Cosmos DB data is indexed. Although many customers are happy to let Azure Cosmos DB automatically handle all aspects of indexing, you can specify a custom indexing policy for collections. This indexing policy is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.
 
 1. Add the following code to create a new ``PartitionKeyDefinition`` instance with a single partition key of ``/type`` defined:
 
@@ -1061,7 +1067,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Observe the results of the application's execution. 
 
-    > You may notice at this point that the results don't scale linearly. In our testing, we observed that **1,000** records needed **1-2** seconds to import while **50,000** records needed **30-60** seconds to import.
+    > Observe the amount of time required to import multiple records.
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
@@ -1117,7 +1123,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Observe the results of the application's execution.
 
-    > The timestamp on these IoT records is based on the time when the record was created. We submit the records as soon as they are created so there's very little latency between the client and server timestamp. Most of the records being submitted will be within the same minute so they share the same **SubmitMinute** partition key. This will cause a hot partition key and can constraint throughput. In this demo, you should expect a total time of >20 seconds.
+    > The timestamp on these IoT records is based on the time when the record was created. We submit the records as soon as they are created so there's very little latency between the client and server timestamp. Most of the records being submitted will be within the same minute so they share the same **SubmitMinute** partition key. This will cause a hot partition key and can constraint throughput. In this context, a hot partition key refers to when requests to the same partition key exceed the provisioned throughput and are rate-limited. A hot partition key causes high volumes of data to be stored within the same partition. Such uneven distribution is inefficient. In this demo, you should expect a total time of >20 seconds.
 
     ```sh
     ---------------------------------------------------------------------

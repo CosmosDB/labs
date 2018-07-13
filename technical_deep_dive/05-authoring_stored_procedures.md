@@ -24,7 +24,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Add Collection** popup, perform the following actions:
 
-    1. In the **Database id** field, enter the value **FinancialDatabase**.
+    1. In the **Database id** field, select the **Create new** option and enter the value **FinancialDatabase**.
+
+    1. Ensure the **Provision database throughput** option is not selected.
 
     1. In the **Collection id** field, enter the value **InvestorCollection**.
 
@@ -44,7 +46,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
+1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
     ![Credentials](../media/04-credentials.png)
 
@@ -98,6 +100,8 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 ### Create Stored Procedure with Nested Callbacks
 
+*All Azure Cosmos DB operations within a stored procedure are asynchronous and depend on JavaScript function callbacks. A **callback function** is a JavaScript function that is used as a parameter to another JavaScript function. In the context of Azure Cosmos DB, the callback function has two parameters, one for the error object in case the operation fails, and one for the created object.*
+
 1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
 
 1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: **createDocument**.
@@ -120,7 +124,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     }
     ```
 
-    > This stored procedures creates a new document and uses a nested callback function to returnt he document as the body of the response.
+    > Inside the JavaScript callback, users can either handle the exception or throw an error. In case a callback is not provided and there is an error, the Azure Cosmos DB runtime throws an error. This stored procedures creates a new document and uses a nested callback function to return the document as the body of the response.
 
 1. Click the **Save** button at the top of the tab.
 
@@ -248,7 +252,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Result** pane at the bottom of the tab, observe that the stored procedure execution has failed.
 
-    > Stored procedures are bound to a specific partition key. You are not able to create or manipulate documents across partition keys within a stored procedure.
+    > Stored procedures are bound to a specific partition key. In this example, tried to execute the stored procedure within the context of the **adventureworks** partition key. Within the stored procedure, we tried to create a new document using the **contosoairlines** partition key. The stored procedure was unable to create a new document (or access existing documents) in a partition key other than the one specified when the stored procedure is executed. This caused the stored procedure to fail. You are not able to create or manipulate documents across partition keys within a stored procedure. 
 
 1. Click the **Execute** button at the top of the tab.
 
@@ -386,7 +390,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     }
     ```
 
-    > We are going to change the stored procedure to put in a different company name for the second document. This should cause the stored procedure to fail since the second document uses a different partition key. The first document will create successfully but will be rolled back when the transaction is rolled back.
+    > Transactions are deeply and natively integrated into Cosmos DB’s JavaScript programming model. Inside a JavaScript function, all operations are automatically wrapped under a single transaction. If the JavaScript completes without any exception, the operations to the database are committed. We are going to change the stored procedure to put in a different company name for the second document. This should cause the stored procedure to fail since the second document uses a different partition key. If there is any exception that’s propagated from the script, Cosmos DB’s JavaScript runtime will roll back the whole transaction. This will effectively ensure that the first or second documents are not commited to the database.
 
 1. Click the **Update** button at the top of the tab.
 

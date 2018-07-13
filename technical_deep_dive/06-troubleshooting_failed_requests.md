@@ -30,7 +30,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Add Collection** popup, perform the following actions:
 
-    1. In the **Database id** field, enter the value **FinancialDatabase**.
+    1. In the **Database id** field, select the **Create new** option and enter the value **FinancialDatabase**.
+
+    1. Ensure the **Provision database throughput** option is not selected.
 
     1. In the **Collection id** field, enter the value **TransactionCollection**.
 
@@ -68,7 +70,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     ![Keys pane](../media/06-keys_pane.png)
 
-1. In the **Keys** pane, record the values in the **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
+1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
     ![Credentials](../media/06-credentials.png)
 
@@ -1002,7 +1004,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 ## Troubleshooting Requests
 
-*First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. You will then observe the throttling of your requests directly in an example application.*
+*First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
 
 ### Reducing R/U Throughput for a Collection
 
@@ -1691,7 +1693,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     };   
     ```
 
-    > Setting the ``MaxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
+    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned collect is fetched serially with respect to the query Setting the ``MaxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
 
 1. Save all of your open editor tabs.
 
@@ -1817,7 +1819,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
     };  
     ```
 
-    > Setting MaxBufferedItemCount to the expected number of results returned (or a higher number) allows the query to receive maximum benefit from pre-fetching.
+    > Parallel query is designed to pre-fetch results while the current batch of results is being processed by the client. The pre-fetching helps in overall latency improvement of a query. **MaxBufferedItemCount** is the parameter to limit the number of pre-fetched results. Setting MaxBufferedItemCount to the expected number of results returned (or a higher number) allows the query to receive maximum benefit from pre-fetching.
 
 1. Save all of your open editor tabs.
 
