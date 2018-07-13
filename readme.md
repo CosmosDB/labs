@@ -22,6 +22,8 @@ Prior to starting these labs, you must have the following operating system and s
 
 # Labs
 
+*It is recommended to complete the labs in the order specified below:*
+
 - [Pre-lab: Creating an Azure Cosmos DB account](technical_deep_dive/01-getting_started.md)
 - [Lab 1: Creating a partitioned solution using Azure Cosmos DB](technical_deep_dive/02-creating_multi_partition_solution.md)
 - [Lab 2: Querying an Azure Cosmos DB Database using the SQL API](technical_deep_dive/04-querying_the_database_using_sql.md)
