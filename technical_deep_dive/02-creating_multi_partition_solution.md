@@ -1159,9 +1159,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **LABQURY** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
 
-1. In the **LABQURY** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
