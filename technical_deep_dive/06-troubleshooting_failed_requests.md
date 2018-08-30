@@ -795,9 +795,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     ```csharp
     object doc = new {
-        id: "example.document",
-        FirstName: "Example",
-        LastName: "Person"
+        id = "example.document",
+        FirstName = "Example",
+        LastName = "Person"
     };
     ```
 
@@ -982,7 +982,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > This command will build and execute the console project.
 
-1. Observe the exception message.
+1. Observe the message.
 
     > Since we are "upserting" a document with a unique **id**, the server-side operation will be to create a new document. You should see the status code ``Created`` indicating that the create operation was completed successfully.
 
@@ -994,7 +994,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     > This command will build and execute the console project.
 
-1. Observe the exception message.
+1. Observe the message.
 
     > Since we are "upserting" a document with the same **id**, the server-side operation will be to update the existing document with the same **id**. You should see the status code ``OK`` indicating that the update operation was completed successfully.
 
@@ -1034,7 +1034,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Name the new file **Transaction.cs** . The editor tab will automatically open for the new file.
 
-1. Paste in the following code for the ``IInteraction`` interface:
+1. Paste in the following code for the ``Transaction`` class:
 
     ```csharp
     public class Transaction
