@@ -428,8 +428,6 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Observe the results of the console project.
 
-    > You should see five aliases printed to the console window.
-
 1. Click the **🗙** symbol to close the terminal pane.
 
 1. Within the **Program.cs** editor tab, locate the **Main** method.
