@@ -397,7 +397,12 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 1. Add a new line of code to invoke the **CreateDocumentAsync** method of the **DocumentClient** instance using the **collectionLink** and **doc** variables as parameters:
 
     ```csharp
-    await client.CreateDocumentAsync(collectionLink, doc);
+    ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
+    ```
+1. After the last line of code in the using block, add a new line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
+
+    ```csharp
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
     ```
 
 1. Your **Main** method should now look like this:
@@ -409,47 +414,10 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
         {
             Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
             object doc = new Bogus.Person();
-            await client.CreateDocumentAsync(collectionLink, doc);
+            ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
+            await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
         }   
     }
-    ```
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the results of the console project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
-
-1. Within the **Main** method, locate the following line of code: 
-
-    ```csharp
-    await client.CreateDocumentAsync(collectionLink, doc);
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
-    ```
-
-    > The ``CreateDocumentAsync`` method returns a **ResourceResponse<>** instance with various metadata about the create operation.
-
-1. After the last line of code in the using block, add a new line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
     ```
 
 1. Save all of your open editor tabs.
