@@ -33,6 +33,12 @@ Prior to starting these labs, you must have the following operating system and s
 
 ---
 
+# Accompanying Powerpoint Decks
+
+- [Workshop Deck](../decks/cosmos-db-l400.pptx)
+- [Workshop Deck (alternative theme)](../decks/cosmos-db-workshop.pptx)
+---
+
 # Notes
 
 1. If you are unsure of what version of the .NET Framework you have installed on your local machine, you can visit the following link to view instructions on determining your installed version: <https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed>.
