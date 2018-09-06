@@ -35,8 +35,9 @@ Prior to starting these labs, you must have the following operating system and s
 
 # Accompanying Powerpoint Decks
 
-- [Workshop Deck](../decks/cosmos-db-l400.pptx)
-- [Workshop Deck (alternative theme)](../decks/cosmos-db-workshop.pptx)
+- [Workshop Deck](./decks/cosmos-db-l400.pptx)
+- [Workshop Deck (alternative theme)](./decks/cosmos-db-workshop.pptx)
+
 ---
 
 # Notes
