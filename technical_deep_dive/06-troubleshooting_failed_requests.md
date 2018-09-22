@@ -639,7 +639,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
-    > You will see immediately that you can still determine if the **/Children** path is defined.
+    > You will see immediately that you can still determine if the **/Relatives** path is defined.
 
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
