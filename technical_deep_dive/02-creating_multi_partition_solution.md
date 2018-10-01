@@ -2,35 +2,41 @@
 
 In this lab, you will create multiple Azure Cosmos DB containers. Some of the containers will be unlimited and configured with a partition key, while others will be fixed-sized. You will then use the SQL API and .NET SDK to query specific containers using a single partition key or across multiple partition keys.
 
+## Log-in to the Azure Portal
+
+1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
+
+1. Once you have logged in, you may be prompted to start a tour of the Azure portal. You can safely skip this step.
+
 ## Setup
 
-*The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
 
 ### Retrieve Account Credentials
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/02-resource_groups.png)
+    ![Resource groups](../media/02-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../media/02-lab_resource_group.png)
+    ![Lab resource group](../media/02-lab_resource_group.jpg)
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/02-cosmos_resource.png)
+    ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../media/02-keys_pane.png)
+    ![Keys pane](../media/02-keys_pane.jpg)
 
 1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/02-credentials.png)
+    ![Credentials](../media/02-keys.jpg)
 
 ## Create Containers using the .NET SDK
 
-*You will start by using the .NET SDK to create both fixed-size and unlimited containers to use in the lab.*
+> You will start by using the .NET SDK to create both fixed-size and unlimited containers to use in the lab.
 
 ### Create a .NET Core Project
 
@@ -38,13 +44,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/02-open_with_code.png)
+    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
 1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
-    ![Open in Command Prompt](../media/02-open_command_prompt.png)
+    ![Open in Command Prompt](../media/02-open_command_prompt.jpg)
 
 1. In the open terminal pane, enter and execute the following command:
 
@@ -62,7 +68,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
     ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
+    > This command will add the [Microsoft.Azure.DocumentDB.Core](../media/https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -70,7 +76,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     dotnet add package Bogus --version 22.0.8
     ```
 
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
+    > This command will add the [Bogus](../media/https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -92,7 +98,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
-    ![Project files](../media/02-project_files.png)
+    ![Project files](../media/02-project_files.jpg)
 
 1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
 
@@ -107,28 +113,24 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Your new XML should look like this:
 
     ```xml
-    <Project Sdk="Microsoft.NET.Sdk">
-        
+    <Project Sdk="Microsoft.NET.Sdk">        
         <PropertyGroup>
             <LangVersion>latest</LangVersion>
-        </PropertyGroup>
-        
+        </PropertyGroup>        
         <PropertyGroup>
             <OutputType>Exe</OutputType>
             <TargetFramework>netcoreapp2.0</TargetFramework>
-        </PropertyGroup>
-        
+        </PropertyGroup>        
         <ItemGroup>
             <PackageReference Include="Bogus" Version="22.0.7" />
             <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
-        </ItemGroup>
-        
+        </ItemGroup>        
     </Project>
     ```
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-    ![Open editor](../media/02-program_editor.png)
+    ![Open editor](../media/02-program_editor.jpg)
 
 ### Create DocumentClient Instance
 
@@ -189,8 +191,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-        
+    {        
     }
     ```
 
@@ -201,7 +202,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     { 
         private static readonly Uri _endpointUri = new Uri("<your uri>");
         private static readonly string _primaryKey = "<your key>";
-
         public static async Task Main(string[] args)
         {    
             using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
@@ -235,8 +235,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-                        
+    {                        
     }
     ```
 
@@ -278,7 +277,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     > In the console window, you will see the self-link string for the database resource in your Azure Cosmos DB account.
 
-1. In the open terminal pane, enter and execute the following command:
+1. In the open terminal pane, enter and execute the following command again:
 
     ```sh
     dotnet run
@@ -294,14 +293,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ### Create a Fixed Collection using the SDK
 
-*Azure Cosmos DB containers can be created as fixed or unlimited in the Azure portal. Fixed-size containers have a maximum limit of 10 GB and 10,000 RU/s throughput. Throughput is the rate at which the database takes in and processes data. A request unit is a normalized quantity that represents the amount of computation required to serve a request. In Cosmos DB, you reserve a guaranteed amount of throughput on a collection or across the database, measured in RU/s. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/request-units](https://docs.microsoft.com/en-us/azure/cosmos-db/request-units). You will create a fixed-size container in this task.*
+*Azure Cosmos DB containers can be created as fixed or unlimited in the Azure portal. Fixed-size containers have a maximum limit of 10 GB and 10,000 RU/s throughput. Throughput is the rate at which the database takes in and processes data. A request unit is a normalized quantity that represents the amount of computation required to serve a request. In Cosmos DB, you reserve a guaranteed amount of throughput on a collection or across the database, measured in RU/s. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/request-units](../media/https://docs.microsoft.com/en-us/azure/cosmos-db/request-units). You will create a fixed-size container in this task.*
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
     ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-                        
+    {                        
     }
     ```
 
@@ -362,14 +360,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ### Create an Unlimited Collection using the SDK
 
-*Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 1,000 RU/s. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).*
+*Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 1,000 RU/s. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](../media/https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).*
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
     ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-                        
+    {                        
     }
     ```
 
@@ -486,31 +483,31 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/02-resource_groups.png)
+    ![Resource groups](../media/02-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../media/02-lab_resource_group.png)
+    ![Lab resource group](../media/02-lab_resource_group.jpg)
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/02-cosmos_resource.png)
+    ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, observe the new collections and database displayed in the middle of the blade.
 
-    ![New collections](../media/02-created_collections.png)
+    ![New collections](../media/02-created_collections.jpg)
 
 1. Locate and click the **Data Explorer** link on the left side of the blade.
 
-    ![Data Explorer pane](../media/02-data_explorer_pane.png)
+    ![Data Explorer pane](../media/02-data_explorer_pane.jpg)
 
 1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection nodes. 
 
-    ![Database node](../media/02-database_node.png)
+    ![Database node](../media/02-database_node.jpg)
 
 1. Expand the **DefaultCollection** node. Within the node, click the **Scale & Settings** link.
 
-    ![Scale and settings](../media/02-scale_and_settings.png)
+    ![Scale and settings](../media/02-scale_and_settings.jpg)
 
 1. Observe the following properties of the collection:
 
@@ -520,7 +517,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     - Indexing Policy
 
-    ![Fixed-Size collection configuration](../media/02-fixed_configuration.png)
+    ![Fixed-Size collection configuration](../media/02-fixed_configuration.jpg)
 
     > You will quickly notice that this is a fixed-size container that has a limited amount of RU/s. The indexing policy is also interesting as it implements a Hash index on string types and Range index on numeric types.
 
@@ -592,17 +589,17 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Populate a Collection with Documents using the SDK
 
-*You will now use the .NET SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple C# classes that you will create in your project.*
+> You will now use the .NET SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple C# classes that you will create in your project.
 
 ### Create Classes
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-    ![New File](../media/02-new_file.png)
+    ![New File](../media/02-new_file.jpg)
 
 1. Name the new file **IInteraction.cs** . The editor tab will automatically open for the new file.
 
-    ![Interaction Interface File](../media/02-interaction_interface.png)
+    ![Interaction Interface File](../media/02-interaction_interface.jpg)
 
 1. Paste in the following code for the ``IInteraction`` interface:
 
@@ -660,7 +657,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Observe your newly created files in the **Explorer** pane.
 
-    ![New files](../media/02-new_classes.png)
+    ![New files](../media/02-new_classes.jpg)
 
 1. Save all of your open editor tabs.
 
@@ -686,8 +683,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ```csharp
     using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-                        
+    {                        
     }
     ```
 
@@ -794,8 +790,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ```csharp
     public static async Task Main(string[] args)
-    {    
-                        
+    {                           
     }
     ```
 
@@ -846,8 +841,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ```csharp
     public static async Task Main(string[] args)
-    {    
-                        
+    {                            
     }
     ```
 
@@ -899,7 +893,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Benchmark A Simple Collection using a .NET Core Application
 
-*In the next part of this lab, you will compare various partition key choices for a large dataset using a special benchmarking tool available on GitHub.com. First, you will learn how to use the benchmarking tool using a simple collection and partition key.*
+> In the next part of this lab, you will compare various partition key choices for a large dataset using a special benchmarking tool available on GitHub.com. First, you will learn how to use the benchmarking tool using a simple collection and partition key.
 
 ### Clone Existing .NET Core Project
 
@@ -1037,7 +1031,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     ---------------------------------------------------------------------
     ```
 
-    > The benchmark tool tells you how long it takes to write a specific number of documents to your collection. YOu also get useful metadata such as the amount of **RU/s** being used and the total execution time. We are not tuning our partition key choice quite yet, we are simply learning to use the tool.
+    > The benchmark tool tells you how long it takes to write a specific number of documents to your collection. You also get useful metadata such as the amount of **RU/s** being used and the total execution time. We are not tuning our partition key choice quite yet, we are simply learning to use the tool.
 
 1. Press the **ENTER** key to complete the execution of the console application.
 
@@ -1077,7 +1071,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Benchmark Various Partition Key Choices using a .NET Core Application
 
-*Now you will use multiple collections and partition key options to compare various strategies for partitioning a large dataset.*
+> Now you will use multiple collections and partition key options to compare various strategies for partitioning a large dataset.
 
 ### Configure Multiple Collections for Benchmarking
 
@@ -1159,9 +1153,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
