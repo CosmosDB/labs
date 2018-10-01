@@ -4,7 +4,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 ## Setup
 
-*Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab.*
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab.
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -12,11 +12,11 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/04-resource_groups.png)
+    ![Resource groups](../media/04-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
@@ -48,7 +48,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/04-credentials.png)
+    ![Credentials](../media/04-keys.jpg)
 
 ## Author Simple Stored Procedures
 
@@ -540,13 +540,13 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/02-open_with_code.png)
+    ![Open with Visual Studio Code](../media/04-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
 1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
-    ![Open in Command Prompt](../media/02-open_command_prompt.png)
+    ![Open in Command Prompt](../media/04-open_command_prompt.jpg)
 
 1. In the open terminal pane, enter and execute the following command:
 
@@ -869,9 +869,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -988,9 +988,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 

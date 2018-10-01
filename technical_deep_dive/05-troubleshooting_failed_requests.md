@@ -4,7 +4,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 ## Setup
 
-*Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.*
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.
 
 ### Download Required Files
 
@@ -18,11 +18,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/06-resource_groups.png)
+    ![Resource groups](../media/05-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
@@ -68,11 +68,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../media/06-keys_pane.png)
+    ![Keys pane](../media/05-keys_pane.jpg)
 
 1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/06-credentials.png)
+    ![Credentials](../media/05-keys.jpg)
 
 ### Import Lab Data Into Collection
 
@@ -82,7 +82,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Welcome** step of the tool, click the **Next** button to begin the migration wizard.
 
-    ![Data Migration Tool - Welcome](../media/06-dmt_welcome.png)
+    ![Data Migration Tool - Welcome](../media/05-dmt_welcome.jpg)
 
 1. In the **Source Information** step of the tool, perform the following actions:
 
@@ -96,7 +96,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     1. Click the **Next** button.
 
-    ![Data Migration Tool - Source](../media/06-dmt_source.png)
+    ![Data Migration Tool - Source](../media/05-dmt_source.jpg)
 
 1. In the **Target Information** step of the tool, perform the following actions:
 
@@ -112,23 +112,23 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     1. Click the **Next** button.
 
-    ![Data Migration Tool - Target](../media/06-dmt_target.png)
+    ![Data Migration Tool - Target](../media/05-dmt_target.jpg)
 
 1. In the **Advanced** step of the tool, leave the existing options set to their default values and click the **Next** button.
 
-    ![Data Migration Tool - Advanced](../media/06-dmt_advanced.png)
+    ![Data Migration Tool - Advanced](../media/05-dmt_advanced.jpg)
 
 1. In the **Summary** step of the tool, review your options and then click the **Import** button.
 
-    ![Data Migration Tool - Summary](../media/06-dmt_summary.png)
+    ![Data Migration Tool - Summary](../media/05-dmt_summary.jpg)
 
 1. Wait for the import process to complete.
 
-    ![Data Migration Tool - Progress](../media/06-dmt_progress.png)
+    ![Data Migration Tool - Progress](../media/05-dmt_progress.jpg)
 
     > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to five minutes.
 
-    ![Data Migration Tool - Results](../media/06-dmt_results.png)
+    ![Data Migration Tool - Results](../media/05-dmt_results.jpg)
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
@@ -138,13 +138,13 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/06-open_with_code.png)
+    ![Open with Visual Studio Code](../media/05-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
 1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
-    ![Open in Command Prompt](../media/06-open_command_prompt.png)
+    ![Open in Command Prompt](../media/05-open_command_prompt.jpg)
 
 1. In the open terminal pane, enter and execute the following command:
 
@@ -192,7 +192,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
-    ![Project files](../media/06-project_files.png)
+    ![Project files](../media/05-project_files.jpg)
 
 1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
 
@@ -224,7 +224,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-    ![Open editor](../media/06-program_editor.png)
+    ![Open editor](../media/05-program_editor.jpg)
 
 ### Create DocumentClient Instance
 
@@ -442,9 +442,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -533,9 +533,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -673,9 +673,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -978,9 +978,9 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
@@ -998,7 +998,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-    ![New File](../media/06-new_file.png)
+    ![New File](../media/05-new_file.jpg)
 
 1. Name the new file **Transaction.cs** . The editor tab will automatically open for the new file.
 

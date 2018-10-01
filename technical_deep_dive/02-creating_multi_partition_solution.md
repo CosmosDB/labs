@@ -10,7 +10,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Setup
 
-> The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
 
 ### Retrieve Account Credentials
 
@@ -18,11 +18,11 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Resource groups](../media/02-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **@lab.CloudResourceGroup(1020).Name** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
     ![Lab resource group](../media/02-lab_resource_group.jpg)
 
-1. In the **@lab.CloudResourceGroup(1020).Name** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
     ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
@@ -485,11 +485,11 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Resource groups](../media/02-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **@lab.CloudResourceGroup(1020).Name** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
     ![Lab resource group](../media/02-lab_resource_group.jpg)
 
-1. In the **@lab.CloudResourceGroup(1020).Name** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
     ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
@@ -1153,9 +1153,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-1. In the **Resource groups** blade, locate and select the **@lab.CloudResourceGroup(1020).Name** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **@lab.CloudResourceGroup(1020).Name** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 

@@ -4,7 +4,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ## Setup
 
-*Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.*
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.
 
 ### Download Required Files
 
@@ -18,23 +18,23 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/04-resource_groups.png)
+    ![Resource groups](../media/03-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../media/04-lab_resource_group.png)
+    ![Lab resource group](../media/03-lab_resource_group.jpg)
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/04-cosmos_resource.png)
+    ![Cosmos resource](../media/03-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
-    ![Overview pane](../media/04-overview_pane.png)
+    ![Overview pane](../media/03-overview.jpg)
 
 1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
 
-    ![Add collection](../media/04-add_collection.png)
+    ![Add collection](../media/03-add_collection.jpg)
 
 1. In the **Add Collection** popup, perform the following actions:
 
@@ -44,7 +44,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
         > Provisioning throughput for a database allows you to share the throughput among all the containers that belong to that database. Within an Azure Cosmos DB database, you can have a set of containers which shares the throughput as well as containers, which have dedicated throughput.
 
-    1. In the **Collection id** field, enter the value **StudentCollection**.
+    1. In the **Collection Id** field, enter the value **StudentCollection**.
 
     1. In the **Storage capacity** section, select the **Unlimited** option.
 
@@ -58,7 +58,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. Click the **OK** button.
 
-    ![Add collection](../media/04-add_collection_settings.png)
+    ![Add collection](../media/04-add_collection_settings.jpg)
 
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
@@ -68,11 +68,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../media/04-keys_pane.png)
+    ![Keys pane](../media/03-keys_pane.jpg)
 
 1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/04-credentials.png)
+    ![Credentials](../media/03-keys.jpg)
 
 ### Import Lab Data Into Collection
 
@@ -84,7 +84,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. In the **Welcome** step of the tool, click the **Next** button to begin the migration wizard.
 
-    ![Data Migration Tool - Welcome](../media/04-dmt_welcome.png)
+    ![Data Migration Tool - Welcome](../media/03-dmt_welcome.jpg)
 
 1. In the **Source Information** step of the tool, perform the following actions:
 
@@ -98,7 +98,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. Click the **Next** button.
 
-    ![Data Migration Tool - Source](../media/04-dmt_source.png)
+    ![Data Migration Tool - Source](../media/03-dmt_source.jpg)
 
 1. In the **Target Information** step of the tool, perform the following actions:
 
@@ -122,23 +122,23 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. Click the **Next** button.
 
-    ![Data Migration Tool - Target](../media/04-dmt_target.png)
+    ![Data Migration Tool - Target](../media/03-dmt_target.jpg)
 
 1. In the **Advanced** step of the tool, leave the existing options set to their default values and click the **Next** button.
 
-    ![Data Migration Tool - Advanced](../media/04-dmt_advanced.png)
+    ![Data Migration Tool - Advanced](../media/03-dmt_advanced.jpg)
 
 1. In the **Summary** step of the tool, review your options and then click the **Import** button.
 
-    ![Data Migration Tool - Summary](../media/04-dmt_summary.png)
+    ![Data Migration Tool - Summary](../media/03-dmt_summary.jpg)
 
 1. Wait for the import process to complete.
 
-    ![Data Migration Tool - Progress](../media/04-dmt_progress.png)
+    ![Data Migration Tool - Progress](../media/03-dmt_progress.jpg)
 
     > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to three minutes.
 
-    ![Data Migration Tool - Results](../media/04-dmt_results.png)
+    ![Data Migration Tool - Results](../media/03-dmt_results.jpg)
 
 1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
 
@@ -154,29 +154,29 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/04-resource_groups.png)
+    ![Resource groups](../media/03-resource_groups.jpg)
 
-1. In the **Resource groups** blade, locate and select the **COSMOSLABS** *Resource Group*.
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../media/04-lab_resource_group.png)
+    ![Lab resource group](../media/03-lab_resource_group.jpg)
 
-1. In the **COSMOSLABS** blade, select the **Azure Cosmos DB** account you recently created.
+1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/04-cosmos_resource.png)
+    ![Cosmos resource](../media/03-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-    ![Data Explorer pane](../media/04-data_explorer_pane.png)
+    ![Data Explorer pane](../media/03-data_explorer_pane.jpg)
 
 1. In the **Data Explorer** section, expand the **UniversityDatabase** database node and then expand the **StudentCollection** collection node. 
 
-    ![Collection node](../media/04-collection_node.png)
+    ![Collection node](../media/03-collection_node.jpg)
 
 1. Within the **StudentCollection** node, click the **Documents** link to view a subset of the various documents in the collection. Select a few of the documents and observe the properties and structure of the documents.
 
-    ![Documents](../media/04-documents.png)
+    ![Documents](../media/03-documents.jpg)
 
-    ![Example document](../media/04-example_document.png)
+    ![Example document](../media/03-example_document.jpg)
 
 ### Executing a Simple SELECT Queries
 
@@ -184,7 +184,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
-    ![New SQL query](../media/04-new_query.png)
+    ![New SQL query](../media/03-new_query.jpg)
 
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
@@ -194,15 +194,15 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     > This first query will select all properties from all documents in the collection where the students where enrolled in 2017. You will notice that we are using the alias ``s`` to refer to the collection.
 
-    ![Query editor](../media/04-query_editor.png)
+    ![Query editor](../media/03-query_editor.jpg)
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
-    ![Execute query](../media/04-execute_query.png)
+    ![Execute query](../media/03-execute_query.jpg)
 
 1. In the **Results** pane, observe the results of your query.
 
-    ![Query results](../media/04-query_results.png)
+    ![Query results](../media/03-query_results.jpg)
 
 1. In the *query editor*, replace the current query with the following query:
 
@@ -409,13 +409,13 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/04-open_with_code.png)
+    ![Open with Visual Studio Code](../media/03-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
 1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
-    ![Open in Command Prompt](../media/04-open_command_prompt.png)
+    ![Open in Command Prompt](../media/03-open_command_prompt.jpg)
 
 1. In the open terminal pane, enter and execute the following command:
 
@@ -455,7 +455,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
-    ![Project files](../media/04-project_files.png)
+    ![Project files](../media/03-project_files.jpg)
 
 1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
 
@@ -471,26 +471,22 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ```xml
     <Project Sdk="Microsoft.NET.Sdk">
-
         <PropertyGroup>
             <LangVersion>latest</LangVersion>
         </PropertyGroup>
-
         <PropertyGroup>
             <OutputType>Exe</OutputType>
             <TargetFramework>netcoreapp2.0</TargetFramework>
         </PropertyGroup>
-
         <ItemGroup>
             <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
-        </ItemGroup>
-        
+        </ItemGroup>        
     </Project>
     ```
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-    ![Open editor](../media/04-program_editor.png)
+    ![Open editor](../media/03-program_editor.jpg)
 
 ### Create DocumentClient Instance
 
@@ -653,11 +649,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-    ![New File](../media/04-new_file.png)
+    ![New File](../media/03-new_file.jpg)
 
 1. Name the new file **Student.cs** . The editor tab will automatically open for the new file.
 
-    ![Student Class File](../media/04-student_class.png)
+    ![Student Class File](../media/03-student_class.jpg)
 
 1. Paste in the following code for the ``Student`` class:
 
