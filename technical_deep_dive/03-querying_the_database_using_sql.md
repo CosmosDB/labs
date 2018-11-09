@@ -4,13 +4,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Azure Data Factory (ADF)** to import existing data into your collection.
 
 ### Download Required Files
 
-*A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection. This is a compressed JSON file, it will not be human-readable. The tool will decompress it. Please remember to check the decompress box.*
-
-1. Download the [students.json](../files/students.json) file and save it to your local machine.
+*A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection. It is available through blob storage.*
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -76,71 +74,94 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ### Import Lab Data Into Collection
 
-*Finally, you will import the JSON documents contained in the **students.json** file you downloaded earlier in this lab. You will use the **Data Migration Tool** to import the JSON array stored in the **students.json** file from your local machine to your Azure Cosmos DB collection.
+You will use **Azure Data Factory (ADF)** to import the JSON array stored in the **students.json** file from Azure Blob Storage.
 
-1. On your local machine, open the **Azure Cosmos DB Data Migration Tool**.
+1. On the left side of the portal, click the **Resource groups** link.
 
-    > To learn more about the Data Migration Tool, refer to [/docs.microsoft.com/azure/cosmos-db/import-data](https://docs.microsoft.com/en-us/azure/cosmos-db/import-data).
+    > To learn more about copying data to Cosmos DB with ADF, please read [ADF's documentation](https://docs.microsoft.com/en-us/azure/data-factory/connector-azure-cosmos-db). 
 
-1. In the **Welcome** step of the tool, click the **Next** button to begin the migration wizard.
+    ![Resource groups](../media/03-resource_groups.jpg)
 
-    ![Data Migration Tool - Welcome](../media/03-dmt_welcome.jpg)
+1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. In the **Source Information** step of the tool, perform the following actions:
 
-    1. In the **Import from** list, select the **JSON file(s)** option.
+3. Click **add** to add a new resource
 
-    1. Click the **Add Files** button.
+![Add adf](../media/03-add_adf.jpg)
 
-    1. In the *Windows Explorer* dialog that opens, locate and select the **students.json** file you downloaded earlier in this lab. Click the **Open** button to add the file.
+4. Search for **Data Factory** and select it
 
-    1. Select the **Decompress data** checkbox.
+![adf-search](../media/03-adf_search.png)
 
-    1. Click the **Next** button.
+5. Create a new **Data Factory**. You should name this data factory **importstudentdata** and select the relevant Azure subscription. You should ensure your existing **cosmosdblab-group** resource group is selected as well as a Version **V2**. Select **East US** as the region. Click **create**.
 
-    ![Data Migration Tool - Source](../media/03-dmt_source.jpg)
+![df](C:../media/03-adf_selections.jpg)
 
-1. In the **Target Information** step of the tool, perform the following actions:
+6. Select **Copy Data**. We will be using ADF for a one-time copy of data from a source JSON file on Azure Blob Storage to a database in Cosmos DB's SQL API. ADF can also be used for more frequent data transfer from Cosmos DB to other data stores.
 
-    1. In the **Export to** list, select the **Azure Cosmos DB - Sequential record import (partitioned collection)** option.
+![](..\media\03-adf_copydata.jpg)
 
-    1. In the **Connection String** field, enter a newly constructed connection string replacing the placeholders with values from your Azure Cosmos DB account recorded earlier in this lab: ```AccountEndpoint=[uri];AccountKey=[key];Database=[database name];```. *Make sure you replace the **[uri]**, **[key]**, and **[database name]** placeholders with the corresponding values from your Azure Cosmos DB account. For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your **key** is ``Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==`` and your **database's name** is ``UniversityDatabase``, then your connection string will look like this: ```AccountEndpoint=https://cosmosacct.documents.azure.com:443/;AccountKey=Get0qW1BrqxRUA9BskSRHti5HHzrp1cjTUJTBMIbxgCGXQgRWh5NZvhc0jIt4A5ZoljA2YiLxjNHtrfC6Bd2fA==;Database=UniversityDatabase;```. If you have followed the instructions up to this point, your database name is **UniversityDatabase**.*
+7. Edit basic properties for this data copy. You should name the task **ImportStudents** and select to **Run once now**
 
-    1. Click the **Verify** button to validate your connection string.
+   ![adf-properties](C:..//media\03-adf_properties.jpg)
 
-        > If you receive an error, proofread to make sure you properly replaced the placeholders.
+   8. **Create a new connection** and select **Azure Blob Storage**. We will import data from a json file on Azure Blob Storage. In addition to Blob Storage, you can use ADF to migrate from a wide variety of sources. We will not cover migration from these sources in this tutorial.
 
-    1. In the **Collection** field, enter the value **StudentCollection**.
+![](..//media/03-adf_blob.jpg)
 
-    1. In the **Partition Key** field, enter the value ``/enrollmentYear``.
+9. Name the source **StudentsJson** and select **Use SAS URI** as the Authentication method. Please use the following SAS URI for read-only access to this Blob Storage container: **KEY_GOES_HERE**
 
-    1. In the **Collection Throughput** field, enter the value ``10000``.
+   ![](../media/03-adf_connecttoblob.jpg)
 
-    1. Click the **Advanced Options** button.
+10. Select the **students** folder
 
-    1. In the **Number of Parallel Requests** field, increment the value from ``10`` to ``25``.
+    ![](../media/03-adf_choosestudents.jpg)
 
-    1. Click the **Next** button.
+    11. Ensure that **Copy file recursively** and **Binary Copy** are not checked off. Also ensure that **Compression Type** is "none".
 
-    ![Data Migration Tool - Target](../media/03-dmt_target.jpg)
+    ![](../media\03-adf_source_next.jpg)
 
-1. In the **Advanced** step of the tool, leave the existing options set to their default values and click the **Next** button.
+    12. ADF should auto-detect the file format to be JSON. You can also select the file format as **JSON format.** You should also make sure you select **Array of Objects**  as the File pattern.
 
-    ![Data Migration Tool - Advanced](../media/03-dmt_advanced.jpg)
+![](../media\03-adf_source_dataset_format.jpg)
 
-1. In the **Summary** step of the tool, review your options and then click the **Import** button.
+13. You have now successfully connected the Blob Storage container with the students.json file. You should select **StudentsJson** as the source and click **Next**.
 
-    ![Data Migration Tool - Summary](../media/03-dmt_summary.jpg)
+![](../media/03-adf_SourceNext.JPG)
 
-1. Wait for the import process to complete.
+14. Add the Cosmos DB target data store by selecting **Create new connection** and selecting **Azure Cosmos DB**.
 
-    ![Data Migration Tool - Progress](../media/03-dmt_progress.jpg)
+![](../media\03-adf_selecttarget.jpg)
 
-    > You will know that the tool has run successfully once it has transferred 50000 records and the progress bar's animation ends. This step can take two to three minutes.
+15. Name the linked service **targetcosmosdb** and select your Azure subscription and Cosmos DB account. You should also select the Cosmos DB database that you created earlier.
 
-    ![Data Migration Tool - Results](../media/03-dmt_results.jpg)
+![](../media/03-adf_selecttargetdb.jpg)
 
-1. Once the import process has completed, close the Azure Cosmos DB Data Migration Tool.
+16. Select your newly created **targetcosmosdb** connection as the Destination date store.
+
+    ![](../media/03-adf_destconnectionnext.jpg)
+
+17. Select your collection from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB collection.
+
+![](../media/03-adf_correcttable.jpg)
+
+18. You should have selected to skip column mappings in a previous step. Click through this screen.
+
+![](../media/03-adf_destinationconnectionfinal.jpg)
+
+19. There is no need to change any settings. Click **next**.
+
+![](../media/03-adf_settings.jpg)
+
+20. After deployment is complete, select **Monitor**.
+
+![](../media/03-adf_deployment.jpg)
+
+21. After a few minutes, refresh the page and the status for the ImportStudents pipeline should be listed as **Succeeded**.
+
+![](../media/03-adf-succeeded.jpg)
+
+22. Once the import process has completed, close the ADF. You will now proceed to execute simple queries on your imported data. 
 
 ## Executing Simple Queries
 
@@ -1162,7 +1183,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
     public static async Task Main(string[] args)
     {       
     }
-    ```   
+    ```
 
 1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
 
