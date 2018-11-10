@@ -6,10 +6,6 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 > Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Azure Data Factory (ADF)** to import existing data into your collection.
 
-### Download Required Files
-
-*A JSON file has been provided that will contain a collection 50,000 students. You will use this file later to import documents into your collection. It is available through blob storage.*
-
 ### Create Azure Cosmos DB Database and Collection
 
 *You will now create a database and collection within your Azure Cosmos DB account.*
