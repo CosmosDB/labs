@@ -755,7 +755,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     ```csharp
     Uri sprocLink = UriFactory.CreateStoredProcedureUri("FinancialDatabase", "InvestorCollection", "bulkUpload");
-    ``` 
+    ```
 
 1. Still within the **using** block, add the following block of code to create a collection of 25,000 "fake" instances of the **Person** class.
 
