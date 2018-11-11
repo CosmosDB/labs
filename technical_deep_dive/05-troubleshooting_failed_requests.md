@@ -84,77 +84,69 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 ![Add adf](../media/03-add_adf.jpg)
 
-1. Search for **Data Factory** and select it
+4. Search for **Data Factory** and select it
 
 ![adf-search](../media/03-adf_search.png)
 
-1. Create a new **Data Factory**. You should name this data factory **importtransactions** and select the relevant Azure subscription. You should ensure your existing **cosmosdblab-group** resource group is selected as well as a Version **V2**. Select **East US** as the region. Click **create**.
+5. Create a new **Data Factory**. You should name this data factory **importtransactions** and select the relevant Azure subscription. You should ensure your existing **cosmosdblab-group** resource group is selected as well as a Version **V2**. Select **East US** as the region. Click **create**.
 
 ![df](../media/05-adf_selections.jpg)
 
-1. Select **Copy Data**. We will be using ADF for a one-time copy of data from a source JSON file on Azure Blob Storage to a database in Cosmos DB's SQL API. ADF can also be used for more frequent data transfer from Cosmos DB to other data stores.
+6. Select **Copy Data**. We will be using ADF for a one-time copy of data from a source JSON file on Azure Blob Storage to a database in Cosmos DB's SQL API. ADF can also be used for more frequent data transfer from Cosmos DB to other data stores.
 
 ![](../media/03-adf_copydata.jpg)
 
-1. Edit basic properties for this data copy. You should name the task **ImportTransactions** and select to **Run once now**.
+7. Edit basic properties for this data copy. You should name the task **ImportTransactionsData** and select to **Run once now**.
 
-   ![adf-properties](../media/05-adf_properties.jpg)
+![adf-properties](../media/05-adf_properties.jpg)
 
-   1. **Create a new connection** and select **Azure Blob Storage**. We will import data from a json file on Azure Blob Storage. In addition to Blob Storage, you can use ADF to migrate from a wide variety of sources. We will not cover migration from these sources in this tutorial.
+8. Create a **new connection** and select **Azure Blob Storage**. We will import data from a json file on Azure Blob Storage. In addition to Blob Storage, you can use ADF to migrate from a wide variety of sources. We will not cover migration from these sources in this tutorial.
 
-![](../media/03-adf_blob.jpg)
+9. Name the source **TransactionsJson** and select **Use SAS URI** as the Authentication method. Please use the following SAS URI for read-only access to this Blob Storage container:  
 
-1. Name the source **TransactionsJson** and select **Use SAS URI** as the Authentication method. Please use the following SAS URI for read-only access to this Blob Storage container:  
+https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2020-03-11T08:08:39Z&st=2018-11-10T02:08:39Z&spr=https&sig=ZSwZhcBdwLVIMRj94pxxGojWwyHkLTAgnL43BkbWKyg%3D
 
-   https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2020-03-11T08:08:39Z&st=2018-11-10T02:08:39Z&spr=https&sig=ZSwZhcBdwLVIMRj94pxxGojWwyHkLTAgnL43BkbWKyg%3D
+![adf-properties](../media/05-adf_newlinkedservice.jpg)
 
-2. Select the **transactions** folder
+10. Select the **transactions** folder.
 
-   ![](../media/03-adf_choosestudents.jpg)
+    ![adf-properties](../media/05-adf_transactions.jpg)
 
-   1. Ensure that **Copy file recursively** and **Binary Copy** are not checked off. Also ensure that **Compression Type** is "none".
+11. Ensure that **Copy file recursively** and **Binary Copy** are not checked off. Also ensure that **Compression Type** is "none".
 
+12. ADF should auto-detect the file format to be JSON. You can also select the file format as **JSON format.** You should also make sure you select **Array of Objects**  as the File pattern.
 
+13. You have now successfully connected the Blob Storage container with the transactions.json file. You should select **TransactionsJson** as the source and click **Next**.
 
-   1. ADF should auto-detect the file format to be JSON. You can also select the file format as **JSON format.** You should also make sure you select **Array of Objects**  as the File pattern.
-
-
-
-1. You have now successfully connected the Blob Storage container with the students.json file. You should select **TransactionsJson** as the source and click **Next**.
-
-
-
-1. Add the Cosmos DB target data store by selecting **Create new connection** and selecting **Azure Cosmos DB**.
+14. Add the Cosmos DB target data store by selecting **Create new connection** and selecting **Azure Cosmos DB**.
 
 ![](../media/03-adf_selecttarget.jpg)
 
-1. Name the linked service **targetcosmosdb** and select your Azure subscription and Cosmos DB account. You should also select the Cosmos DB database that you created earlier.
+15. Name the linked service **targetcosmosdb** and select your Azure subscription and Cosmos DB account. You should also select the Cosmos DB database that you created earlier.
 
 ![](../media/03-adf_selecttargetdb.jpg)
 
-1. Select your newly created **targetcosmosdb** connection as the Destination date store.
+16. Select your newly created **targetcosmosdb** connection as the Destination date store.
 
-   ![](../media/03-adf_destconnectionnext.jpg)
-
-2. Select your collection from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB collection.
+17. Select your collection from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB collection.
 
 ![](../media/03-adf_correcttable.jpg)
 
-1. You should have selected to skip column mappings in a previous step. Click through this screen.
+18. You should have selected to skip column mappings in a previous step. Click through this screen.
 
-![](../03-adf_destinationconnectionfinal.jpg)
+![](../media/03-adf_destinationconnectionfinal.jpg)
 
-1. There is no need to change any settings. Click **next**.
+19. There is no need to change any settings. Click **next**.
 
-![](../03-adf_settings.jpg)
+![](../media/03-adf_settings.jpg)
 
-1. After deployment is complete, select **Monitor**.
+20. After deployment is complete, select **Monitor**.
 
-![](../03-adf_deployment.jpg)
+![](../media/03-adf_deployment.jpg)
 
-1. After a few minutes, refresh the page and the status for the ImportStudents pipeline should be listed as **Succeeded**.
+21. After a few minutes, refresh the page and the status for the **ImportTransactions** pipeline should be listed as **Succeeded**.
 
-1. Once the import process has completed, close the ADF. You will now proceed to execute simple queries on your imported data. 
+22. Once the import process has completed, close the ADF. You will now proceed to execute simple queries on your imported data. 
 
 ### Create a .NET Core Project
 
