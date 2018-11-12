@@ -80,7 +80,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 2. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-1. Click **add** to add a new resource
+3. Click **add** to add a new resource
 
 ![Add adf](../media/03-add_adf.jpg)
 
@@ -110,7 +110,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 10. Select the **transactions** folder.
 
-    ![adf-properties](../media/05-adf_transactions.jpg)
+![adf-properties](../media/05-adf_transactions.jpg)
 
 11. Ensure that **Copy file recursively** and **Binary Copy** are not checked off. Also ensure that **Compression Type** is "none".
 
