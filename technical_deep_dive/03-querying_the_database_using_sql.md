@@ -94,7 +94,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ![df](../media/03-adf_selections.jpg)
 
 6. After creation, open your newly created Data Factory. Select **Author & Monitor** and you will launch ADF. You should see a screen similar to the screenshot below. Select **Copy Data**. We will be using ADF for a one-time copy of data from a source JSON file on Azure Blob Storage to a database in Cosmos DB’s SQL API. ADF can also be used for more frequent data transfers from Cosmos DB to other data stores.
-
+    ![](../media/03-adf_author&monitor.jpg)
     ![](../media/03-adf_copydata.jpg)
 
 7. Edit basic properties for this data copy. You should name the task **ImportStudents** and select to **Run once now**
