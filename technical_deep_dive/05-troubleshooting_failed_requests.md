@@ -219,7 +219,8 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
     ```
-
+    *It is important you follow this step because we will be making use of ``async main`` which is now available in C# 7.1 but needs to be explicitly targetted.*
+    
 1. Your new XML should look like this:
 
     ```xml
@@ -353,6 +354,8 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     ```
 
     > This command will build the console project.
+
+
 
 1. Click the **🗙** symbol to close the terminal pane.
 
