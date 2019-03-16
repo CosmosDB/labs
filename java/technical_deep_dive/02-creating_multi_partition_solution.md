@@ -1,6 +1,5 @@
 # Creating a Multi-Partition Solution using Azure Cosmos DB
-
-In this lab, you will create multiple Azure Cosmos DB containers. Some of the containers will be unlimited and configured with a partition key, while others will be fixed-sized. You will then use the SQL API and .NET SDK to query specific containers using a single partition key or across multiple partition keys.
+In this lab, you will create multiple Azure Cosmos DB containers. Some of the containers will be unlimited and configured with a partition key, while others will be fixed-sized. You will then use the SQL API and Java Async SDK to query specific containers using a single partition key or across multiple partition keys.
 
 ## Log-in to the Azure Portal
 
@@ -10,7 +9,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. The Java Async SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
 
 ### Retrieve Account Credentials
 
@@ -34,13 +33,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Credentials](../media/02-keys.jpg)
 
-## Create Containers using the .NET SDK
+## Create Containers using the Java SDK
 
-> You will start by using the .NET SDK to create both fixed-size and unlimited containers to use in the lab.
+> You will start by using the Java SDK to create both fixed-size and unlimited containers to use in the lab. This lab is based on VS Code, but you may feel free to use the Java IDE of your choice. If using VS Code, ensure you install the Java Extension Pack from [here](vscode:extension/vscjava.vscode-java-pack). You should also install Apache Maven (see [here](https://maven.apache.org/) for maven downloads and instructions).
 
-### Create a .NET Core Project
+### Create a Java Project
 
-1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
+1. On your local machine, create a new folder that will be used to contain the content of your Java project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
