@@ -207,14 +207,10 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     }
 
     private void createDatabaseIfNotExists() throws Exception {
-        //writeToConsoleAndPromptToContinue(
-         //       "Check if database " + databaseName + " exists.");
 
         String databaseLink = String.format("/dbs/%s", databaseName);
-
         Observable<ResourceResponse<Database>> databaseReadObs =
                 client.readDatabase(databaseLink, null);
-
         Observable<ResourceResponse<Database>> databaseExistenceObs =
                 databaseReadObs
                         .doOnNext(x -> {
@@ -222,35 +218,21 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                         })
                         .onErrorResumeNext(
                                 e -> {
-                                    // if the database doesn't already exists
-                                    // readDatabase() will result in 404 error
                                     if (e instanceof DocumentClientException) {
                                         DocumentClientException de = (DocumentClientException) e;
                                         // if database
                                         if (de.getStatusCode() == 404) {
-                                            // if the database doesn't exist, create it.
                                             System.out.println("database " + databaseName + " doesn't existed,"
                                                     + " creating it...");
-
                                             Database dbDefinition = new Database();
                                             dbDefinition.setId(databaseName);
-
                                             return client.createDatabase(dbDefinition, null);
                                         }
                                     }
-
-                                    // some unexpected failure in reading database happened.
-                                    // pass the error up.
                                     System.err.println("Reading database " + databaseName + " failed.");
                                     return Observable.error(e);
                                 });
-
-
-        // wait for completion,
-        // as waiting for completion is a blocking call try to
-        // provide your own scheduler to avoid stealing netty io threads.
         databaseExistenceObs.toCompletable().await();
-
         System.out.println("Checking database " + databaseName + " completed!\n");
     }
 
@@ -294,7 +276,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private final ExecutorService executorService;
         private final Scheduler scheduler;
         private AsyncDocumentClient client;
-
         private final String databaseName = "JavaDatabase";
 
         public Program() {
@@ -318,15 +299,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             
         }
 
-        private void createDatabase() throws Exception {
-        
+        private void createDatabase() throws Exception {       
             client = new AsyncDocumentClient.Builder()
-            .withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
-            .withMasterKeyOrResourceToken("6PqiF5lEc4xKcU9EWCv4ihT7671FYLCpuxqRXYeNiHqp6X7qhlY0cb26iDgkNCFQFgbyiFW2kIicuBwzlwtzKw==")
+            .withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
             .withConnectionPolicy(ConnectionPolicy.GetDefault())
             .withConsistencyLevel(ConsistencyLevel.Eventual)
             .build();
-
             createDatabaseIfNotExists();
         
         }
@@ -344,35 +323,21 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                             })
                             .onErrorResumeNext(
                                     e -> {
-                                        // if the database doesn't already exists
-                                        // readDatabase() will result in 404 error
                                         if (e instanceof DocumentClientException) {
                                             DocumentClientException de = (DocumentClientException) e;
-                                            // if database
                                             if (de.getStatusCode() == 404) {
-                                                // if the database doesn't exist, create it.
                                                 System.out.println("database " + databaseName + " doesn't existed,"
                                                         + " creating it...");
-
                                                 Database dbDefinition = new Database();
                                                 dbDefinition.setId(databaseName);
-
                                                 return client.createDatabase(dbDefinition, null);
                                             }
                                         }
-
-                                        // some unexpected failure in reading database happened.
-                                        // pass the error up.
                                         System.err.println("Reading database " + databaseName + " failed.");
                                         return Observable.error(e);
                                     });
 
-
-            // wait for completion,
-            // as waiting for completion is a blocking call try to
-            // provide your own scheduler to avoid stealing netty io threads.
             databaseExistenceObs.toCompletable().await();
-
             System.out.println("Checking database " + databaseName + " completed!\n");
         }
 
