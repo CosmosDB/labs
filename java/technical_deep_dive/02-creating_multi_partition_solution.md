@@ -56,7 +56,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     ![Open in Command Prompt](../media/maven2.jpg)
 
 
-1. Once confirmed, Maven will create the project, and provide a sample App.java. For any Java class created in the project, VS Code's Java Extension will provide "run" and "debug" links directly in the code:
+1. Once confirmed, Maven will create the project, and provide a sample App.java. For any Java class created in the project, VS Code's Java Extension will provide "run" and "debug" links directly in the code. Clicking "run" will compile and run your Java code:
 
     ![Open in Command Prompt](../media/maven3.jpg)
 
@@ -71,7 +71,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     </dependency>
     ```
 
-1. For this tutorial, you may also need to change the source and target compiler versions to Java 1.8. When finished, your pom.xml should look like the below:
+1. For this tutorial, you will also need to change the source and target compiler versions to Java 1.8, as we will use some lambda syntax which is only supported from Java 8 onwards. When finished, your pom.xml should look like the below:
 
     ![Open in Command Prompt](../media/maven4.jpg)
 
@@ -79,6 +79,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Once the changes are applied, ensure you click file -> save all. At this point, VS Code will recognise that you modified the pom.xml build file. Ensure that you accept the prompt to sync the dependancies:
 
     ![Open in Command Prompt](../media/maven6.jpg)
+
+    > Once the dependencies are pulled down, you will be ready to start writing Java code for Cosmos DB.
 
 ### Create DocumentClient Instance and Database
 
@@ -142,7 +144,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         scheduler = Schedulers.from(executorService);
     ```
 
-1. Below the main method in the Program class, add the following methods for creating an AsyncDocumentClient (replace "uri" and "key" with the values you recorded earlier in the lab), database, and closing down the client: 
+1. Below the main method in the Program class, add the following methods for creating an AsyncDocumentClient instance (replace "uri" and "key" with the values you recorded earlier in the lab), creating a database, and closing down the client: 
 
     ```java
     private void createDatabase() throws Exception {
