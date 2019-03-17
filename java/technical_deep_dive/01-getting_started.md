@@ -16,21 +16,21 @@ In this lab, you will create an Azure Cosmos DB account.
 
 1. On the left side of the portal, click the **Create a resource** link.
 
-    ![Create a resource](../media/01-create_a_resource.jpg)
+    ![Create a resource](../../media/01-create_a_resource.jpg)
 
 1. At the top of the **New** blade, locate the **Search the Marketplace** field.
 
-    ![Search the Marketplace](../media/01-search_the_marketplace.jpg)
+    ![Search the Marketplace](../../media/01-search_the_marketplace.jpg)
 
 1. Enter the text **Cosmos** into the search field and press **Enter**.
 
 1. In the **Everything** search results blade, select the **Azure Cosmos DB** result.
 
-    ![Cosmos search results](../media/01-cosmos_search_result.jpg)
+    ![Cosmos search results](../../media/01-cosmos_search_result.jpg)
 
 1. In the **Azure Cosmos DB** blade, click the **Create** button.
 
-    ![Create Cosmos instance](../media/01-create_cosmos.jpg)
+    ![Create Cosmos instance](../../media/01-create_cosmos.jpg)
 
 1. In the new **Create Azure Cosmos DB Account** blade, perform the following actions:
 
@@ -56,18 +56,18 @@ In this lab, you will create an Azure Cosmos DB account.
 
     1. Click the **Review + create** button.
 
-        ![Configure Cosmos account](../media/01-create_cosmos_settings.jpg)
+        ![Configure Cosmos account](../../media/01-create_cosmos_settings.jpg)
 
     1. After your settings are validated, click the **Create** button to begin the deployment of an Azure Cosmos DB account resource.
 
-        ![Create Cosmos account](../media/01-create_cosmos_validate.jpg)
+        ![Create Cosmos account](../../media/01-create_cosmos_validate.jpg)
 
 1. The deployment blade will appear with details about your deployment.
 
-    ![Cosmos account deployment](../media/01-cosmos_deployment_underway.jpg)
+    ![Cosmos account deployment](../../media/01-cosmos_deployment_underway.jpg)
 
 1. Wait for the deployment task to complete before completing this lab.
 
     > Deployment can take up to ten minutes.
 
-    ![Cosmos deployment complete](../media/01-cosmos_deployment_complete.jpg)
+    ![Cosmos deployment complete](../../media/01-cosmos_deployment_complete.jpg)
