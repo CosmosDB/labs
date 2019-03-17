@@ -451,9 +451,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
         private void createDatabase() throws Exception {
 
-            client = new AsyncDocumentClient.Builder().withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
-                    .withMasterKeyOrResourceToken(
-                            "WqVzl9RWFoRnGF3RJlCNeZf4XpezXD0VDrGSu9JX2VDvonyPJTKdLlQje63J9kgrMcne8KMmBh3zUJtkZkya0A==")
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+                    .withMasterKeyOrResourceToken("key")
                     .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
                     .build();
 
