@@ -15,7 +15,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/02-resource_groups.jpg)
+    ![Resource groups](../../media/02-resource_groups.jpg)
 
 1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
@@ -23,15 +23,15 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/02-cosmos_resource.jpg)
+    ![Cosmos resource](../../media/02-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../media/02-keys_pane.jpg)
+    ![Keys pane](../../media/02-keys_pane.jpg)
 
 1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../media/02-keys.jpg)
+    ![Credentials](../../media/02-keys.jpg)
 
 ## Create Containers using the Java SDK
 
@@ -43,13 +43,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
+    ![Open with Visual Studio Code](../../media/02-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
 1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
 
-    ![Open in Command Prompt](../media/02-open_command_prompt.jpg)
+    ![Open in Command Prompt](../../media/02-open_command_prompt.jpg)
 
 1. In the open terminal pane, enter and execute the following command:
 
