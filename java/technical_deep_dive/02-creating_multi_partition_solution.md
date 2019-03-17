@@ -93,22 +93,24 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Within the **Program.java** editor tab, Add the following using blocks to the top of the editor:
 
     ```java
-    import java.io.IOException;
+    import java.util.ArrayList;
+    import java.util.Collection;
+    import java.util.List;
+    import java.util.concurrent.CountDownLatch;
     import java.util.concurrent.ExecutorService;
     import java.util.concurrent.Executors;
     import com.microsoft.azure.cosmosdb.ConnectionPolicy;
     import com.microsoft.azure.cosmosdb.ConsistencyLevel;
+    import com.microsoft.azure.cosmosdb.DataType;
     import com.microsoft.azure.cosmosdb.Database;
-    import com.microsoft.azure.cosmosdb.Document;
     import com.microsoft.azure.cosmosdb.DocumentClientException;
     import com.microsoft.azure.cosmosdb.DocumentCollection;
-    import com.microsoft.azure.cosmosdb.FeedOptions;
-    import com.microsoft.azure.cosmosdb.FeedResponse;
+    import com.microsoft.azure.cosmosdb.IncludedPath;
+    import com.microsoft.azure.cosmosdb.Index;
+    import com.microsoft.azure.cosmosdb.IndexingPolicy;
+    import com.microsoft.azure.cosmosdb.PartitionKeyDefinition;
     import com.microsoft.azure.cosmosdb.RequestOptions;
     import com.microsoft.azure.cosmosdb.ResourceResponse;
-    import com.microsoft.azure.cosmosdb.SqlParameter;
-    import com.microsoft.azure.cosmosdb.SqlParameterCollection;
-    import com.microsoft.azure.cosmosdb.SqlQuerySpec;
     import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
     import rx.Observable;
     import rx.Scheduler;
@@ -311,120 +313,238 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 *Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 1,000 RU/s. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](../media/https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).*
 
-1. Locate the using block within the **Main** method and delete any existing code:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {                        
+1. Go back to your Program class and add three new instance variables:
+
+    ```java
+    private final String collectionId = "JavaCollection";
+    private final String partitionKeyPath = "/type";
+    private final int throughPut = 400;
+
+1. Now create another method within the class, below the createDatabaseIfNotExists() method, to define the multi-partition parameters. This will set indexing policy for your collection, and include the partition key (defined as "/type" in your instance variable) and collection id (the name of the collection defined in your instance variable):
+
+    ```java
+    private DocumentCollection getMultiPartitionCollectionDefinition() {
+        DocumentCollection collectionDefinition = new DocumentCollection();
+        collectionDefinition.setId(collectionId);
+
+        PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition();
+        List<String> paths = new ArrayList<>();
+        paths.add(partitionKeyPath);
+        partitionKeyDefinition.setPaths(paths);
+        collectionDefinition.setPartitionKey(partitionKeyDefinition);
+
+        // Set indexing policy to be range range for string and number
+        IndexingPolicy indexingPolicy = new IndexingPolicy();
+        Collection<IncludedPath> includedPaths = new ArrayList<>();
+        IncludedPath includedPath = new IncludedPath();
+        includedPath.setPath("/*");
+        Collection<Index> indexes = new ArrayList<>();
+        Index stringIndex = Index.Range(DataType.String);
+        stringIndex.set("precision", -1);
+        indexes.add(stringIndex);
+
+        Index numberIndex = Index.Range(DataType.Number);
+        numberIndex.set("precision", -1);
+        indexes.add(numberIndex);
+        includedPath.setIndexes(indexes);
+        includedPaths.add(includedPath);
+        indexingPolicy.setIncludedPaths(includedPaths);
+        collectionDefinition.setIndexingPolicy(indexingPolicy);
+
+        return collectionDefinition;
+    }
+    ```
+     > By default, all Azure Cosmos DB data is indexed. Although many customers are happy to let Azure Cosmos DB automatically handle all aspects of indexing, you can specify a custom indexing policy for collections. This indexing policy we created is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.   
+
+1. Now, below this method, add another method that will create the multi partition collection. This will also set the throughput value:
+
+    ```java
+    public void createMultiPartitionCollection() throws Exception {
+        RequestOptions multiPartitionRequestOptions = new RequestOptions();
+        multiPartitionRequestOptions.setOfferThroughput(throughPut);
+        String databaseLink = String.format("/dbs/%s", databaseName);
+
+        Observable<ResourceResponse<DocumentCollection>> createCollectionObservable = client.createCollection(
+            databaseLink, getMultiPartitionCollectionDefinition(), multiPartitionRequestOptions);
+
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        createCollectionObservable.single() // We know there is only single result
+                .subscribe(collectionResourceResponse -> {
+                    System.out.println(collectionResourceResponse.getActivityId());
+                    countDownLatch.countDown();
+                }, error -> {
+                    System.err.println(
+                            "an error occurred while creating the collection: actual cause: " + error.getMessage());
+                    countDownLatch.countDown();
+                });
+        System.out.println("creating collection...");
+        countDownLatch.await();
     }
     ```
 
-1. Add the following code to the method to open a connection to the database asynchronously:
+1. Finally, add a call to the new createMultiPartitionCollection() nethod in the main method of your Program class:
 
-    ```csharp
-    await client.OpenAsync();
-    ```
+    ```java
+    public static void main(String[] args) {
+        Program p = new Program();
 
-    > By default, the first request has a higher latency because it has to fetch the address routing table. To avoid this startup latency on the first request, you should call ``OpenAsync()`` once during initialization as follows.
-
-1. Add the following code to the method to create a self-link to an existing database:
-
-    ```csharp
-    Uri databaseLink = UriFactory.CreateDatabaseUri("EntertainmentDatabase");
-    ```
-
-1. Add the following code to create a new ``IndexingPolicy`` instance with a custom indexing policy configured:
-
-    ```csharp
-    IndexingPolicy indexingPolicy = new IndexingPolicy
-    {
-        IndexingMode = IndexingMode.Consistent,
-        Automatic = true,
-        IncludedPaths = new Collection<IncludedPath>
-        {
-            new IncludedPath
-            {
-                Path = "/*",
-                Indexes = new Collection<Index>
-                {
-                    new RangeIndex(DataType.Number, -1),
-                    new RangeIndex(DataType.String, -1)                           
-                }
-            }
+        try {
+            p.createDatabase();
+            System.out.println(String.format("Database created, please hold while resources are released"));
+ 
+            //create collection...
+            p.createMultiPartitionCollection();
+            
+        } catch (Exception e) {
+            System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
+        } finally {
+            System.out.println("close the client");
+            p.close();
         }
-    };
+        System.exit(0);
+
+    }
+        
+
+    }
     ```
 
-    > By default, all Azure Cosmos DB data is indexed. Although many customers are happy to let Azure Cosmos DB automatically handle all aspects of indexing, you can specify a custom indexing policy for collections. This indexing policy is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.
+1. Your Program class should now look like this:
 
-1. Add the following code to create a new ``PartitionKeyDefinition`` instance with a single partition key of ``/type`` defined:
+    ```java
+    public class Program {
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
 
-    ```csharp
-    PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition
-    {
-        Paths = new Collection<string> { "/type" }
-    };
+        private final String databaseName = "JavaDatabase";
+        private final String collectionId = "JavaCollection";
+        private final String partitionKeyPath = "/type";
+        private final int throughPut = 400;
+
+        public Program() {
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+        }
+
+        public static void main(String[] args) {
+            Program p = new Program();
+
+            try {
+                p.createDatabase();
+                System.out.println(String.format("Database created, please hold while resources are released"));
+    
+                //create collection...
+                p.createMultiPartitionCollection();
+                
+            } catch (Exception e) {
+                System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
+            } finally {
+                System.out.println("close the client");
+                p.close();
+            }
+            System.exit(0);
+
+        }
+
+        private void createDatabase() throws Exception {
+
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
+                    .withMasterKeyOrResourceToken(
+                            "WqVzl9RWFoRnGF3RJlCNeZf4XpezXD0VDrGSu9JX2VDvonyPJTKdLlQje63J9kgrMcne8KMmBh3zUJtkZkya0A==")
+                    .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+                    .build();
+
+            createDatabaseIfNotExists();
+        }
+
+        private void createDatabaseIfNotExists() throws Exception {
+            String databaseLink = String.format("/dbs/%s", databaseName);
+            Observable<ResourceResponse<Database>> databaseReadObs = client.readDatabase(databaseLink, null);
+            Observable<ResourceResponse<Database>> databaseExistenceObs = databaseReadObs.doOnNext(x -> {
+                System.out.println("database " + databaseName + " already exists.");
+            }).onErrorResumeNext(e -> {
+                if (e instanceof DocumentClientException) {
+                    DocumentClientException de = (DocumentClientException) e;
+                    if (de.getStatusCode() == 404) {
+                        System.out.println("database " + databaseName + " doesn't existed," + " creating it...");
+                        Database dbDefinition = new Database();
+                        dbDefinition.setId(databaseName);
+                        return client.createDatabase(dbDefinition, null);
+                    }
+                }
+                System.err.println("Reading database " + databaseName + " failed.");
+                return Observable.error(e);
+            });
+            databaseExistenceObs.toCompletable().await();
+            System.out.println("Checking database " + databaseName + " completed!\n");
+        }
+
+        
+
+        private DocumentCollection getMultiPartitionCollectionDefinition() {
+            DocumentCollection collectionDefinition = new DocumentCollection();
+            collectionDefinition.setId(collectionId);
+
+            PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition();
+            List<String> paths = new ArrayList<>();
+            paths.add(partitionKeyPath);
+            partitionKeyDefinition.setPaths(paths);
+            collectionDefinition.setPartitionKey(partitionKeyDefinition);
+
+            // Set indexing policy to be range range for string and number
+            IndexingPolicy indexingPolicy = new IndexingPolicy();
+            Collection<IncludedPath> includedPaths = new ArrayList<>();
+            IncludedPath includedPath = new IncludedPath();
+            includedPath.setPath("/*");
+            Collection<Index> indexes = new ArrayList<>();
+            Index stringIndex = Index.Range(DataType.String);
+            stringIndex.set("precision", -1);
+            indexes.add(stringIndex);
+
+            Index numberIndex = Index.Range(DataType.Number);
+            numberIndex.set("precision", -1);
+            indexes.add(numberIndex);
+            includedPath.setIndexes(indexes);
+            includedPaths.add(includedPath);
+            indexingPolicy.setIncludedPaths(includedPaths);
+            collectionDefinition.setIndexingPolicy(indexingPolicy);
+
+            return collectionDefinition;
+        }
+    
+        public void createMultiPartitionCollection() throws Exception {
+            RequestOptions multiPartitionRequestOptions = new RequestOptions();
+            multiPartitionRequestOptions.setOfferThroughput(throughPut);
+            String databaseLink = String.format("/dbs/%s", databaseName);
+
+            Observable<ResourceResponse<DocumentCollection>> createCollectionObservable = client.createCollection(
+                databaseLink, getMultiPartitionCollectionDefinition(), multiPartitionRequestOptions);
+
+            final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+            createCollectionObservable.single() // We know there is only single result
+                    .subscribe(collectionResourceResponse -> {
+                        System.out.println(collectionResourceResponse.getActivityId());
+                        countDownLatch.countDown();
+                    }, error -> {
+                        System.err.println(
+                                "an error occurred while creating the collection: actual cause: " + error.getMessage());
+                        countDownLatch.countDown();
+                    });
+            System.out.println("creating collection...");
+            countDownLatch.await();
+        }
+
+        public void close() {
+            executorService.shutdown();
+            client.close();
+        }
+    }
     ```
 
-    > This definition will create a partition key on the ``/type`` path. Partition key paths are case sensitive. This is especially important when you consider JSON property casing in the context of .NET CLR object to JSON object serialization.
-
-1. Add the following lines of code to create a new ``DocumentCollection`` instance where you specify values for multiple properties:
-
-    ```csharp
-    DocumentCollection customCollection = new DocumentCollection
-    {
-        Id = "CustomCollection",
-        PartitionKey = partitionKeyDefinition,
-        IndexingPolicy = indexingPolicy
-    };   
-    ```
-
-    > We are going to explicitly specify various values for a collection created using the .NET SDK.
-
-1. Add the following code to create a new ``RequestOptions`` instance seting the **throughput** for the collection:
-
-    ```csharp
-    RequestOptions requestOptions = new RequestOptions
-    {
-        OfferThroughput = 10000
-    };
-    ```
-
-    > Here is where we can specify the RU/s allocated for the collection. If this is not specified, the SDK has a default value for RU/s assigned to a collection.
-
-1. Add the following code to create a new collection instance if one does not already exist within your database:
-
-    ```csharp
-    customCollection = await client.CreateDocumentCollectionIfNotExistsAsync(databaseLink, customCollection, requestOptions);         
-    ```
-
-    > This code will check to see if a collection exists in your database that meets all of the specified parameters. If a collection that matches does not exist, it will create a new collection.
-
-1. Add the following code to print out the self-link of the database:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"Custom Collection Self-Link:\t{customCollection.SelfLink}");  
-    ```
-
-    > The ``customCollection`` variable will have metadata about the collection whether a new collection is created or an existing one is read.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the running command.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
 
 ### Observe Newly Created Database and Collections in the Portal
 
@@ -432,31 +552,31 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../media/02-resource_groups.jpg)
+    ![Resource groups](../../media/02-resource_groups.jpg)
 
 1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../media/02-lab_resource_group.jpg)
+    ![Lab resource group](../../media/02-lab_resource_group.jpg)
 
 1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../media/02-cosmos_resource.jpg)
+    ![Cosmos resource](../../media/02-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, observe the new collections and database displayed in the middle of the blade.
 
-    ![New collections](../media/02-created_collections.jpg)
+    ![New collections](../../media/02-created_collections.jpg)
 
 1. Locate and click the **Data Explorer** link on the left side of the blade.
 
-    ![Data Explorer pane](../media/02-data_explorer_pane.jpg)
+    ![Data Explorer pane](../../media/02-data_explorer_pane.jpg)
 
 1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection nodes. 
 
-    ![Database node](../media/02-database_node.jpg)
+    ![Database node](../../media/02-database_node.jpg)
 
 1. Expand the **DefaultCollection** node. Within the node, click the **Scale & Settings** link.
 
-    ![Scale and settings](../media/02-scale_and_settings.jpg)
+    ![Scale and settings](../../media/02-scale_and_settings.jpg)
 
 1. Observe the following properties of the collection:
 
@@ -466,7 +586,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     - Indexing Policy
 
-    ![Fixed-Size collection configuration](../media/02-fixed_configuration.jpg)
+    ![Fixed-Size collection configuration](../../media/02-fixed_configuration.jpg)
 
     > You will quickly notice that this is a fixed-size container that has a limited amount of RU/s. The indexing policy is also interesting as it implements a Hash index on string types and Range index on numeric types.
 
