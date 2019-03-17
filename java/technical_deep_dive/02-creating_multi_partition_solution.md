@@ -47,93 +47,46 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. In the Visual Studio Code window that appears, right-click the **Explorer** under the folder you created, and select "Generate from Maven Archetype":
 
-    ![Open in Command Prompt](../../media/02-open_command_prompt.jpg)
+    ![Open in Command Prompt](../media/maven1.jpg)
 
-1. In the open terminal pane, enter and execute the following command:
+1. From the options that appear, select "maven-archetype-quickstart", and then select the directory you created for the project when prompted. Maven will then prompt you to provide values for group id, artifact id, version, package. Fill these in when prompted and then confirm:
 
-    ```sh
-    dotnet new console --output .
-    ```
+    ![Open in Command Prompt](../media/maven2.jpg)
 
-    > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
-1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+1. Once confirmed, Maven will create the project, and provide a sample App.java. For any Java class created in the project, VS Code's Java Extension will provide "run" and "debug" links directly in the code:
 
-1. In the terminal pane, enter and execute the following command:
+    ![Open in Command Prompt](../media/maven3.jpg)
 
-    ```sh
-    dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
-    ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](../../media/https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet add package Bogus --version 22.0.8
-    ```
-
-    > This command will add the [Bogus](../../media/https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet restore
-    ```
-
-    > This command will restore all packages specified as dependencies in the project.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
-
-    ![Project files](../media/02-project_files.jpg)
-
-1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
-
-1. We will now add a new **PropertyGroup** XML element to the project configuration within the **Project** element. To add a new **PropertyGroup**, insert the following lines of code under the line that reads ``<Project Sdk="Microsoft.NET.Sdk">``:
+1. To add the Maven project dependancies required to work with Cosmos DB, you should add the following into the pom.xml file located at the bottom of your project, within the dependancies section:
 
     ```xml
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+   <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-cosmosdb</artifactId>
+      <version>2.4.3</version>
+    </dependency>
     ```
 
-1. Your new XML should look like this:
+1. For this tutorial, you may also need to change the source and target compiler versions to Java 1.8. When finished, your pom.xml should look like the below:
 
-    ```xml
-    <Project Sdk="Microsoft.NET.Sdk">        
-        <PropertyGroup>
-            <LangVersion>latest</LangVersion>
-        </PropertyGroup>        
-        <PropertyGroup>
-            <OutputType>Exe</OutputType>
-            <TargetFramework>netcoreapp2.0</TargetFramework>
-        </PropertyGroup>        
-        <ItemGroup>
-            <PackageReference Include="Bogus" Version="22.0.7" />
-            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
-        </ItemGroup>        
-    </Project>
-    ```
+    ![Open in Command Prompt](../media/maven4.jpg)
 
-1. Double-click the **Program.java** link in the **Explorer** pane to open the file in the editor.
 
-    ![Open editor](../media/02-program_editor.jpg)
+1. Once the changes are applied, ensure you click file -> save all. At this point, VS Code will recognise that you modified the pom.xml build file. Ensure that you accept the prompt to sync the dependancies:
+
+    ![Open in Command Prompt](../media/maven6.jpg)
 
 ### Create DocumentClient Instance and Database
 
 *The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
+
+1. At the same level as the default "App.java" file that already exists, right click and create a new file called "Program.java":
+
+    ![Open in Command Prompt](../media/maven5.jpg)
 
 1. Within the **Program.java** editor tab, Add the following using blocks to the top of the editor:
 
@@ -141,7 +94,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     import java.io.IOException;
     import java.util.concurrent.ExecutorService;
     import java.util.concurrent.Executors;
-
     import com.microsoft.azure.cosmosdb.ConnectionPolicy;
     import com.microsoft.azure.cosmosdb.ConsistencyLevel;
     import com.microsoft.azure.cosmosdb.Database;
@@ -347,8 +299,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         }
     }
     ```
-
-    > We will now execute a build of the application to make sure our code compiles successfully.
 
 1. Save all of your open editor tabs.
 
