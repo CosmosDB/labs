@@ -90,7 +90,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Open in Command Prompt](../media/maven5.jpg)
 
-1. Within the **Program.java** editor tab, Add the following using blocks to the top of the editor:
+1. Within the **Program.java** editor tab, Add the following imports to the top of the editor:
 
     ```java
     import java.util.ArrayList;
