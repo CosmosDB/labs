@@ -35,7 +35,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Create Containers using the Java SDK
 
-> You will start by using the Java SDK to create both fixed-size and unlimited containers to use in the lab. This lab is based on VS Code, but you may feel free to use the Java IDE of your choice. If using VS Code, ensure you install the Java Extension Pack from [here](vscode:extension/vscjava.vscode-java-pack). You should also install Apache Maven (see [here](https://maven.apache.org/) for maven downloads and instructions).
+> You will start by using the Java SDK to create both fixed-size and unlimited containers to use in the lab. This lab is based on VS Code, but you may feel free to use the Java IDE of your choice. If using VS Code, ensure you install the Java Extension Pack from [here](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack). You should also install Apache Maven (see [here](https://maven.apache.org/) for maven downloads and instructions), and per the instructions, ensure that Maven is included in the PATH variable, within system variables.
 
 ### Create a Java Project
 
