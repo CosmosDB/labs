@@ -126,7 +126,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private final Scheduler scheduler;
         private AsyncDocumentClient client;
 
-        private final String databaseName = "JavaDatabase";
+        private final String databaseName = "EntertainmentDatabase";
 
         public Program() {
             //public constructor
@@ -232,7 +232,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private final ExecutorService executorService;
         private final Scheduler scheduler;
         private AsyncDocumentClient client;
-        private final String databaseName = "JavaDatabase";
+        private final String databaseName = "EntertainmentDatabase";
 
         public Program() {
             executorService = Executors.newFixedThreadPool(100);
@@ -317,7 +317,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Go back to your Program class and add three new instance variables:
 
     ```java
-    private final String collectionId = "JavaCollection";
+    private final String collectionId = "CustomCollection";
     private final String partitionKeyPath = "/type";
     private final int throughPut = 400;
 
@@ -419,8 +419,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private final Scheduler scheduler;
         private AsyncDocumentClient client;
 
-        private final String databaseName = "JavaDatabase";
-        private final String collectionId = "JavaCollection";
+        private final String databaseName = "EntertainmentDatabase";
+        private final String collectionId = "CustomCollection";
         private final String partitionKeyPath = "/type";
         private final int throughPut = 400;
 
