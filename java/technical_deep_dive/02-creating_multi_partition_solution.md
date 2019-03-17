@@ -19,7 +19,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../media/02-lab_resource_group.jpg)
+    ![Lab resource group](../../media/02-lab_resource_group.jpg)
 
 1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
@@ -67,7 +67,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
     ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](../media/https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
+    > This command will add the [Microsoft.Azure.DocumentDB.Core](../../media/https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -75,7 +75,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     dotnet add package Bogus --version 22.0.8
     ```
 
-    > This command will add the [Bogus](../media/https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
+    > This command will add the [Bogus](../../media/https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
