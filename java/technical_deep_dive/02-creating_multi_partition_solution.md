@@ -127,85 +127,258 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     </Project>
     ```
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **Program.java** link in the **Explorer** pane to open the file in the editor.
 
     ![Open editor](../media/02-program_editor.jpg)
 
-### Create DocumentClient Instance
+### Create DocumentClient Instance and Database
 
-*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
+*The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
 
-1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
+1. Within the **Program.java** editor tab, Add the following using blocks to the top of the editor:
 
-    ```csharp
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using Microsoft.Azure.Documents.Linq;
+    ```java
+    import java.io.IOException;
+    import java.util.concurrent.ExecutorService;
+    import java.util.concurrent.Executors;
+
+    import com.microsoft.azure.cosmosdb.ConnectionPolicy;
+    import com.microsoft.azure.cosmosdb.ConsistencyLevel;
+    import com.microsoft.azure.cosmosdb.Database;
+    import com.microsoft.azure.cosmosdb.Document;
+    import com.microsoft.azure.cosmosdb.DocumentClientException;
+    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.FeedOptions;
+    import com.microsoft.azure.cosmosdb.FeedResponse;
+    import com.microsoft.azure.cosmosdb.RequestOptions;
+    import com.microsoft.azure.cosmosdb.ResourceResponse;
+    import com.microsoft.azure.cosmosdb.SqlParameter;
+    import com.microsoft.azure.cosmosdb.SqlParameterCollection;
+    import com.microsoft.azure.cosmosdb.SqlQuerySpec;
+    import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
+    import rx.Observable;
+    import rx.Scheduler;
+    import rx.schedulers.Schedulers;
     ```
 
-1. Locate the **Program** class and replace it with the following class:
+1. Create a **Program** class in the Program.java file as below, with the following class variables, a public constructor and main method:
 
-    ```csharp
-    public class Program
+    ```java
+    public class Program 
     {
-        public static async Task Main(string[] args)
-        {         
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
+
+        private final String databaseName = "JavaDatabase";
+
+        public Program() {
+            //public constructor
+
+        }
+        public static void main( String[] args )
+        {
+ 
         }
     }
     ```
 
-1. Within the **Program** class, add the following lines of code to create variables for your connection information:
+1. Within the **Program** class's constructor, add the following lines of code to create a scheduler (this is used for switching from a netty thread to a user app thread, which is required for async IO operations):
 
-    ```csharp
-    private static readonly Uri _endpointUri = new Uri("");
-    private static readonly string _primaryKey = "";
+    ```java
+        executorService = Executors.newFixedThreadPool(100);
+        scheduler = Schedulers.from(executorService);
     ```
 
-1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+1. Below the main method in the Program class, add the following methods for creating an AsyncDocumentClient (replace "uri" and "key" with the values you recorded earlier in the lab), database, and closing down the client: 
 
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://cosmosacct.documents.azure.com:443/");``.
+    ```java
+    private void createDatabase() throws Exception {
+    
+        client = new AsyncDocumentClient.Builder()
+        .withServiceEndpoint("uri")
+        .withMasterKeyOrResourceToken("key")
+        .withConnectionPolicy(ConnectionPolicy.GetDefault())
+        .withConsistencyLevel(ConsistencyLevel.Eventual)
+        .build();
 
-    > Keep the **URI** value recorded, you will use it again later in this lab.
+        createDatabaseIfNotExists();
+    
+    }
 
-1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+    private void createDatabaseIfNotExists() throws Exception {
+        //writeToConsoleAndPromptToContinue(
+         //       "Check if database " + databaseName + " exists.");
 
-    > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
+        String databaseLink = String.format("/dbs/%s", databaseName);
 
-    > Keep the **PRIMARY KEY** value recorded, you will use it again later in this lab.
+        Observable<ResourceResponse<Database>> databaseReadObs =
+                client.readDatabase(databaseLink, null);
+
+        Observable<ResourceResponse<Database>> databaseExistenceObs =
+                databaseReadObs
+                        .doOnNext(x -> {
+                            System.out.println("database " + databaseName + " already exists.");
+                        })
+                        .onErrorResumeNext(
+                                e -> {
+                                    // if the database doesn't already exists
+                                    // readDatabase() will result in 404 error
+                                    if (e instanceof DocumentClientException) {
+                                        DocumentClientException de = (DocumentClientException) e;
+                                        // if database
+                                        if (de.getStatusCode() == 404) {
+                                            // if the database doesn't exist, create it.
+                                            System.out.println("database " + databaseName + " doesn't existed,"
+                                                    + " creating it...");
+
+                                            Database dbDefinition = new Database();
+                                            dbDefinition.setId(databaseName);
+
+                                            return client.createDatabase(dbDefinition, null);
+                                        }
+                                    }
+
+                                    // some unexpected failure in reading database happened.
+                                    // pass the error up.
+                                    System.err.println("Reading database " + databaseName + " failed.");
+                                    return Observable.error(e);
+                                });
+
+
+        // wait for completion,
+        // as waiting for completion is a blocking call try to
+        // provide your own scheduler to avoid stealing netty io threads.
+        databaseExistenceObs.toCompletable().await();
+
+        System.out.println("Checking database " + databaseName + " completed!\n");
+    }
+
+    public void close() {
+        executorService.shutdown();
+        client.close();
+    }
+    ```
     
 1. Locate the **Main** method:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    { 
-    }
+    ```java
+        public static void main( String[] args )
+        {
+ 
+        }
     ```
 
-1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+1. Within the **Main** method, add the following lines of code to create and dispose of the **AsyncDocumentClient** instance:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {        
-    }
+    ```java
+        Program p = new Program();
+
+        try {
+            p.createDatabase();
+            System.out.println(String.format("Database created, please hold while resources are released"));
+        } catch (Exception e) {
+            System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
+        } finally {
+            System.out.println("close the client");
+            p.close();
+        }
+        System.exit(0);
     ```
 
 1. Your ``Program`` class definition should now look like this:
 
-    ```csharp
-    public class Program
-    { 
-        private static readonly Uri _endpointUri = new Uri("<your uri>");
-        private static readonly string _primaryKey = "<your key>";
-        public static async Task Main(string[] args)
-        {    
-            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-            {
-            }     
+    ```java
+    public class Program 
+    {
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
+
+        private final String databaseName = "JavaDatabase";
+
+        public Program() {
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+        }
+        public static void main( String[] args )
+        {
+            Program p = new Program();
+
+            try {
+                p.createDatabase();
+                System.out.println(String.format("Database created, please hold while resources are released"));
+            } catch (Exception e) {
+                System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
+            } finally {
+                System.out.println("close the client");
+                p.close();
+            }
+            System.exit(0);
+            
+        }
+
+        private void createDatabase() throws Exception {
+        
+            client = new AsyncDocumentClient.Builder()
+            .withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
+            .withMasterKeyOrResourceToken("6PqiF5lEc4xKcU9EWCv4ihT7671FYLCpuxqRXYeNiHqp6X7qhlY0cb26iDgkNCFQFgbyiFW2kIicuBwzlwtzKw==")
+            .withConnectionPolicy(ConnectionPolicy.GetDefault())
+            .withConsistencyLevel(ConsistencyLevel.Eventual)
+            .build();
+
+            createDatabaseIfNotExists();
+        
+        }
+
+        private void createDatabaseIfNotExists() throws Exception {
+            String databaseLink = String.format("/dbs/%s", databaseName);
+
+            Observable<ResourceResponse<Database>> databaseReadObs =
+                    client.readDatabase(databaseLink, null);
+
+            Observable<ResourceResponse<Database>> databaseExistenceObs =
+                    databaseReadObs
+                            .doOnNext(x -> {
+                                System.out.println("database " + databaseName + " already exists.");
+                            })
+                            .onErrorResumeNext(
+                                    e -> {
+                                        // if the database doesn't already exists
+                                        // readDatabase() will result in 404 error
+                                        if (e instanceof DocumentClientException) {
+                                            DocumentClientException de = (DocumentClientException) e;
+                                            // if database
+                                            if (de.getStatusCode() == 404) {
+                                                // if the database doesn't exist, create it.
+                                                System.out.println("database " + databaseName + " doesn't existed,"
+                                                        + " creating it...");
+
+                                                Database dbDefinition = new Database();
+                                                dbDefinition.setId(databaseName);
+
+                                                return client.createDatabase(dbDefinition, null);
+                                            }
+                                        }
+
+                                        // some unexpected failure in reading database happened.
+                                        // pass the error up.
+                                        System.err.println("Reading database " + databaseName + " failed.");
+                                        return Observable.error(e);
+                                    });
+
+
+            // wait for completion,
+            // as waiting for completion is a blocking call try to
+            // provide your own scheduler to avoid stealing netty io threads.
+            databaseExistenceObs.toCompletable().await();
+
+            System.out.println("Checking database " + databaseName + " completed!\n");
+        }
+
+        public void close() {
+            executorService.shutdown();
+            client.close();
         }
     }
     ```
@@ -214,81 +387,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the console project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
-### Create Database using the SDK
-
-1. Locate the using block within the **Main** method:
-
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {                        
-    }
-    ```
-
-1. Add the following code to the method to create a new ``Database`` instance:
-
-    ```csharp
-    Database targetDatabase = new Database { Id = "EntertainmentDatabase" };
-    ```
-
-1. Add the following code to create a new database instance if one does not already exist:
-
-    ```csharp
-    targetDatabase = await client.CreateDatabaseIfNotExistsAsync(targetDatabase);
-    ```
-
-    > This code will check to see if a database exists in your Azure Cosmos DB account that meets the specified parameters. If a database that matches does not exist, it will create a new database.
-
-1. Add the following code to print out the self-link of the database:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"Database Self-Link:\t{targetDatabase.SelfLink}");
-    ```
-
-    > The ``targetDatabase`` variable will have metadata about the database whether a new database is created or an existing one is read.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the running command.
-
-    > In the console window, you will see the self-link string for the database resource in your Azure Cosmos DB account.
-
-1. In the open terminal pane, enter and execute the following command again:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Again, observe the output of the running command.
-
-    > Since the database already exists, you will see the same self-link on both executions of the console application. This simply means that the SDK detected that the database already exists and used the existing database instance instead of creating a new instance of the database.
-
-1. Click the **🗙** symbol to close the terminal pane.
+1. In the Visual Studio Code window, select the "run" option (from "run" and "debug") that should appear within your class file (or compile and run the code in your java IDE of choice). After the code has compiled and run, you should be able to view the database in Data Explorer from the Azure portal. 
 
 
 ### Create an Unlimited Collection using the SDK
