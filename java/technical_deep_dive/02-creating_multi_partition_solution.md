@@ -756,7 +756,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         public Program() {
             executorService = Executors.newFixedThreadPool(100);
             scheduler = Schedulers.from(executorService);
-            // Sets up the requirements for each test
             ConnectionPolicy connectionPolicy = new ConnectionPolicy();
             connectionPolicy.setConnectionMode(ConnectionMode.Direct);
             asyncClient = new AsyncDocumentClient.Builder()
@@ -770,11 +769,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             collectionDefinition.setId(UUID.randomUUID().toString());
         
         }
-
-        /**
-        * Create a document with a programmatically set definition, in an Async manner
-        */
-
 
         public static void main(String[] args) {
 
