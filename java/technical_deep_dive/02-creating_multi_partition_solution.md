@@ -712,8 +712,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         public WatchLiveTelevisionChannel(int number) throws NumberFormatException {
 
             for (int i= 0; i < number;i++){  
-                Document documentDefinition = new Document(); 
-                DecimalFormat df = new DecimalFormat("###.###");      
+                Document documentDefinition = new Document();      
                 documentDefinition.set("type", "WatchLiveTelevisionChannel");   
                 String[] arr={"NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8"};
                 Random r=new Random();
