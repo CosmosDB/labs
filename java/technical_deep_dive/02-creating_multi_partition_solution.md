@@ -902,261 +902,50 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Benchmark A Simple Collection using a .NET Core Application
 
-> In the next part of this lab, you will compare various partition key choices for a large dataset using a special benchmarking tool available on GitHub.com. First, you will learn how to use the benchmarking tool using a simple collection and partition key.
+> In the next part of this lab, you will test a large dataset using a special benchmarking tool available on GitHub.com. 
 
-### Clone Existing .NET Core Project
+### Clone Existing Java Project
 
-1. On your local machine, create a new folder that will be used to contain the content of your new .NET Core project.
+1. On your local machine, create a new folder that will be used to contain the content of your new Java project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
 1. In the open terminal pane, enter and execute the following command:
 
     ```sh
-    git clone https://github.com/seesharprun/cosmos-benchmark.git .
+    git clone https://github.com/Azure/azure-cosmosdb-java.git
     ```
 
-    > This command will create a copy of a .NET Core project located on GitHub (<https://github.com/seesharprun/cosmos-benchmark>) in your local folder.
+    > This command will create a copy of a Java project located on GitHub (<https://github.com/Azure/azure-cosmosdb-java/tree/master/benchmark>) in your local folder.
 
-1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
 
-1. In the terminal pane, enter and execute the following command:
+1. When this has run, in the terminal pane, navigate to azure-cosmos-db-java folder and run "mvn clean package -DskipTests":
 
-    ```sh
-    dotnet restore
-    ```
-
-    > This command will restore all packages specified as dependencies in the project.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
+    ![Data Explorer pane](../media/benchmark-java1.jpg)
 
     > This command will build the project.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Observe the **Program.cs** and **benchmark.csproj** files created by the .NET Core CLI.
-
-1. Double-click the **sample.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Observe the sample JSON file
-
-    > This file will show you a sample of the types of JSON documents that will be uploaded to your collection. Pay close attention to the **Submit\*** fields, the **DeviceId** field and the **LocationId** field.
-
-### Update the Application's Settings
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/cosmosSettings.endpointUri** JSON path:
-
-    ```js
-    "endpointUri": ""
-    ```
-
-    Update the **endPointUri** property by setting it's value to the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
-
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new property will look like this: ``"endpointUri": "https://cosmosacct.documents.azure.com:443/"``.
-
-1. Locate the **/cosmosSettings.primaryKey** JSON path:
-
-    ```js
-    "primaryKey": ""
-    ```
-
-    Update the **primaryKey** property by setting it's value to the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
-
-    > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new property will look like this: ``"primaryKey": "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ=="``.
-
-### Configure a Simple Collection for Benchmarking
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/collectionSettings** JSON path:
-
-    ```js
-    "collectionSettings": [],
-    ```
-
-    Update the **collectionSettings** property by setting it's value to the following array of JSON objects:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithHourKey",
-            "throughput": 10000,
-            "partitionKeys": [ "/SubmitHour" ]
-        }
-    ],
-    ```
-
-    > The object above will instruct the benchmark tool to create a single collection and set it's throughput and partition key to the specified values. For this simple demo, we will use the **hour** when an IoT device recording was submitted as our partition key.
-
-    | Collection Name | Throughput | Partition Key |
-    | --- | --- | --- |
-    | CollectionWithHourKey | 10000 | /SubmitHour |
-
-1. Save all of your open editor tabs.
-
 ### Run the Benchmark Application
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. Verify the project built with no errors (note: a JDK higher than version 8 may not compile). The navigate to the target folder by typing **cd benchmark\target**. You can then run the benchmark tool, replacing the text "uri" and "key" with the values from your account (ensure the jar file name is correct for the version of the jar present in the folder):
 
     ```sh
-    dotnet run
+    java -jar azure-cosmosdb-benchmark-2.4.3-jar-with-dependencies.jar -serviceEndpoint uri -masterKey key -databaseId EntertainmentDatabase -collectionId CustomCollection -consistencyLevel Eventual -concurrency 2 -numberOfOperations 10 -operation WriteLatency -connectionMode Direct
     ```
 
-1. Observe the results of the application's execution. Your results should look very similar to the code sample below:
+1. You can experiment with the values "concurrency" (number of concurrent requests in the simulated app) and "numberOfOperations" (number of documents that will be inserted by the benchmark tool). By default, the tool will use the document id as the partition key, but you can experiment with this in the code, if you prefer. 
 
-    ```sh
-    DocumentDBBenchmark starting...
-    Database Validated:     dbs/MOEFAA==/
-    Collection Validated:   dbs/MOEFAA==/colls/MOEFAN6FoQU=/
-    Summary:
-    ---------------------------------------------------------------------
-    Endpoint:               https://cosmosacct.documents.azure.com/
-    Database                IoTDeviceData
-    Collection              CollectionWithHourKey
-    Partition Key:          /SubmitHour
-    Throughput:             10000 Request Units per Second (RU/s)
-    Insert Operation:       100 Tasks Inserting 1000 Documents Total
-    ---------------------------------------------------------------------
+1. The output of running the benchmark test should look as below:
 
-    Starting Inserts with 100 tasks
-    Inserted 1000 docs @ 997 writes/s, 7220 RU/s (19B max monthly 1KB reads)
+    ![Data Explorer pane](../media/benchmark-java3.jpg)
 
-    Summary:
-    ---------------------------------------------------------------------
-    Total Time Elapsed:     00:00:01.0047125
-    Inserted 1000 docs @ 995 writes/s, 7209 RU/s (19B max monthly 1KB reads)
-    ---------------------------------------------------------------------
-    ```
 
-    > The benchmark tool tells you how long it takes to write a specific number of documents to your collection. You also get useful metadata such as the amount of **RU/s** being used and the total execution time. We are not tuning our partition key choice quite yet, we are simply learning to use the tool.
 
-1. Press the **ENTER** key to complete the execution of the console application.
-
-### Update the Application's Settings
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/cosmosSettings.numberOfDocumentsToInsert** JSON path:
-
-    ```js
-    "numberOfDocumentsToInsert": 1000
-    ```
-
-    Update the **numberOfDocumentsToInsert** property by setting it's value to **50,000**:
-
-    ```js
-    "numberOfDocumentsToInsert": 50000
-    ```
-
-1. Save all of your open editor tabs.
-
-### Run the Benchmark Application
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-1. Observe the results of the application's execution. 
-
-    > Observe the amount of time required to import multiple records.
-
-1. Press the **ENTER** key to complete the execution of the console application.
-
-## Benchmark Various Partition Key Choices using a .NET Core Application
-
-> Now you will use multiple collections and partition key options to compare various strategies for partitioning a large dataset.
-
-### Configure Multiple Collections for Benchmarking
-
-1. Double-click the **appsettings.json** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **/collectionSettings** JSON path:
-
-    ```js
-    "collectionSettings": [],
-    ```
-
-    Update the **collectionSettings** property by setting it's value to the following array of JSON objects:
-
-    ```js
-    "collectionSettings": [
-        {
-            "id": "CollectionWithMinuteKey",
-            "throughput": 10000,
-            "partitionKeys": [ "/SubmitMinute" ]
-        },
-        {
-            "id": "CollectionWithDeviceKey",
-            "throughput": 10000,
-            "partitionKeys": [ "/DeviceId" ]
-        }
-    ],
-    ```
-
-    > The object above will instruct the benchmark tool to create multiple collections and set their throughput and partition key to the specified values. For this demo, we will compare the results using each partition key.
-
-    | Collection Name | Throughput | Partition Key |
-    | --- | --- | --- |
-    | CollectionWithMinuteKey | 10000 | /SubmitMinute |
-    | CollectionWithDeviceKey | 10000 | /DeviceId |
-
-1. Save all of your open editor tabs.
-
-### Run the Benchmark Application
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-1. Observe the results of the application's execution.
-
-    > The timestamp on these IoT records is based on the time when the record was created. We submit the records as soon as they are created so there's very little latency between the client and server timestamp. Most of the records being submitted will be within the same minute so they share the same **SubmitMinute** partition key. This will cause a hot partition key and can constraint throughput. In this context, a hot partition key refers to when requests to the same partition key exceed the provisioned throughput and are rate-limited. A hot partition key causes high volumes of data to be stored within the same partition. Such uneven distribution is inefficient. In this demo, you should expect a total time of >20 seconds.
-
-    ```sh
-    ---------------------------------------------------------------------
-    Collection              CollectionWithMinuteKey
-    Partition Key:          /SubmitMinute
-    Total Time Elapsed:     00:00:57.4233616
-    Inserted 50000 docs @ 871 writes/s, 6304 RU/s (16B max monthly 1KB reads)
-    ---------------------------------------------------------------------
-    ```
-
-    > The **SubmitMinute** partition key will most likely take longer to execute than the **DeviceId** partition key. Using the **DeviceId** partition key creates a more even distribution of requests across your various partition keys. Because of this behavior, you should notice drastically improved performance.
-
-    ```sh
-    ---------------------------------------------------------------------
-    Collection              CollectionWithDeviceKey
-    Partition Key:          /DeviceId
-    Total Time Elapsed:     00:00:27.2769234
-    Inserted 50000 docs @ 1833 writes/s, 13272 RU/s (34B max monthly 1KB reads)
-    ---------------------------------------------------------------------
-    ```
-
-1. Compare the RU/s and total time for both collections.
-
-1. Press the **ENTER** key to complete the execution of the console application.
-
-### Observe the New Collections and Database in the Azure Portal
+### Observe the data in the Azure Portal
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -1168,9 +957,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **IoTDeviceData** database node and then observe the various collection nodes.
+1. In the **Data Explorer** section, expand the database node and then observe the collection node.
 
-1. Expand the **CollectionWithDeviceKey** node. Within the node, click the **Scale & Settings** link.
+1. click the **Scale & Settings** link.
 
 1. Observe the following properties of the collection:
 
@@ -1185,17 +974,17 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT VALUE COUNT(1) FROM recordings
+    SELECT VALUE COUNT(1) FROM c
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
 1. In the **Results** pane, observe the results of your query.
 
-1. Back in the **Data Explorer** section, right-click the **IoTDeviceData** database node and select the **Delete Database** option.
+1. Back in the **Data Explorer** section, right-click the database node and select the **Delete Database** option.
 
-    > Since you created multiple collections in this database with high throughput, it makes sense to dispose of the database immediately to minimize your Azure subscription consumption.
+    > It makes sense to dispose of the database immediately to minimize your Azure subscription consumption.
 
-1. In the **Delete Database** popup enter the name of the database (**IoTDeviceData**) in the field and then press the **OK** button.
+1. In the **Delete Database** popup enter the name of the database  in the field and then press the **OK** button.
 
 1. Close your browser application.

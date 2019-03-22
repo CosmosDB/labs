@@ -12,8 +12,10 @@ Prior to starting these labs, you must have the following operating system and s
 | Software | Download Link |
 | --- | --- |
 | Git | [/git-scm.com/downloads](https://git-scm.com/downloads) 
-Java 11 JDK (or greater) | [/jdk11-downloads-5066655.html](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html) |
+Java 8 JDK | [/jdk8-downloads-2133151.html](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) |
+Java 8 JRE | [/jre8-downloads-2133155.html](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) |
 | Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
+| Java Extension Pack (if using VS Code) | [/vscode-java-pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) |
 | Maven | [https://maven.apache.org/](https://maven.apache.org/) |
 
 
