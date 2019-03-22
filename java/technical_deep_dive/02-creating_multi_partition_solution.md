@@ -650,7 +650,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Name the new file **PurchaseFoodOrBeverage.java** . The editor tab will automatically open for the new file. Paste in the following code for the ``PurchaseFoodOrBeverage`` class (ensure the package declaration matches the classpath for your project):
 
     ```java
-    package testpackage;
+    package test;
 
     import java.text.DecimalFormat;
     import java.util.ArrayList;
@@ -692,7 +692,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Paste in the following code for the ``WatchLiveTelevisionChannel`` class (ensure the package declaration matches the classpath for your project):
 
     ```java
-    package testpackage;
+    package test;
 
     import java.text.DecimalFormat;
     import java.util.ArrayList;
