@@ -15,23 +15,23 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../../media/02-resource_groups.jpg)
+    ![Resource groups](../media/02-resource_groups.jpg)
 
 1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../../media/02-lab_resource_group.jpg)
+    ![Lab resource group](../media/02-lab_resource_group.jpg)
 
 1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../../media/02-cosmos_resource.jpg)
+    ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link.
 
-    ![Keys pane](../../media/02-keys_pane.jpg)
+    ![Keys pane](../media/02-keys_pane.jpg)
 
 1. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
 
-    ![Credentials](../../media/02-keys.jpg)
+    ![Credentials](../media/02-keys.jpg)
 
 ## Create Containers using the Java SDK
 
@@ -43,7 +43,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../../media/02-open_with_code.jpg)
+    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
@@ -90,9 +90,10 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Open in Command Prompt](../media/maven5.jpg)
 
-1. Within the **Program.java** editor tab, Add the following imports to the top of the editor:
+1. Within the **Program.java** editor tab, Add the package declaration (which will need to match the path you created for your maven project, if not "test" as in the sample shown here) and the following imports to the top of the editor:
 
     ```java
+    package test;
     import java.util.ArrayList;
     import java.util.Collection;
     import java.util.List;
@@ -139,55 +140,48 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     }
     ```
 
-1. Within the **Program** class's constructor, add the following lines of code to create a scheduler (this is used for switching from a netty thread to a user app thread, which is required for async IO operations):
+
+1. Locate the **Program** class's constructor:
+
+    ```java
+        public Program() {
+        //public constructor
+
+        }
+    ```
+
+1. Within the constructor, add the following lines of code to create a scheduler (this is used for switching from a netty thread to a user app thread, which is required for async IO operations) and also the AsyncDocumentClient (replace "uri" and "key" with the values you recorded earlier in the lab) that we will use throughout this lab:
 
     ```java
         executorService = Executors.newFixedThreadPool(100);
         scheduler = Schedulers.from(executorService);
+        client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+        .withMasterKeyOrResourceToken("key")
+        .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+        .build();
     ```
 
-1. Below the main method in the Program class, add the following methods for creating an AsyncDocumentClient instance (replace "uri" and "key" with the values you recorded earlier in the lab), creating a database, and closing down the client: 
+1. Below the main method in the Program class, add the following methods for creating a database, and closing down the AsyncDocumentClient: 
 
     ```java
     private void createDatabase() throws Exception {
-    
-        client = new AsyncDocumentClient.Builder()
-        .withServiceEndpoint("uri")
-        .withMasterKeyOrResourceToken("key")
-        .withConnectionPolicy(ConnectionPolicy.GetDefault())
-        .withConsistencyLevel(ConsistencyLevel.Eventual)
-        .build();
-
-        createDatabaseIfNotExists();
-    
-    }
-
-    private void createDatabaseIfNotExists() throws Exception {
-
         String databaseLink = String.format("/dbs/%s", databaseName);
-        Observable<ResourceResponse<Database>> databaseReadObs =
-                client.readDatabase(databaseLink, null);
-        Observable<ResourceResponse<Database>> databaseExistenceObs =
-                databaseReadObs
-                        .doOnNext(x -> {
-                            System.out.println("database " + databaseName + " already exists.");
-                        })
-                        .onErrorResumeNext(
-                                e -> {
-                                    if (e instanceof DocumentClientException) {
-                                        DocumentClientException de = (DocumentClientException) e;
-                                        // if database
-                                        if (de.getStatusCode() == 404) {
-                                            System.out.println("database " + databaseName + " doesn't existed,"
-                                                    + " creating it...");
-                                            Database dbDefinition = new Database();
-                                            dbDefinition.setId(databaseName);
-                                            return client.createDatabase(dbDefinition, null);
-                                        }
-                                    }
-                                    System.err.println("Reading database " + databaseName + " failed.");
-                                    return Observable.error(e);
-                                });
+        Observable<ResourceResponse<Database>> databaseReadObs = client.readDatabase(databaseLink, null);
+        Observable<ResourceResponse<Database>> databaseExistenceObs = databaseReadObs.doOnNext(x -> {
+            System.out.println("database " + databaseName + " already exists.");
+        }).onErrorResumeNext(e -> {
+            if (e instanceof DocumentClientException) {
+                DocumentClientException de = (DocumentClientException) e;
+                if (de.getStatusCode() == 404) {
+                    System.out.println("database " + databaseName + " doesn't exist," + " creating it...");
+                    Database dbDefinition = new Database();
+                    dbDefinition.setId(databaseName);
+                    return client.createDatabase(dbDefinition, null);
+                }
+            }
+            System.err.println("Reading database " + databaseName + " failed.");
+            return Observable.error(e);
+        });
         databaseExistenceObs.toCompletable().await();
         System.out.println("Checking database " + databaseName + " completed!\n");
     }
@@ -237,7 +231,12 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         public Program() {
             executorService = Executors.newFixedThreadPool(100);
             scheduler = Schedulers.from(executorService);
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
+            .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+            .build();
         }
+
         public static void main( String[] args )
         {
             Program p = new Program();
@@ -255,44 +254,24 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             
         }
 
-        private void createDatabase() throws Exception {       
-            client = new AsyncDocumentClient.Builder()
-            .withServiceEndpoint("uri")
-            .withMasterKeyOrResourceToken("key")
-            .withConnectionPolicy(ConnectionPolicy.GetDefault())
-            .withConsistencyLevel(ConsistencyLevel.Eventual)
-            .build();
-            createDatabaseIfNotExists();
-        
-        }
-
-        private void createDatabaseIfNotExists() throws Exception {
+        private void createDatabase() throws Exception {
             String databaseLink = String.format("/dbs/%s", databaseName);
-
-            Observable<ResourceResponse<Database>> databaseReadObs =
-                    client.readDatabase(databaseLink, null);
-
-            Observable<ResourceResponse<Database>> databaseExistenceObs =
-                    databaseReadObs
-                            .doOnNext(x -> {
-                                System.out.println("database " + databaseName + " already exists.");
-                            })
-                            .onErrorResumeNext(
-                                    e -> {
-                                        if (e instanceof DocumentClientException) {
-                                            DocumentClientException de = (DocumentClientException) e;
-                                            if (de.getStatusCode() == 404) {
-                                                System.out.println("database " + databaseName + " doesn't existed,"
-                                                        + " creating it...");
-                                                Database dbDefinition = new Database();
-                                                dbDefinition.setId(databaseName);
-                                                return client.createDatabase(dbDefinition, null);
-                                            }
-                                        }
-                                        System.err.println("Reading database " + databaseName + " failed.");
-                                        return Observable.error(e);
-                                    });
-
+            Observable<ResourceResponse<Database>> databaseReadObs = client.readDatabase(databaseLink, null);
+            Observable<ResourceResponse<Database>> databaseExistenceObs = databaseReadObs.doOnNext(x -> {
+                System.out.println("database " + databaseName + " already exists.");
+            }).onErrorResumeNext(e -> {
+                if (e instanceof DocumentClientException) {
+                    DocumentClientException de = (DocumentClientException) e;
+                    if (de.getStatusCode() == 404) {
+                        System.out.println("database " + databaseName + " doesn't exist," + " creating it...");
+                        Database dbDefinition = new Database();
+                        dbDefinition.setId(databaseName);
+                        return client.createDatabase(dbDefinition, null);
+                    }
+                }
+                System.err.println("Reading database " + databaseName + " failed.");
+                return Observable.error(e);
+            });
             databaseExistenceObs.toCompletable().await();
             System.out.println("Checking database " + databaseName + " completed!\n");
         }
@@ -427,6 +406,10 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         public Program() {
             executorService = Executors.newFixedThreadPool(100);
             scheduler = Schedulers.from(executorService);
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
+            .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+            .build();
         }
 
         public static void main(String[] args) {
@@ -438,7 +421,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     
                 //create collection...
                 p.createMultiPartitionCollection();
-                
+
             } catch (Exception e) {
                 System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
             } finally {
@@ -449,17 +432,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
         }
 
+
         private void createDatabase() throws Exception {
-
-            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
-                    .withMasterKeyOrResourceToken("key")
-                    .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
-                    .build();
-
-            createDatabaseIfNotExists();
-        }
-
-        private void createDatabaseIfNotExists() throws Exception {
             String databaseLink = String.format("/dbs/%s", databaseName);
             Observable<ResourceResponse<Database>> databaseReadObs = client.readDatabase(databaseLink, null);
             Observable<ResourceResponse<Database>> databaseExistenceObs = databaseReadObs.doOnNext(x -> {
@@ -468,7 +442,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 if (e instanceof DocumentClientException) {
                     DocumentClientException de = (DocumentClientException) e;
                     if (de.getStatusCode() == 404) {
-                        System.out.println("database " + databaseName + " doesn't existed," + " creating it...");
+                        System.out.println("database " + databaseName + " doesn't exist," + " creating it...");
                         Database dbDefinition = new Database();
                         dbDefinition.setId(databaseName);
                         return client.createDatabase(dbDefinition, null);
@@ -551,31 +525,31 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. On the left side of the portal, click the **Resource groups** link.
 
-    ![Resource groups](../../media/02-resource_groups.jpg)
+    ![Resource groups](../media/02-resource_groups.jpg)
 
 1. In the **Resource groups** blade, locate and select the **cosmosgroup-lab** *Resource Group*.
 
-    ![Lab resource group](../../media/02-lab_resource_group.jpg)
+    ![Lab resource group](../media/02-lab_resource_group.jpg)
 
 1. In the **cosmosgroup-lab** blade, select the **Azure Cosmos DB** account you recently created.
 
-    ![Cosmos resource](../../media/02-cosmos_resource.jpg)
+    ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
 1. In the **Azure Cosmos DB** blade, observe the new collections and database displayed in the middle of the blade.
 
-    ![New collections](../../media/02-created_collections.jpg)
+    ![New collections](../media/02-created_collections.jpg)
 
 1. Locate and click the **Data Explorer** link on the left side of the blade.
 
-    ![Data Explorer pane](../../media/02-data_explorer_pane.jpg)
+    ![Data Explorer pane](../media/02-data_explorer_pane.jpg)
 
 1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection nodes. 
 
-    ![Database node](../../media/02-database_node.jpg)
+    ![Database node](../media/02-database_node.jpg)
 
 1. Expand the **DefaultCollection** node. Within the node, click the **Scale & Settings** link.
 
-    ![Scale and settings](../../media/02-scale_and_settings.jpg)
+    ![Scale and settings](../media/02-scale_and_settings.jpg)
 
 1. Observe the following properties of the collection:
 
@@ -585,7 +559,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     - Indexing Policy
 
-    ![Fixed-Size collection configuration](../../media/02-fixed_configuration.jpg)
+    ![Fixed-Size collection configuration](../media/02-fixed_configuration.jpg)
 
     > You will quickly notice that this is a fixed-size container that has a limited amount of RU/s. The indexing policy is also interesting as it implements a Hash index on string types and Range index on numeric types.
 
@@ -657,307 +631,299 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Populate a Collection with Documents using the SDK
 
-> You will now use the .NET SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple C# classes that you will create in your project.
+> You will now use the Async Java SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple Java classes that you will create in your project. To help generate random data in the documents, we are going to use a java library called "javafaker", so you will need to add the following to your pom.xml file, located at the bottom of your project, within the dependancies section (ensure you accept the "synchronize the Java classpath/configuration" warning if you have not accepted this permanently):
+
+    ```xml
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>0.17.2</version>
+        </dependency>  
+    ```
 
 ### Create Classes
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+1. In the Visual Studio Code window, at the "test" directory (or whatever you named the classpath when creating your maven project) right-click the **Explorer** pane and select the **New File** menu option.
 
-    ![New File](../media/02-new_file.jpg)
+    ![New File](../media/new-java-file.jpg)
 
-1. Name the new file **IInteraction.cs** . The editor tab will automatically open for the new file.
+1. Name the new file **PurchaseFoodOrBeverage.java** . The editor tab will automatically open for the new file. Paste in the following code for the ``PurchaseFoodOrBeverage`` class (ensure the package declaration matches the classpath for your project):
 
-    ![Interaction Interface File](../media/02-interaction_interface.jpg)
+    ```java
+    package testpackage;
 
-1. Paste in the following code for the ``IInteraction`` interface:
+    import java.text.DecimalFormat;
+    import java.util.ArrayList;
+    import com.github.javafaker.Faker;
+    import com.microsoft.azure.cosmosdb.Document;
 
-    ```csharp
-    public interface IInteraction
-    {
-        string type { get; }
+    public class PurchaseFoodOrBeverage {
+        public DecimalFormat unitPrice;
+        public DecimalFormat totalPrice;
+        public int quantity;
+        public String type;
+
+        Faker faker = new Faker();
+        ArrayList<Document> documentDefinitions = new ArrayList<>();  
+        public PurchaseFoodOrBeverage(int number) throws NumberFormatException {
+
+            for (int i= 0; i < number;i++){  
+                Document documentDefinition = new Document(); 
+                DecimalFormat df = new DecimalFormat("###.###");      
+                documentDefinition.set("type", "PurchaseFoodOrBeverage");            
+                documentDefinition.set("quantity", faker.random().nextInt(1, 5));            
+                String unitPrice = df.format(Double.valueOf((Double)faker.random().nextDouble()));
+                documentDefinition.set("unitPrice", Double.valueOf(unitPrice));
+                int quantity = Integer.valueOf((Integer)documentDefinition.get("quantity"));        
+                String totalPrice = df.format(Double.valueOf(unitPrice) * quantity);
+                documentDefinition.set("totalPrice", Double.valueOf(totalPrice));
+                documentDefinitions.add(documentDefinition);
+            }
+            
+        }
     }
     ```
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
-
-1. Name the new file **PurchaseFoodOrBeverage.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``PurchaseFoodOrBeverage`` class:
-
-    ```csharp
-    public class PurchaseFoodOrBeverage : IInteraction
-    {
-        public decimal unitPrice { get; set; }
-        public decimal totalPrice { get; set; }
-        public int quantity { get; set; }
-        public string type { get; set; }
-    }
-    ```
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
-
-1. Name the new file **ViewMap.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``ViewMap`` class:
-
-    ```csharp
-    public class ViewMap : IInteraction
-    {	
-        public int minutesViewed { get; set; }
-        public string type { get; set; }
-    }
-    ```
     
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-1. Name the new file **WatchLiveTelevisionChannel.cs** . The editor tab will automatically open for the new file.
+1. Name the new file **WatchLiveTelevisionChannel.java** . The editor tab will automatically open for the new file.
 
-1. Paste in the following code for the ``WatchLiveTelevisionChannel`` class:
+1. Paste in the following code for the ``WatchLiveTelevisionChannel`` class (ensure the package declaration matches the classpath for your project):
 
-    ```csharp
-    public class WatchLiveTelevisionChannel : IInteraction
-    {
-        public string channelName { get; set; }
-        public int minutesViewed { get; set; }
-        public string type { get; set; }
+    ```java
+    package testpackage;
+
+    import java.text.DecimalFormat;
+    import java.util.ArrayList;
+    import java.util.Random;
+
+    import com.github.javafaker.Faker;
+    import com.microsoft.azure.cosmosdb.Document;
+
+    public class WatchLiveTelevisionChannel {
+        public DecimalFormat unitPrice;
+        public DecimalFormat totalPrice;
+        public int quantity;
+        public String type;
+
+        Faker faker = new Faker();
+        ArrayList<Document> documentDefinitions = new ArrayList<>();  
+        public WatchLiveTelevisionChannel(int number) throws NumberFormatException {
+
+            for (int i= 0; i < number;i++){  
+                Document documentDefinition = new Document(); 
+                DecimalFormat df = new DecimalFormat("###.###");      
+                documentDefinition.set("type", "WatchLiveTelevisionChannel");   
+                String[] arr={"NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8"};
+                Random r=new Random();
+                int randomNumber=r.nextInt(arr.length);        
+                documentDefinition.set("channelName", arr[randomNumber]);            
+                documentDefinition.set("minutesViewed", faker.random().nextInt(1, 45));
+                documentDefinitions.add(documentDefinition);
+            }
+            
+        }
     }
     ```
 
 1. Observe your newly created files in the **Explorer** pane.
 
-    ![New files](../media/02-new_classes.jpg)
+    ![New files](../media/02-new_java_classes.jpg)
 
 1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the console project.
-
-1. Click the **🗙** symbol to close the terminal pane.
 
 1. Close all open editor tabs.
 
 ### Populate Unlimited Collection with Data
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Open **Program.java** in the **Explorer** pane to open the file in the editor. Remove all methods except the main() method, and remove the contents of the main method. When done your program class should look as below (with your uri and key):
 
-1. Locate the using block within the **Main** method and delete any existing code:
+    ```java
+    public class Program {
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {                        
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
+
+        private final String databaseName = "EntertainmentDatabase";
+        private final String collectionId = "CustomCollection";
+        private AsyncDocumentClient asyncClient;
+        private final String partitionKeyPath = "/type";
+        private final int throughPut = 400;
+
+
+        public Program() {
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            // Sets up the requirements for each test
+            ConnectionPolicy connectionPolicy = new ConnectionPolicy();
+            connectionPolicy.setConnectionMode(ConnectionMode.Direct);
+            asyncClient = new AsyncDocumentClient.Builder()
+                    .withServiceEndpoint("uri")
+                    .withMasterKeyOrResourceToken("key")
+                    .withConnectionPolicy(connectionPolicy)
+                    .withConsistencyLevel(ConsistencyLevel.Session)
+                    .build();
+
+            DocumentCollection collectionDefinition = new DocumentCollection();
+            collectionDefinition.setId(UUID.randomUUID().toString());
+        
+        }
+
+        /**
+        * Create a document with a programmatically set definition, in an Async manner
+        */
+
+
+        public static void main(String[] args) {
+
+
+        }        
     }
     ```
 
-1. Add the following code to the method to create an asynchronous connection:
+1. Below the main() method, add the following method to the methods to create 500 documents using the PurchaseFoodOrBeverage class:
 
-    ```csharp
-    await client.OpenAsync();
-    ```
-
-1. Add the following code to the method to create a self-link to an existing collection:
-
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-    ```
-
-1. Observe the code in the **Main** method.
-
-    > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
-
-1. Add the following code to create a collection of ``PurchaseFoodOrBeverage`` instances:
-
-    ```csharp
-    var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
-        .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
-        .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
-        .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
-        .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
-        .Generate(500);
-    ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
-    
-1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
-
-    ```csharp
-    foreach(var interaction in foodInteractions)
-    {
+    ```java
+    public void createDocument() throws Exception {
+        ArrayList<Document> documents = new PurchaseFoodOrBeverage(500).documentDefinitions;
+        for (Document document: documents){
+            // Create a document
+            asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false)
+            .toBlocking().single().getResource();
+            System.out.println("inserting: "+document);
+        }
     }
     ```
 
-1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
+1. Locate the **Main** method:
 
-    ```csharp
-    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
-    ```
-
-    > The ``CreateDocumentAsync`` method of the ``DocumentClient`` class takes in a self-link for a collection and an object that you would like to serialize into JSON and store as a document within the specified collection.
-
-1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"Document #{foodInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
-    ```
-
-    > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
-
-1. Your **Main** method should look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    ```java
+        public static void main( String[] args )
         {
-            await client.OpenAsync();
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-            var foodInteractions = new Bogus.Faker<PurchaseFoodOrBeverage>()
-                .RuleFor(i => i.type, (fake) => nameof(PurchaseFoodOrBeverage))
-                .RuleFor(i => i.unitPrice, (fake) => Math.Round(fake.Random.Decimal(1.99m, 15.99m), 2))
-                .RuleFor(i => i.quantity, (fake) => fake.Random.Number(1, 5))
-                .RuleFor(i => i.totalPrice, (fake, user) => Math.Round(user.unitPrice * user.quantity, 2))
-                .Generate(500);
-            foreach(var interaction in foodInteractions)
-            {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
-                await Console.Out.WriteLineAsync($"Document #{foodInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
-            }
-        }     
-    }
+ 
+        }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
+1. Add the following code within the main method:
+
+    ```java
+        Program p = new Program();
+
+        try {
+            p.createDocument();
+
+        } catch (Exception e) {
+            System.err.println(String.format("failed with %s", e));
+        } 
+        System.exit(0);
+    ```
+
+1. You **Program** class should now look like this:
+
+
+
+    ```java
+    public class Program {
+
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
+
+        private final String databaseName = "EntertainmentDatabase";
+        private final String collectionId = "CustomCollection";
+        private AsyncDocumentClient asyncClient;
+        private final String partitionKeyPath = "/type";
+        private final int throughPut = 400;
+
+
+        public Program() {
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            // Sets up the requirements for each test
+            ConnectionPolicy connectionPolicy = new ConnectionPolicy();
+            connectionPolicy.setConnectionMode(ConnectionMode.Direct);
+            asyncClient = new AsyncDocumentClient.Builder()
+                    .withServiceEndpoint("uri")
+                    .withMasterKeyOrResourceToken("key")
+                    .withConnectionPolicy(connectionPolicy)
+                    .withConsistencyLevel(ConsistencyLevel.Session)
+                    .build();
+
+            DocumentCollection collectionDefinition = new DocumentCollection();
+            collectionDefinition.setId(UUID.randomUUID().toString());
+        
+        }
+
+        /**
+        * Create a document with a programmatically set definition, in an Async manner
+        */
+
+
+        public static void main(String[] args) {
+            Program p = new Program();
+
+            try {
+                p.createDocument();
+
+            } catch (Exception e) {
+                System.err.println(String.format("failed with %s", e));
+            } 
+            System.exit(0);
+
+        }     
+        public void createDocument() throws Exception {
+            ArrayList<Document> documents = new PurchaseFoodOrBeverage(500).documentDefinitions;
+            for (Document document: documents){
+                // Create a document
+                asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false)
+                .toBlocking().single().getResource();
+                System.out.println("inserting: "+document);
+            }
+        }
+    }
+    ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. Click "run" in your class file (or compile and run from chosen IDE).
 
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
 
 1. Observe the output of the console application.
 
-    > You should see a list of document ids associated with new documents that are being created by this tool.
+    > You should see a list of documents that are being created by this tool.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
 ### Populate Unlimited Collection with Data of Different Types
 
-1. Locate the **Main** method and delete any existing code:
+1. Locate the **createDocument** method and change the documents array to use the **WatchLiveTelevisionChannel** class. It should now look like the below:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {                           
-    }
-    ```
-
-1. Replace the **Main** method with the following implementation:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {  
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-            var tvInteractions = new Bogus.Faker<WatchLiveTelevisionChannel>()
-                .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
-                .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-                .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
-                .Generate(500);
-            foreach(var interaction in tvInteractions)
-            {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
-                await Console.Out.WriteLineAsync($"Document #{tvInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
+    ```java
+        public void createDocument() throws Exception {
+            ArrayList<Document> documents = new WatchLiveTelevisionChannel(500).documentDefinitions;
+            for (Document document: documents){
+                // Create a document
+                asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false)
+                .toBlocking().single().getResource();
+                System.out.println("inserting: "+document);
             }
         }
-    }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Click "run" in your class file (or compile and run from chosen IDE).
 
 1. Observe the output of the console application.
 
-    > You should see a list of document ids associated with new documents that are being created.
+    > You should see a list of documents that are being created.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the **Main** method and delete any existing code:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {                            
-    }
-    ```
-
-1. Replace the **Main** method with the following implementation:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {  
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri("EntertainmentDatabase", "CustomCollection");
-            var mapInteractions = new Bogus.Faker<ViewMap>()
-                .RuleFor(i => i.type, (fake) => nameof(ViewMap))
-                .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-                .Generate(500);
-            foreach(var interaction in mapInteractions)
-            {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, interaction);
-                await Console.Out.WriteLineAsync($"Document #{mapInteractions.IndexOf(interaction):000} Created\t{result.Resource.Id}");
-            }
-        }
-    }
-    ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 1000 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > You should see a list of document ids associated with new documents that are being created.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
-1. Close the Visual Studio Code application.
 
 ## Benchmark A Simple Collection using a .NET Core Application
 
