@@ -850,11 +850,6 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         
         }
 
-        /**
-        * Create a document with a programmatically set definition, in an Async manner
-        */
-
-
         public static void main(String[] args) {
             Program p = new Program();
 
