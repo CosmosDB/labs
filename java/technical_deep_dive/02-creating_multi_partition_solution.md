@@ -658,15 +658,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     import com.microsoft.azure.cosmosdb.Document;
 
     public class PurchaseFoodOrBeverage {
-        public DecimalFormat unitPrice;
-        public DecimalFormat totalPrice;
-        public int quantity;
-        public String type;
-
         Faker faker = new Faker();
         ArrayList<Document> documentDefinitions = new ArrayList<>();  
         public PurchaseFoodOrBeverage(int number) throws NumberFormatException {
-
             for (int i= 0; i < number;i++){  
                 Document documentDefinition = new Document(); 
                 DecimalFormat df = new DecimalFormat("###.###");      
@@ -678,8 +672,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 String totalPrice = df.format(Double.valueOf(unitPrice) * quantity);
                 documentDefinition.set("totalPrice", Double.valueOf(totalPrice));
                 documentDefinitions.add(documentDefinition);
-            }
-            
+            }      
         }
     }
     ```
@@ -702,17 +695,12 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     import com.microsoft.azure.cosmosdb.Document;
 
     public class WatchLiveTelevisionChannel {
-        public DecimalFormat unitPrice;
-        public DecimalFormat totalPrice;
-        public int quantity;
-        public String type;
-
         Faker faker = new Faker();
         ArrayList<Document> documentDefinitions = new ArrayList<>();  
         public WatchLiveTelevisionChannel(int number) throws NumberFormatException {
-
             for (int i= 0; i < number;i++){  
-                Document documentDefinition = new Document();      
+                Document documentDefinition = new Document(); 
+                DecimalFormat df = new DecimalFormat("###.###");      
                 documentDefinition.set("type", "WatchLiveTelevisionChannel");   
                 String[] arr={"NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8"};
                 Random r=new Random();
@@ -720,8 +708,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 documentDefinition.set("channelName", arr[randomNumber]);            
                 documentDefinition.set("minutesViewed", faker.random().nextInt(1, 45));
                 documentDefinitions.add(documentDefinition);
-            }
-            
+            }    
         }
     }
     ```
