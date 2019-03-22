@@ -777,7 +777,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     }
     ```
 
-1. Below the main() method, add the following method to the methods to create 500 documents using the PurchaseFoodOrBeverage class:
+1. Below the main() method, add the following method to create 500 documents using the PurchaseFoodOrBeverage class:
 
     ```java
     public void createDocument() throws Exception {
