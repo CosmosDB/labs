@@ -12,7 +12,7 @@ Prior to starting these labs, you must have the following operating system and s
 | Software | Download Link |
 | --- | --- |
 | Git | [/git-scm.com/downloads](https://git-scm.com/downloads) 
-Java 11 SDK (or greater) | [/jdk11-downloads-5066655.html](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html) |
+Java 11 JDK (or greater) | [/jdk11-downloads-5066655.html](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html) |
 | Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
 | Maven | [https://maven.apache.org/](https://maven.apache.org/) |
 
