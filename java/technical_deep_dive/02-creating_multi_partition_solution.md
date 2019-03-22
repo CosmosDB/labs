@@ -82,7 +82,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     > Once the dependencies are pulled down, you will be ready to start writing Java code for Cosmos DB.
 
-### Create DocumentClient Instance and Database
+### Create AsyncDocumentClient Instance and Database
 
 *The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
 
@@ -633,13 +633,13 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 > You will now use the Async Java SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple Java classes that you will create in your project. To help generate random data in the documents, we are going to use a java library called "javafaker", so you will need to add the following to your pom.xml file, located at the bottom of your project, within the dependancies section (ensure you accept the "synchronize the Java classpath/configuration" warning if you have not accepted this permanently):
 
-    ```xml
-        <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>0.17.2</version>
-        </dependency>  
-    ```
+ ```xml
+     <dependency>
+         <groupId>com.github.javafaker</groupId>
+         <artifactId>javafaker</artifactId>
+         <version>0.17.2</version>
+     </dependency>  
+ ```
 
 ### Create Classes
 
