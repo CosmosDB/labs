@@ -900,9 +900,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 
 
-## Benchmark A Simple Collection using a .NET Core Application
+## Benchmark your Collection using a Java Application
 
-> In the next part of this lab, you will test a large dataset using a special benchmarking tool available on GitHub.com. 
+> In the next part of this lab, you will test a large dataset against your collection using a benchmarking tool available on GitHub.com. 
 
 ### Clone Existing Java Project
 
