@@ -581,7 +581,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
         Program p = new Program();
         Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql1, options);
+                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
         // observable to an iterator
 
         List<String> resultList = Collections.synchronizedList(new ArrayList<>());
@@ -625,7 +625,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
             String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
             Program p = new Program();
             Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                    .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql1, options);
+                    .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
             // observable to an iterator
 
             List<String> resultList = Collections.synchronizedList(new ArrayList<>());
