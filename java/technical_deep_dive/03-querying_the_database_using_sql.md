@@ -416,243 +416,231 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Click the **Execute Query** button in the query tab to run the query. In the **Results** pane, observe the results of your query.
 
-## Use .NET SDK to Query Azure Cosmos DB
+## Use Java Async SDK to Query Azure Cosmos DB
 
-*After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB collection, you are now going to use the .NET SDK to issue similar queries.*
+*After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB collection, you are now going to use the Java Async SDK to issue similar queries.*
 
-### Create a .NET Core Project
+### Create a Java Core Project
 
-1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
+1. On your local machine, create a new folder that will be used to contain the content of your Java project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/03-open_with_code.jpg)
+    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. In the Visual Studio Code window that appears, right-click the **Explorer** under the folder you created, and select "Generate from Maven Archetype":
 
-    ![Open in Command Prompt](../media/03-open_command_prompt.jpg)
+    ![Open in Command Prompt](../media/maven1.jpg)
 
-1. In the open terminal pane, enter and execute the following command:
+1. From the options that appear, select "maven-archetype-quickstart", and then select the directory you created for the project when prompted. Maven will then prompt you to provide values for group id, artifact id, version, package. Fill these in when prompted and then confirm:
 
-    ```sh
-    dotnet new console --output .
-    ```
+    ![Open in Command Prompt](../media/maven2.jpg)
 
-    > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
-1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+1. Once confirmed, Maven will create the project, and provide a sample App.java. For any Java class created in the project, VS Code's Java Extension will provide "run" and "debug" links directly in the code. Clicking "run" will compile and run your Java code:
 
-1. In the terminal pane, enter and execute the following command:
+    ![Open in Command Prompt](../media/maven3.jpg)
 
-    ```sh
-    dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
-    ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet restore
-    ```
-
-    > This command will restore all packages specified as dependencies in the project.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
-
-    ![Project files](../media/03-project_files.jpg)
-
-1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
-
-1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+1. To add the Maven project dependancies required to work with Cosmos DB, you should add the following into the pom.xml file located at the bottom of your project, within the dependancies section:
 
     ```xml
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+   <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-cosmosdb</artifactId>
+      <version>2.4.3</version>
+    </dependency>
     ```
 
-1. Your new XML should look like this:
+1. For this tutorial, you will also need to change the source and target compiler versions to Java 1.8, as we will use some lambda syntax which is only supported from Java 8 onwards. When finished, your pom.xml should look like the below:
 
-    ```xml
-    <Project Sdk="Microsoft.NET.Sdk">
-        <PropertyGroup>
-            <LangVersion>latest</LangVersion>
-        </PropertyGroup>
-        <PropertyGroup>
-            <OutputType>Exe</OutputType>
-            <TargetFramework>netcoreapp2.0</TargetFramework>
-        </PropertyGroup>
-        <ItemGroup>
-            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
-        </ItemGroup>        
-    </Project>
+    ![Open in Command Prompt](../media/maven4.jpg)
+
+
+1. Once the changes are applied, ensure you click file -> save all. At this point, VS Code will recognise that you modified the pom.xml build file. Ensure that you accept the prompt to sync the dependancies:
+
+    ![Open in Command Prompt](../media/maven6.jpg)
+
+    > Once the dependencies are pulled down, you will be ready to start writing Java code for Cosmos DB.
+
+### Create AsyncDocumentClient Instance and Database
+
+*The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
+
+1. At the same level as the default "App.java" file that already exists, right click and create a new file called "Program.java":
+
+    ![Open in Command Prompt](../media/maven5.jpg)
+
+1. Within the **Program.java** editor tab, Add the package declaration (which will need to match the path you created for your maven project, if not "test" as in the sample shown here) and the following imports to the top of the editor:
+
+    ```java
+    package test;
+    import java.util.ArrayList;
+    import java.util.Collection;
+    import java.util.Collections;
+    import java.util.Iterator;
+    import java.util.List;
+    import java.util.concurrent.CountDownLatch;
+    import java.util.concurrent.ExecutorService;
+    import java.util.concurrent.Executors;
+    import com.microsoft.azure.cosmosdb.ConnectionPolicy;
+    import com.microsoft.azure.cosmosdb.ConsistencyLevel;
+    import com.microsoft.azure.cosmosdb.DataType;
+    import com.microsoft.azure.cosmosdb.Database;
+    import com.microsoft.azure.cosmosdb.Document;
+    import com.microsoft.azure.cosmosdb.DocumentClientException;
+    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.FeedOptions;
+    import com.microsoft.azure.cosmosdb.FeedResponse;
+    import com.microsoft.azure.cosmosdb.IncludedPath;
+    import com.microsoft.azure.cosmosdb.Index;
+    import com.microsoft.azure.cosmosdb.IndexingPolicy;
+    import com.microsoft.azure.cosmosdb.PartitionKeyDefinition;
+    import com.microsoft.azure.cosmosdb.RequestOptions;
+    import com.microsoft.azure.cosmosdb.ResourceResponse;
+    import com.microsoft.azure.cosmosdb.internal.HttpConstants;
+    import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
+    import rx.Observable;
+    import rx.Scheduler;
+    import rx.schedulers.Schedulers;
     ```
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Create a **Program** class in the Program.java file as below, with the following class variables, a public constructor and main method:
 
-    ![Open editor](../media/03-program_editor.jpg)
-
-### Create DocumentClient Instance
-
-*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
-
-1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
-
-    ```csharp
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using Microsoft.Azure.Documents.Linq;
-    ```
-
-1. Locate the **Program** class and replace it with the following class:
-
-    ```csharp
-    public class Program
+    ```java
+    public class Program 
     {
-        public static async Task Main(string[] args)
-        {         
+
+        public Program() {
+            //public constructor
+
+        }
+        public static void main( String[] args )
+        {
+ 
         }
     }
     ```
 
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```csharp
-    private static readonly Uri _endpointUri = new Uri("");
-    private static readonly string _primaryKey = "";
-    private static readonly string _databaseId = "UniversityDatabase";
-    private static readonly string _collectionId = "StudentCollection";  
+    ```java
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
+
+        private final String databaseName = "UniversityDatabase";
+        private final String collectionId = "StudentCollection";
     ```
 
-1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://cosmosacct.documents.azure.com:443/");``.
 
-1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+1. Locate the **Program** class constructor:
 
-    > For example, if your **primary key** is ``NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";``.
-    
+    ```java
+        public Program() {
+            //public constructor
+
+        }
+    ```
+
+1. Within the constructor, add the following lines of code (replacing "uri" and "key" with the values from your cosmos db account):
+
+    ```java
+        public Program() {
+            //public constructor
+        executorService = Executors.newFixedThreadPool(100);
+        scheduler = Schedulers.from(executorService);
+        client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+        .withMasterKeyOrResourceToken("key")
+        .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+        .build();
+        }
+    ```
+    > We are now going to implement a simple query to make sure our client connection code works.
+
 1. Locate the **Main** method:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    { 
-    }
+    ```java
+        public static void main( String[] args )
+        {
+
+        }
     ```
 
-1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+1. Add the following code within the main method:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-        
-    }
+    ```java
+            // as this is a multi collection enable cross partition query
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(5);
+        options.setMaxDegreeOfParallelism(2);
+        String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
+        Program p = new Program();
+        Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql1, options);
+        // observable to an iterator
+
+        List<String> resultList = Collections.synchronizedList(new ArrayList<>());
+        documentQueryObservable.map(FeedResponse::getResults)
+                .concatMap(Observable::from) // Flatten the list of documents
+                .map(doc -> doc.toString()) // Map to the document Id
+                //.forEach(doc -> resultList.add(doc)) // Add each document Id to the
+                .forEach(System.out::println);
     ```
 
-1. Your ``Program`` class definition should now look like this:
+1. Your **Program** class definition now look like this:
 
-    ```csharp
-    public class Program
-    { 
-        private static readonly Uri _endpointUri = new Uri("<your uri>");
-        private static readonly string _primaryKey = "<your key>";
-        private static readonly string _databaseId = "UniversityDatabase";
-        private static readonly string _collectionId = "StudentCollection";
+    ```java
+    public class Program {
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
 
-        public static async Task Main(string[] args)
-        {    
-            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-            {
-            }     
+        private final String databaseName = "UniversityDatabase";
+        private final String collectionId = "StudentCollection";
+
+        private int numberOfDocuments;
+
+        public Program() {
+            // public constructor
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+                    .withMasterKeyOrResourceToken("key")
+                    .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+                    .build();
+
+        }
+
+        public static void main(String[] args) throws InterruptedException {
+            // as this is a multi collection enable cross partition query
+            FeedOptions options = new FeedOptions();
+            options.setEnableCrossPartitionQuery(true);
+            options.setMaxItemCount(5);
+            options.setMaxDegreeOfParallelism(2);
+            String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
+            Program p = new Program();
+            Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                    .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql1, options);
+            // observable to an iterator
+
+            List<String> resultList = Collections.synchronizedList(new ArrayList<>());
+            documentQueryObservable.map(FeedResponse::getResults)
+                    // Map the logical page to the list of documents in the page
+                    .concatMap(Observable::from) // Flatten the list of documents
+                    .map(doc -> doc.toString()) // Map to the document Id
+                    //.forEach(doc -> resultList.add(doc)) // Add each document Id to the
+                    .forEach(System.out::println);
+                        
         }
     }
     ```
 
-    > We are now going to implement a sample query to make sure our client connection code works.
-
-1. Locate the using block within the **Main** method:
-
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-                        
-    }
-    ```
-
-1. Add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
-
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-    ```
-
-1. Add the following line of code to create a string variable named ``sql`` that contains a sample SQL query:
-
-    ```csharp
-    string sql = "SELECT TOP 5 VALUE s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
-    ```
-
-    > This query will get the alias of the top 5 2018-enrollees in the collection sorted by their alias alphabetically
-
-1. Add the following line of code to create a document query:
-
-    ```csharp
-    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
-    ```
-
-1. Add the following lines of code to enumerate over the results and print the strings to the console:
-
-    ```csharp
-    foreach(string alias in query)
-    {
-        await Console.Out.WriteLineAsync(alias);
-    }
-    ```
-
-1. Your **Main** method should now look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {         
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-            string sql = "SELECT TOP 5 VALUE s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
-            IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
-            foreach(string alias in query)
-            {
-                await Console.Out.WriteLineAsync(alias);
-            }
-        }   
-    }
-    ```
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs and run the code.
 
 1. Observe the results of the console project.
 
@@ -661,6 +649,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 1. Click the **🗙** symbol to close the terminal pane.
 
 1. Close all open editor tabs.
+
 
 ### Query Intra-document Array
 
