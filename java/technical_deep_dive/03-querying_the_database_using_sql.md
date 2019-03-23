@@ -573,23 +573,27 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 1. Add the following code within the main method:
 
     ```java
+            FeedOptions options = new FeedOptions();
             // as this is a multi collection enable cross partition query
-        FeedOptions options = new FeedOptions();
-        options.setEnableCrossPartitionQuery(true);
-        options.setMaxItemCount(5);
-        options.setMaxDegreeOfParallelism(2);
-        String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
-        Program p = new Program();
-        Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
-        // observable to an iterator
+            options.setEnableCrossPartitionQuery(true);
+            // note that setMaxItemCount sets the number of items to return in a single page
+            // result
+            options.setMaxItemCount(5);
+            String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
+            Program p = new Program();
+            Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                            .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+            // observable to an iterator
+            Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
-        List<String> resultList = Collections.synchronizedList(new ArrayList<>());
-        documentQueryObservable.map(FeedResponse::getResults)
-                .concatMap(Observable::from) // Flatten the list of documents
-                .map(doc -> doc.toString()) // Map to the document Id
-                //.forEach(doc -> resultList.add(doc)) // Add each document Id to the
-                .forEach(System.out::println);
+            while (it.hasNext()) {
+                    FeedResponse<Document> page = it.next();
+                    List<Document> results = page.getResults();
+                    // here we iterate over all the items in the page result
+                    for (Object doc : results) {
+                            System.out.println(doc);
+                    }
+            }
     ```
 
 1. Your **Program** class definition now look like this:
@@ -617,24 +621,27 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         }
 
         public static void main(String[] args) throws InterruptedException {
-            // as this is a multi collection enable cross partition query
             FeedOptions options = new FeedOptions();
+            // as this is a multi collection enable cross partition query
             options.setEnableCrossPartitionQuery(true);
+            // note that setMaxItemCount sets the number of items to return in a single page
+            // result
             options.setMaxItemCount(5);
-            options.setMaxDegreeOfParallelism(2);
             String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
             Program p = new Program();
             Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                    .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                            .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
             // observable to an iterator
+            Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
-            List<String> resultList = Collections.synchronizedList(new ArrayList<>());
-            documentQueryObservable.map(FeedResponse::getResults)
-                    // Map the logical page to the list of documents in the page
-                    .concatMap(Observable::from) // Flatten the list of documents
-                    .map(doc -> doc.toString()) // Map to the document Id
-                    //.forEach(doc -> resultList.add(doc)) // Add each document Id to the
-                    .forEach(System.out::println);
+            while (it.hasNext()) {
+                    FeedResponse<Document> page = it.next();
+                    List<Document> results = page.getResults();
+                    // here we iterate over all the items in the page result
+                    for (Object doc : results) {
+                            System.out.println(doc);
+                    }
+            }
                         
         }
     }
@@ -653,87 +660,81 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 ### Query Intra-document Array
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-    ![New File](../media/03-new_file.jpg)
+1. Here you will use org.json to parse JSON in Java, so you will need to add the library as a dependency in your pom.xml file (don't forget to accept sync prompt) :
 
-1. Name the new file **Student.cs** . The editor tab will automatically open for the new file.
-
-    ![Student Class File](../media/03-student_class.jpg)
-
-1. Paste in the following code for the ``Student`` class:
-
-    ```csharp
-    public class Student
-    {
-        public string[] Clubs { get; set; }
-    }
+    ```xml
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20090211</version>
+    </dependency> 
     ```
 
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+1. In the Visual Studio Code window, double-click the **Program.java** file to open an editor tab for the file.
 
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+1. Within the **Program.java** editor tab, locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT TOP 5 VALUE students.studentAlias FROM students WHERE students.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
     > This new query will select the **clubs** property for each student in the result set. The value of the **clubs** property is a string array.
 
-1. Locate the following line of code: 
+1. Locate the following lines of code: 
 
-    ```csharp
-    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                // here we iterate over all the items in the page result
+                for (Object doc : results) {
+                        System.out.println(doc);
+                }
+        }
     ```
 
-    Replace that line of code with the following code:
+    Replace them with the following code:
 
-    ```csharp
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());
+                        JSONArray  student = obj.getJSONArray("clubs");
+                        for (int i = 0; i < student.length(); i++) {
+                                Object club = student.getString(i);
+                                System.out.println(club);
+                        }
+                        
+                }
+        }
     ```
 
-    > The query was updated to return a collection of student entities instead of string values.
+    > Our new query will need to iterate twice. First, we will iterate the collection of students and then we will iterate the collection of clubs for each student.
 
-1. Locate the following line of code: 
+1. Finally, within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    foreach(string alias in query)
-    {
-        await Console.Out.WriteLineAsync(alias);
-    }
+    ```java
+    options.setMaxItemCount(5);
     ```
 
-    Replace that line of code with the following code:
+1. As you will be returning many more results, you will want to increase the allowed number of items in each page: 
 
-    ```csharp
-    foreach(Student student in query)
-    foreach(string club in student.Clubs)
-    {
-        await Console.Out.WriteLineAsync(club);
-    }
+    ```java
+    options.setMaxItemCount(5000);
     ```
 
-    > Our new query will need to iterate twice. First, we will iterate the collection of students and then we will iterate the collection of clubs for each student instance.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run. 
 
 1. Observe the results of the console project.
 
@@ -741,74 +742,66 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
-
-1. Within the **Student.cs** editor tab, replace all of the existing code with the following code for the ``Student`` class:
-
-    ```csharp
-    public class Student
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string[] Clubs { get; set; }
-    }
-    ```
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+1. Within the **Program.java** editor tab, locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT s.firstName, s.lastName, s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT s.firstName, s.lastName, s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
     > We are now including the **firstName** and **lastName** fields in our query.
 
 1. Locate the following block of code: 
 
-    ```csharp
-    foreach(Student student in query)
-    foreach(string club in student.Clubs)
-    {
-        await Console.Out.WriteLineAsync(club);
-    }
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());
+                        JSONArray  student = obj.getJSONArray("clubs");
+                        for (int i = 0; i < student.length(); i++) {
+                                Object club = student.getString(i);
+                                System.out.println(club);
+                        }
+                        
+                }
+        }
     ```
 
     Replace that block of code with the following code:
 
-    ```csharp
-    foreach(Student student in query)
-    {
-        await Console.Out.WriteLineAsync($"{student.FirstName} {student.LastName}");
-        foreach(string club in student.Clubs)
-        {
-            await Console.Out.WriteLineAsync($"\t{club}");
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());
+                        JSONArray  student = obj.getJSONArray("clubs");
+                        String firstName = obj.getString("firstName");                          
+                        String lastName = obj.getString("lastName");
+                        System.out.println("***Student name***");
+                        System.out.println(firstName +" "+lastName);
+                        System.out.println("***Student name***");
+                        for (int i = 0; i < student.length(); i++) {
+                                Object club = student.getString(i);
+                                System.out.println(club);
+                        }
+                        
+                }
         }
-        await Console.Out.WriteLineAsync();
-    }
     ```
 
     > This modification simply prints out more information to the console.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run. 
 
 1. Observe the results of the console project.
 
