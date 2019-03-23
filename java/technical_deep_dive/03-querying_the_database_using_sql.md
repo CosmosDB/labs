@@ -551,12 +551,12 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ```java
         public Program() {
             //public constructor
-        executorService = Executors.newFixedThreadPool(100);
-        scheduler = Schedulers.from(executorService);
-        client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
-        .withMasterKeyOrResourceToken("key")
-        .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
-        .build();
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
+            .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+            .build();
         }
     ```
     > We are now going to implement a simple query to make sure our client connection code works.
