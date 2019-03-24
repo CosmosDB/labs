@@ -809,83 +809,63 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     > Since we only really care about the list of clubs, we want to peform a self-join that applies a cross product across the **club** properties of each student in the result set.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+1. In the Visual Studio Code window, double-click the **Program.java** file to open an editor tab for the file.
 
-1. Name the new file **StudentActivity.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``StudentActivity`` class:
-
-    ```csharp
-    public class StudentActivity
-    {
-        public string Activity { get; set; }
-    }
-    ```
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+1. Within the **Program.java** editor tab, locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT s.firstName, s.lastName, s.clubs FROM students s WHERE s.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT s.firstName, s.lastName, s.clubs FROM students s WHERE s.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
     > Here we are performing an intra-document JOIN to get a projection of all clubs across all matching students.
 
-1. Locate the following line of code: 
-
-    ```csharp
-    IQueryable<Student> query = client.CreateDocumentQuery<Student>(collectionLink, new SqlQuerySpec(sql));
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
-    ```
 
 1. Locate the following line of code: 
 
-    ```csharp
-    foreach(Student student in query)
-    {
-        await Console.Out.WriteLineAsync($"{student.FirstName} {student.LastName}");
-        foreach(string club in student.Clubs)
-        {
-            await Console.Out.WriteLineAsync($"\t{club}");
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());
+                        JSONArray  student = obj.getJSONArray("clubs");
+                        String firstName = obj.getString("firstName");                          
+                        String lastName = obj.getString("lastName");
+                        System.out.println("***Student name***");
+                        System.out.println(firstName +" "+lastName);
+                        System.out.println("***Student name***");
+                        for (int i = 0; i < student.length(); i++) {
+                                Object club = student.getString(i);
+                                System.out.println(club);
+                        }
+                        
+                }
         }
-        await Console.Out.WriteLineAsync();
-    }
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    foreach(StudentActivity studentActivity in query)
-    {
-        await Console.Out.WriteLineAsync(studentActivity.Activity);
-    }
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());                       
+                        String activity = obj.getString("activity");                           
+                        System.out.println(activity);                               
+                }
+         }
     ```
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the console project.
 
@@ -893,113 +873,23 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-    > While we did get very useful information with our JOIN query, it would be more useful to get the raw array values instead of a wrapped value. It would also make our query easier to read if we could simply create an array of strings.
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
-
-1. Within the **Main** method, locate the following line of code: 
-
-    ```csharp
-    string sql = "SELECT activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";  
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
-    ```
-
-    > Here we are using the ``VALUE`` keyword to flatten our query.
-
-1. Locate the following line of code: 
-
-    ```csharp
-    IQueryable<StudentActivity> query = client.CreateDocumentQuery<StudentActivity>(collectionLink, new SqlQuerySpec(sql));
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
-    ```
-
-1. Locate the following line of code: 
-
-    ```csharp
-    foreach(StudentActivity studentActivity in query)
-    {
-        await Console.Out.WriteLineAsync(studentActivity.Activity);
-    }
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    foreach(string activity in query)
-    {
-        await Console.Out.WriteLineAsync(activity);
-    }
-    ```
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the results of the console project.
-
-    > You should see multiple club names printed to the console window.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
 
 ### Projecting Query Results
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
+1. In the Visual Studio Code window, double-click the **Program.java** file to open an editor tab for the file.
 
-1. Name the new file **StudentProfile.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``StudentProfile`` and ``StudentProfileEmailInformation`` classes:
-
-    ```csharp
-    public class StudentProfile
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public StudentProfileEmailInformation Email { get; set; }
-    }
-
-    public class StudentProfileEmailInformation
-    {
-        public string Home { get; set; }
-        public string School { get; set; }
-    }
-    ```
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+1. Within the **Program.java** editor tab, locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
+    ```java
+    String sql = "SELECT VALUE activity FROM students s JOIN activity IN s.clubs WHERE s.enrollmentYear = 2018";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT VALUE { 'id': s.id, 'name': CONCAT(s.firstName, ' ', s.lastName), 'email': { 'home': s.homeEmailAddress, 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018"; 
+    ```java
+    String sql = "SELECT VALUE { 'id': s.id, 'name': CONCAT(s.firstName, ' ', s.lastName), 'email': { 'home': s.homeEmailAddress, 'school': CONCAT(s.studentAlias, '@contoso.edu') } } FROM students s WHERE s.enrollmentYear = 2018"; 
     ```
 
     > This query will get relevant information about a student and format it to a specific JSON structure that our application expects. For your information, here's the query that we are using:
@@ -1014,50 +904,43 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         }
     } FROM students s WHERE s.enrollmentYear = 2018
     ```
-
-1. Locate the following line of code: 
-
-    ```csharp
-    IQueryable<string> query = client.CreateDocumentQuery<string>(collectionLink, new SqlQuerySpec(sql));
-    ```
-
-    Replace that code with the following code:
-
-    ```csharp
-    IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));   
-    ```
+ 
 
 1. Locate the following lines of code: 
 
-    ```csharp
-    foreach(string activity in query)
-    {
-        await Console.Out.WriteLineAsync(activity);
-    }
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());             
+                        String activity = obj.getString("activity");               
+                        System.out.println(activity);                               
+                }
+         }
     ```
 
     Replace that code with the following code:
 
-    ```csharp
-    foreach(StudentProfile profile in query)
-    {
-        await Console.Out.WriteLineAsync($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
-    }
+    ```java
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+                for (Document doc : results) {
+                        JSONObject obj = new JSONObject(doc.toJson());
+                        String id = obj.getString("id");              
+                        String name = obj.getString("name");      
+                        String mail = obj.getString("email");         
+                        JSONObject email = new JSONObject(mail);
+                        System.out.println("id: "+id);
+                        System.out.println("name: "+name);
+                        System.out.println("school: "+email.getString("school"));
+                        System.out.println("home: "+email.getString("home"));                        
+                }
+        }
     ```
 
-    > This code uses the special alignment features of C# string formatting so you can see all properties of the ``StudentProfile`` instances.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the execution.
 
@@ -1065,72 +948,10 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Close all open editor tabs.
 
-## Implement Pagination using the .NET SDK
 
-*You will use the **HasMoreResults** boolean property and **ExecuteNextAsync** method of the **ResourceResponse** class to implement paging of your query results. Behind the scenes, these properties use a continuation token. A continuation token enables a client to retrieve the ‘next’ set of data in a follow-up query.*
+## Implementing Pagination
 
-### Use the **HasMoreResults** and **ExecuteNextAsync** Members to Implement Pagination
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
-
-1. Within the **Main** method, locate the following line of code: 
-
-    ```csharp
-    IQueryable<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql));  
-    ```
-
-    Replace that code with the following code:
-
-    ```csharp
-    IDocumentQuery<StudentProfile> query = client.CreateDocumentQuery<StudentProfile>(collectionLink, new SqlQuerySpec(sql), new FeedOptions { MaxItemCount = 100 }).AsDocumentQuery();
-    ```
-
-    > The DocumentQuery class will allow us to determine if there are more results available and page through results.
-
-1. Locate the following lines of code:
-
-    ```csharp
-    foreach(StudentProfile profile in query)
-    {
-        await Console.Out.WriteLineAsync($"[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
-    }  
-    ```
-
-    Replace that code with the following code:
-
-    ```csharp
-    int pageCount = 0;
-    while(query.HasMoreResults)
-    {
-        await Console.Out.WriteLineAsync($"---Page #{++pageCount:0000}---");
-        foreach(StudentProfile profile in await query.ExecuteNextAsync())
-        {
-            await Console.Out.WriteLineAsync($"\t[{profile.Id}]\t{profile.Name,-20}\t{profile.Email.School,-50}\t{profile.Email.Home}");
-        }
-    }
-    ```
-
-    > First we check if there are more results using the ``HasMoreResults`` property of the ``IDocumentQuery<>`` interface. If this value is set to true, we invoke the ``ExecuteNextAsync`` method to get the next batch of results and enumerate them using a ``foreach`` block.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the results of the execution.
-
-    > You can view the current page count by looking at the headers in the console output.
-
-1. Click the **🗙** symbol to close the terminal pane.
+*The approach taken in all the examples above allows you to implement pagination in your application. The toBlocking().getIterator() chained methods return an iterator over the Observable FeedResponse - this iterates over all pages brought back by the query. With options.setMaxItemCount(), you can set the maximum number of records (items) to return per page*
 
 
 ## Implement Cross-Partition Queries
@@ -1139,87 +960,54 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 ### Execute Single-Partition Query
 
-1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
 
-1. Replace the existing **Student** class implementation with the following code:
+1. Within the **Program.java** editor tab, locate the **Main** method and delete any existing code:
 
-    ```csharp
-    public class Student
-    {
-        public string studentAlias { get; set; }
-        public int age { get; set; }
-        public int enrollmentYear { get; set; }
-        public int projectedGraduationYear { get; set; }
-    }
-    ```
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method and delete any existing code:
-
-    ```csharp
-    public static async Task Main(string[] args)
+    ```java
+    public static void main(String[] args) throws InterruptedException, JSONException {
     {       
     }
     ```
 
-1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+1. Within the **Main** method, add the following lines of code:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-        
-    }
+    ```java
+        FeedOptions options = new FeedOptions();
+        PartitionKey partitionKey = new PartitionKey(2016);
+        options.setPartitionKey(partitionKey);        
+        // as this is a multi collection enable cross partition query
+        options.setEnableCrossPartitionQuery(true);
+        // note that setMaxItemCount sets the number of items to return in a single page result
+        options.setMaxItemCount(5000);
+        String sql = "select * from s where s.projectedGraduationYear = 2020 ";
+        Program p = new Program();
+        Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+        // observable to an iterator
+        Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
+
+        while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                Object results = page.getRequestCharge();
+                System.out.println("results: "+results.toString()); 
+        }
     ```
 
-1. Within the new *using* block, add the following line of code to asynchronously open a connection:
+    1. Observe the following lines of code in particular:
 
-    ```csharp
-    await client.OpenAsync();
-    ```
+    ```java
+        FeedOptions options = new FeedOptions();
+        PartitionKey partitionKey = new PartitionKey(2016);
+        options.setPartitionKey(partitionKey); 
     
-1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
-
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
+    > First we will restrict our query to a single partition key using the ``setPartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``/enrollmentYear`` path is ``2016``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``enrollmentYear``, it will match on the partition key path of ``/enrollmentYear``.
 
-1. Add the following block of code to create a query that is filtered to a single partition key:
-
-    ```csharp
-    IEnumerable<Student> query = client
-        .CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016) })
-        .Where(student => student.projectedGraduationYear == 2020);
-    ```
-
-    > First we will restrict our query to a single partition key using the ``PartitionKey`` property of the ``FeedOptions`` class. One of our partition key values for the ``/enrollmentYear`` path is ``2016``. We will filter our query to only return documents that uses this partition key. Remember, partition key paths are case sensitive. Since our property is named ``enrollmentYear``, it will match on the partition key path of ``/enrollmentYear``.
-
-1. Add the following block of code to print out the results of your query:
-
-    ```csharp
-    foreach(Student student in query)
-    {
-        Console.Out.WriteLine($"Enrolled: {student.enrollmentYear}\tGraduation: {student.projectedGraduationYear}\t{student.studentAlias}");
-    }      
-    ```
-
-    > We are using the C# string formatting features to print out two properties of our student instances.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run. 
 
 1. Observe the results of the execution.
 
-    > You should only see records from a single partition.
+    > The query will return a numeric value which represents the RU charge incurred for the query
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -1227,37 +1015,20 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    IEnumerable<Student> query = client
-        .CreateDocumentQuery<Student>(collectionLink, new FeedOptions { PartitionKey = new PartitionKey(2016) })
-        .Where(student => student.projectedGraduationYear == 2020);
+    ```java
+        PartitionKey partitionKey = new PartitionKey(2016);
+        options.setPartitionKey(partitionKey);   
     ```
 
-    Replace that code with the following code:
+    Remove these lines of code.
 
-    ```csharp
-    IEnumerable<Student> query = client
-        .CreateDocumentQuery<Student>(collectionLink, new FeedOptions { EnableCrossPartitionQuery = true })
-        .Where(student => student.projectedGraduationYear == 2020);
-    ```
+    > Cross-partition queries are already enabled using the ``setEnableCrossPartitionQuery`` property of the ``FeedOptions`` class. You must explicitly opt-in using the SDK classes if you wish to perform a cross-partition query from the SDK. By removing the code that specifies the partition key, the query will scan across all partitions. 
 
-    > We could ignore the partition keys and simply enable cross-partition queries using the ``EnableCrossPartitionQuery`` property of the ``FeedOptions`` class. You must explicitly opt-in using the SDK classes if you wish to perform a cross-partition query from the SDK.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the execution.
 
-    > You will notice that results are coming from more than one partition. You can observe this by looking at the values for ``type`` on the left-hand side of the output.
+    > You will notice that the RU charge is significantly higher, as results are coming from more than one partition. 
 
 1. Click the **🗙** symbol to close the terminal pane.
 
