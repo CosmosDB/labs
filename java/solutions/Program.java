@@ -60,9 +60,8 @@ public class Program {
 
     private void createDatabase() throws Exception {
 
-        client = new AsyncDocumentClient.Builder().withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
-                .withMasterKeyOrResourceToken(
-                        "Ii9PZCoHr0LM9Cy4vABwGVWmmymmp4KeNpZUgaZaG8jhvKUSHdPKDfNETPDczjUnwpYH5NoHArZ5zeJ4xFGtNg==")
+        client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+                .withMasterKeyOrResourceToken("key")
                 .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
                 .build();
 
