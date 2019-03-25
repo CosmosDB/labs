@@ -534,328 +534,312 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. Click the **Save** button at the top of the tab.
 
-### Create a .NET Core Project
+### Create a Java Project
 
-1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
+1. On your local machine, create a new folder that will be used to contain the content of your Java project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/04-open_with_code.jpg)
+    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. In the Visual Studio Code window that appears, right-click the **Explorer** under the folder you created, and select "Generate from Maven Archetype":
 
-    ![Open in Command Prompt](../media/04-open_command_prompt.jpg)
+    ![Open in Command Prompt](../media/maven1.jpg)
 
-1. In the open terminal pane, enter and execute the following command:
+1. From the options that appear, select "maven-archetype-quickstart", and then select the directory you created for the project when prompted. Maven will then prompt you to provide values for group id, artifact id, version, package. Fill these in when prompted and then confirm:
 
-    ```sh
-    dotnet new console --output .
-    ```
+    ![Open in Command Prompt](../media/maven2.jpg)
 
-    > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
-1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+1. Once confirmed, Maven will create the project, and provide a sample App.java. For any Java class created in the project, VS Code's Java Extension will provide "run" and "debug" links directly in the code. Clicking "run" will compile and run your Java code:
 
-1. In the terminal pane, enter and execute the following command:
+    ![Open in Command Prompt](../media/maven3.jpg)
 
-    ```sh
-    dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
-    ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet add package Bogus --version 22.0.8
-    ```
-
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet restore
-    ```
-
-    > This command will restore all packages specified as dependencies in the project.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
-
-1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
-
-1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+1. To add the Maven project dependancies required to work with Cosmos DB, you should add the following into the pom.xml file located at the bottom of your project, within the dependancies section:
 
     ```xml
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+   <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-cosmosdb</artifactId>
+      <version>2.4.3</version>
+    </dependency>
     ```
 
-1. Your new XML should look like this:
+1. For this tutorial, you will also need to change the source and target compiler versions to Java 1.8, as we will use some lambda syntax which is only supported from Java 8 onwards. When finished, your pom.xml should look like the below:
 
-    ```xml
-    <Project Sdk="Microsoft.NET.Sdk">
-        <PropertyGroup>
-            <LangVersion>latest</LangVersion>
-        </PropertyGroup>
-        <PropertyGroup>
-            <OutputType>Exe</OutputType>
-            <TargetFramework>netcoreapp2.0</TargetFramework>
-        </PropertyGroup>
-        <ItemGroup>
-            <PackageReference Include="Bogus" Version="22.0.7" />
-            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
-        </ItemGroup>
-    </Project>
+    ![Open in Command Prompt](../media/maven4.jpg)
+
+
+1. Once the changes are applied, ensure you click file -> save all. At this point, VS Code will recognise that you modified the pom.xml build file. Ensure that you accept the prompt to sync the dependancies:
+
+    ![Open in Command Prompt](../media/maven6.jpg)
+
+    > Once the dependencies are pulled down, you will be ready to start writing Java code for Cosmos DB.
+
+### Create AsyncDocumentClient Instance and Database
+
+*The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
+
+1. To help generate random data in the documents, we are going to use a java library called "javafaker", which was also used in an earlier lab. If not already done so, you will need to add the following to your pom.xml file, located at the bottom of your project, within the dependancies section (ensure you accept the "synchronize the Java classpath/configuration" warning if you have not accepted this permanently):
+
+ ```xml
+     <dependency>
+         <groupId>com.github.javafaker</groupId>
+         <artifactId>javafaker</artifactId>
+         <version>0.17.2</version>
+     </dependency>  
+ ```
+
+1. At the same level as the default "App.java" file that already exists, right click and create a new file called "Person.java" . The editor will automatically open this file. Copy in the following code (be sure that the package declaration matches the classpath you have created in the above steps):
+
+    ```java
+    package test;
+
+    import java.text.DecimalFormat;
+    import java.util.ArrayList;
+    import java.util.Random;
+
+    import com.github.javafaker.Faker;
+    import com.microsoft.azure.cosmosdb.Document;
+
+    public class Person {
+        Faker faker = new Faker();
+        ArrayList<Object> documentDefinitions = new ArrayList<>();  
+        public Person(int number) throws NumberFormatException {
+            for (int i= 0; i < number;i++){  
+                Document documentDefinition = new Document();          
+                documentDefinition.set("firstName", faker.name().firstName());
+                documentDefinition.set("lastName", faker.name().lastName());
+                documentDefinition.set("company", "contosofinancial");
+                String docdef = documentDefinition.toString();
+                documentDefinitions.add(docdef);
+            }    
+        }
+    }
+
+
+1. Create a new file called "Program.java" (or delete the contents of the existing file if already created)
+
+1. Within the **Program.java** editor tab, Add the package declaration (which will need to match the path you created for your maven project, if not "test" as in the sample shown here) and the following imports to the top of the editor:
+
+    ```java
+    package test;
+    import java.util.ArrayList;
+    import java.util.concurrent.CountDownLatch;
+    import java.util.concurrent.ExecutorService;
+    import java.util.concurrent.Executors;
+    import com.microsoft.azure.cosmosdb.ConnectionPolicy;
+    import com.microsoft.azure.cosmosdb.ConsistencyLevel;
+    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.PartitionKey;
+    import com.microsoft.azure.cosmosdb.RequestOptions;
+    import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
+    import rx.Scheduler;
+    import rx.schedulers.Schedulers;
+
+    import com.microsoft.azure.cosmosdb.ConnectionMode;
+    import com.microsoft.azure.cosmosdb.Document;
+    import java.util.UUID;
     ```
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Create a **Program** class in the Program.java file as below, with the following class variables, a public constructor and main method:
 
-### Create DocumentClient Instance
-
-*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
-
-1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
-
-    ```csharp
-    using Bogus;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using System.Collections.Generic;
-    using System.Linq;
-    ```
-
-1. Locate the **Program** class and replace it with the following class:
-
-    ```csharp
-    public class Program
+    ```java
+    public class Program 
     {
-        public static async Task Main(string[] args)
-        {         
+
+        public Program() {
+            //public constructor
+
+        }
+        public static void main( String[] args )
+        {
+ 
         }
     }
     ```
 
 1. Within the **Program** class, add the following lines of code to create variables for your connection information:
 
-    ```csharp
-    private static readonly Uri _endpointUri = new Uri("");
-    private static readonly string _primaryKey = "";
+    ```java
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
+
+        private final String databaseName = "FinancialDatabase";
+        private final String collectionId = "InvestorCollection";
     ```
 
-1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
 
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://cosmosacct.documents.azure.com:443/");``.
 
-1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+1. Locate the **Program** class constructor:
 
-    > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
-    
+    ```java
+        public Program() {
+            //public constructor
+
+        }
+    ```
+
+1. Within the constructor, add the following lines of code (replacing "uri" and "key" with the values from your cosmos db account):
+
+    ```java
+        public Program() {
+            //public constructor
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
+            .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+            .build();
+        }
+    ```
+    > We are now going to implement a stored procedure.
+
+### Execute Bulk Upload Stored Procedure from Async Java SDK
+
+1. Below the **Main** method, add the following method to execute the bulkUpload stored procedure:
+
+    ```java
+    public void executeStoredProc() throws Exception {
+        ArrayList<Object> documents = new Person(2).documentDefinitions;
+
+        System.out.println(documents);
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.setScriptLoggingEnabled(true);
+        requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));
+        
+        final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
+        String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkUpload"; 
+        // Execute the stored procedure
+        Object docs = documents.toArray();
+        System.out.println("docs: "+docs);
+        Object[] storedProcedureArgs = new Object[]{docs};
+        client.executeStoredProcedure(sprocLink, requestOptions, storedProcedureArgs)
+                .subscribe(storedProcedureResponse -> {
+                    String storedProcResultAsString = storedProcedureResponse.getResponseAsString();
+                    successfulCompletionLatch.countDown();
+                    System.out.println(storedProcedureResponse.getActivityId());
+                }, error -> {
+                    System.err.println("an error occurred while executing the stored procedure: actual cause: "
+                                               + error.getMessage());
+                });
+
+        successfulCompletionLatch.await();        
+
+    }
+    ```
+
 1. Locate the **Main** method:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    { 
-    }
+    ```java
+        public static void main( String[] args )
+        {
+
+        }
     ```
 
-1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+1. Within the **Main** method, add the following code:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-        
-    }
+
+    ```java
+        Program p = new Program();
+
+        try {
+            p.executeStoredProc();
+            System.out.println("finished");
+
+        } catch (Exception e) {
+            System.err.println(String.format("failed with %s", e));
+        } 
+        System.exit(0);
     ```
 
-1. Within the using block, add the following code to the method to open a connection asynchronously:
-
-    ```csharp
-    await client.OpenAsync();
-    ```
 
 1. Your ``Program`` class definition should now look like this:
 
-    ```csharp
-    public class Program
-    { 
-        private static readonly Uri _endpointUri = new Uri("<your uri>");
-        private static readonly string _primaryKey = "<your key>";
+    ```java
+        public class Program {
 
-        public static async Task Main(string[] args)
-        {    
-            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-            {
-                await client.OpenAsync();
-            }     
-        }
-    }
-    ```
+            private final ExecutorService executorService;
+            private final Scheduler scheduler;
+            private AsyncDocumentClient client;
 
-    > We will now execute a build of the application to make sure our code compiles successfully.
+            private final String databaseName = "FinancialDatabase";
+            private final String collectionId = "InvestorCollection";
 
-1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+            public Program() {
+                executorService = Executors.newFixedThreadPool(100);
+                scheduler = Schedulers.from(executorService);
+                // Sets up the requirements for each test
+                ConnectionPolicy connectionPolicy = new ConnectionPolicy();
+                connectionPolicy.setConnectionMode(ConnectionMode.Direct);
+                client = new AsyncDocumentClient.Builder()
+                        .withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
+                        .withMasterKeyOrResourceToken("Ii9PZCoHr0LM9Cy4vABwGVWmmymmp4KeNpZUgaZaG8jhvKUSHdPKDfNETPDczjUnwpYH5NoHArZ5zeJ4xFGtNg==")
+                        .withConnectionPolicy(connectionPolicy)
+                        .withConsistencyLevel(ConsistencyLevel.Session)
+                        .build();
 
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the console project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
-### Execute Bulk Upload Stored Procedure from .NET Core SDK
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
-
-1. Name the new file **Person.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``Person`` class:
-
-    ```csharp
-    public class Person
-    {
-        public string firstName { get; set; }
-        public string lastName { get; set; }
-        public string company { get; set; }
-    }
-    ```
-
-1. Save all of your open editor tabs.
-
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
-
-1. Locate the **Main** method within the **Program** class:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    ```
-
-1. Within the **using** block, add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
-
-    ```csharp
-    Uri sprocLink = UriFactory.CreateStoredProcedureUri("FinancialDatabase", "InvestorCollection", "bulkUpload");
-    ```
-
-1. Still within the **using** block, add the following block of code to create a collection of 25,000 "fake" instances of the **Person** class.
-
-    ```csharp
-    List<Person> people = new Faker<Person>()
-        .RuleFor(p => p.firstName, f => f.Name.FirstName())
-        .RuleFor(p => p.lastName, f => f.Name.LastName())
-        .RuleFor(p => p.company, f => "contosofinancial")
-        .Generate(25000);
-    ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 25,000 items using the Bogus library and the rules listed above. The **Generate** method tells the Bogus library to use the rules to create the specified number of entities and store them in a generic **List<T>**.
-
-1. Still within the **using** block, add the following line of code to create a variable named **pointer** with a default value of **zero**.
-
-    ```csharp
-    int pointer = 0;
-    ```
-
-    > We are going to use this variable to determine how many documents were uploaded by our stored procedure.
-
-1. Still within the **using** block, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is *less than* the amount of items in the **people** collection:
-
-    ```js
-    while(pointer < people.Count)
-    {
-    }
-    ```
-
-    > We are going to create a while loop that will keep uploading documents until the pointer's value greater than or equal to the amount of people in our object set.
-
-1. Within the **while** block, add the following lines of code to create an object of type **RequestOptions** that specified **contosofinancial** as the partition key for the request:
-
-    ```csharp
-    RequestOptions options = new RequestOptions { PartitionKey = new PartitionKey("contosofinancial") };
-    ```
-
-    > If you are executing a stored procedure in an unlimited container, you must specify the partition key to use as the context of the stored procedure's execution.
-
-1. Still within the **while** block, add the following lines of code to execute the stored procedure:
-
-    ```csharp
-    StoredProcedureResponse<int> result = await client.ExecuteStoredProcedureAsync<int>(sprocLink, options, people.Skip(pointer));
-    ```
-
-    > This line of code will execute the stored procedure using three parameters; a self-link to the stored procedure to execute, an instance of the RequestOptions class, and then a dynamic list of parameters for the stored procedure. In this example, we are passing in an array of objects as the first parameter for the stored procedure.
-
-1. Still within the **while** block, add the following line of code to store the number returned by the stored procedure in the **pointer** variable:
-
-    ```csharp
-    pointer += result.Response;
-    ```
-
-    > Everytime the stored procedure returns how many documents were processed, we will increment the counter.
-
-1. Still within the **while** block, add the following line of code to print out the amount of documents uploaded in the current iteration:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{pointer} Total Documents\t{result.Response} Documents Uploaded in this Iteration");
-    ```
-
-1. Your **Main** method should now look like this:
-
-    ```chsarp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri sprocLink = UriFactory.CreateStoredProcedureUri("FinancialDatabase", "InvestorCollection", "bulkUpload");
-            List<Person> people = new Faker<Person>()
-                .RuleFor(p => p.firstName, f => f.Name.FirstName())
-                .RuleFor(p => p.lastName, f => f.Name.LastName())
-                .RuleFor(p => p.company, f => "contosofinancial")
-                .Generate(25000);
-            int pointer = 0;
-            while(pointer < people.Count)
-            {
-                RequestOptions options = new RequestOptions { PartitionKey = new PartitionKey("contosofinancial") };
-                StoredProcedureResponse<int> result = await client.ExecuteStoredProcedureAsync<int>(sprocLink, options, people.Skip(pointer));
-                pointer += result.Response;
-                await Console.Out.WriteLineAsync($"{pointer} Total Documents\t{result.Response} Documents Uploaded in this Iteration");
+                DocumentCollection collectionDefinition = new DocumentCollection();
+                collectionDefinition.setId(UUID.randomUUID().toString());
+            
             }
-        }   
-    }
+
+            /**
+            * Create a document with a programmatically set definition, in an Async manner
+            */
+
+
+            public static void main(String[] args) {
+                SPProgram p = new Program();
+
+                try {
+                    p.executeStoredProc();
+                    System.out.println("finished");
+
+                } catch (Exception e) {
+                    System.err.println(String.format("failed with %s", e));
+                } 
+                System.exit(0);
+
+            }     
+            public void executeStoredProc() throws Exception {
+                ArrayList<Object> documents = new Person(25000).documentDefinitions;
+
+                System.out.println(documents);
+                RequestOptions requestOptions = new RequestOptions();
+                requestOptions.setScriptLoggingEnabled(true);
+                requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));
+                
+                final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
+                String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkUpload"; 
+                // Execute the stored procedure
+                Object docs = documents.toArray();
+                System.out.println("docs: "+docs);
+                Object[] storedProcedureArgs = new Object[]{docs};
+                client.executeStoredProcedure(sprocLink, requestOptions, storedProcedureArgs)
+                        .subscribe(storedProcedureResponse -> {
+                            String storedProcResultAsString = storedProcedureResponse.getResponseAsString();
+                            successfulCompletionLatch.countDown();
+                            System.out.println(storedProcedureResponse.getActivityId());
+                        }, error -> {
+                            System.err.println("an error occurred while executing the stored procedure: actual cause: "
+                                                    + error.getMessage());
+                        });
+
+                successfulCompletionLatch.await();        
+
+            }
+        }
     ```
 
-    > You will notice that our C# code using the **Skip** method of the LINQ library to submit only the subset of our documents that are not yet uploaded. On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents. When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **5000** documents were uploaded. The pointer will now be incremented to a value of **5000**. On the next check of the while loop's condition, **5000** will be evaluated to be less than **25000** causing another execution of the code in the while loop. The LINQ method will now skip **5000** documents and send the remaining **20000** documents to the stored procedure to upload. This loop will continue until all documents are uploaded.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the console project.
 

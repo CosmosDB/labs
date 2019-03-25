@@ -420,7 +420,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 *After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB collection, you are now going to use the Java Async SDK to issue similar queries.*
 
-### Create a Java Core Project
+### Create a Java Project
 
 1. On your local machine, create a new folder that will be used to contain the content of your Java project.
 
