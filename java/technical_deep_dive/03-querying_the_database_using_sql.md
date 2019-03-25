@@ -1036,8 +1036,8 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Locate the **Main** method and delete any existing code:
 
-    ```csharp
-    public static async Task Main(string[] args)
+    ```java
+    public static void main(String[] args) throws InterruptedException, JSONException {
     {    
                         
     }
@@ -1045,56 +1045,43 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Replace the **Main** method with the following implementation:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {         
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
+    ```java
+        public static void main(String[] args) throws InterruptedException, JSONException {
+                FeedOptions options = new FeedOptions();
+                // as this is a multi collection enable cross partition query
+                options.setEnableCrossPartitionQuery(true);
+                // note that setMaxItemCount sets the number of items to return in a single page result
+                options.setMaxItemCount(2000);
+                String continuationToken = "";
+                options.setRequestContinuation(continuationToken);
+                String sql = "SELECT * FROM s where s.age < 18";
+                Program p = new Program();
+                Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                // observable to an iterator
+                Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+                System.out.println("continuationToken: "+continuationToken); 
+                do  {
+                        FeedResponse<Document> page = it.next();
+                        List<Document> results = page.getResults();
+                        for (Document doc : results) {
+                                JSONObject obj = new JSONObject(doc.toJson());
+                                String age = obj.getString("age");                                
+                                System.out.println("age: "+age);
 
-            string continuationToken = String.Empty;
-            do
-            {
-                FeedOptions options = new FeedOptions 
-                { 
-                    EnableCrossPartitionQuery = true, 
-                    RequestContinuation = continuationToken 
-                };
-                IDocumentQuery<Student> query = client
-                    .CreateDocumentQuery<Student>(collectionLink, options)
-                    .Where(student => student.age < 18)
-                    .AsDocumentQuery();
-
-                FeedResponse<Student> results = await query.ExecuteNextAsync<Student>();                
-                continuationToken = results.ResponseContinuation;
-
-                await Console.Out.WriteLineAsync($"ContinuationToken:\t{continuationToken}");
-                foreach(Student result in results)
-                {
-                    await Console.Out.WriteLineAsync($"[Age: {result.age}]\t{result.studentAlias}@consoto.edu");
+                        }
+                        continuationToken = page.getResponseContinuation();                        
                 }
-                await Console.Out.WriteLineAsync(); 
-            } 
-            while (!String.IsNullOrEmpty(continuationToken));          
+                while (continuationToken != null);
+                System.out.println("continuationToken: "+continuationToken); 
+                System.out.println("finished");
         }
-    }
     ```
 
-    > A continuation token allows us to resume a paginated query either immediately or later. When creating a query, the results are automatically paged. If there are more results, the returned page of results will also include a continuation token. This token should be passed back in    This implementation creates a **do-while** loop that will continue to get pages of results as long as the continuation token is not null.
+    > A continuation token allows us to resume a paginated query either immediately or later. When creating a query, the results are automatically paged. If there are more results, the returned page of results will also include a continuation token. This token should be passed back in. This implementation creates a **do-while** loop that will continue to get pages of results as long as the continuation token is not null.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run. 
 
 1. Observe the output of the console application.
 
@@ -1104,33 +1091,12 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 ### Observe How Partitions Are Accessed in a Cross-Partition Query
 
-1. In the Visual Studio Code window, double-click the **Student.cs** file to open an editor tab for the file.
-
-1. Replace the existing **Student** class implementation with the following code:
-
-    ```csharp
-    public class Student
-    {
-        public string studentAlias { get; set; }
-        public int age { get; set; }
-        public int enrollmentYear { get; set; }
-        public int projectedGraduationYear { get; set; }
-
-        public FinancialInfo financialData { get; set; }
-
-        public class FinancialInfo
-        {
-            public double tuitionBalance { get; set; }
-        }
-    }
-    ```
-
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+1. In the Visual Studio Code window, double-click the **Program.java** file to open an editor tab for the file.
 
 1. Locate the **Main** method and delete any existing code:
 
-    ```csharp
-    public static async Task Main(string[] args)
+    ```java
+    public static void main(String[] args) throws InterruptedException, JSONException {
     {    
                         
     }
@@ -1138,54 +1104,51 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Replace the **Main** method with the following implementation:
 
-    ```csharp
-        public static async Task Main(string[] args)
-        {         
-            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-            {
-                await client.OpenAsync();
+    ```java
+        public static void main(String[] args) throws InterruptedException, JSONException {
+                FeedOptions options = new FeedOptions();
+                // as this is a multi collection enable cross partition query
+                options.setEnableCrossPartitionQuery(true);
+                // note that setMaxItemCount sets the number of items to return in a single page result
+                options.setMaxItemCount(1);
+                String continuationToken = "";
+                options.setRequestContinuation(continuationToken);
+                String sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
+                Program p = new Program();
+                Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                // observable to an iterator
+                Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
-                Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-
-                FeedOptions options = new FeedOptions 
-                { 
-                    EnableCrossPartitionQuery = true
-                };
-
-                string sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
-
-                IDocumentQuery<Student> query = client
-                    .CreateDocumentQuery<Student>(collectionLink, sql, options)
-                    .AsDocumentQuery();
-
+                System.out.println("continuationToken: "+continuationToken); 
                 int pageCount = 0;
-                while(query.HasMoreResults)
-                {
-                    await Console.Out.WriteLineAsync($"---Page #{++pageCount:0000}---");
-                    foreach(Student result in await query.ExecuteNextAsync())
-                    {
-                        await Console.Out.WriteLineAsync($"Enrollment: {result.enrollmentYear}\tBalance: {result.financialData.tuitionBalance}\t{result.studentAlias}@consoto.edu");
-                    }
-                }        
-            }
+                do  {
+                        FeedResponse<Document> page = it.next();
+                        List<Document> results = page.getResults();
+                        pageCount++;
+                        System.out.println("---Page #"+pageCount+"------");
+                        for (Document doc : results) {
+                                JSONObject obj = new JSONObject(doc.toJson());
+                                String enrollmentYear = obj.getString("enrollmentYear");                                 
+                                String financialData = obj.getString("financialData"); 
+                                JSONObject financialDataObj = new JSONObject(financialData);  
+                                String studentAlias = obj.getString("studentAlias");                              
+                                System.out.println("Enrollment: "+enrollmentYear+", Balance: "+financialDataObj.getString("tuitionBalance")+", "+studentAlias+"@consoto.edu");
+
+                        }
+                        continuationToken = page.getResponseContinuation();                        
+                }
+                while (continuationToken != null);
+                System.out.println("continuationToken: "+continuationToken); 
+                System.out.println("finished");
         }
     ```
 
     > We are creating a cross-partition query here that may (or may not) have results for each partition key. Since this is a server-side fan-out and we are not filtering on a partition key, the search will be forced to check each partition. You can potentially have pages returned that have no results for partition keys that do not have any matching data.
 
-1. Save all of your open editor tabs.
+1. Save all of your open editor tabs, and click run.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+1. Observe the output of the application.
 
     > You should see a list of documents grouped by "pages" of results. Scroll up and look at the results for **every page**. You should also notice that there is at least one page that does not have any results. This page occurs because the server-side fan-out is forced to check every partition since you are not filtering by partition keys. The next few examples will illustrate this even more.
 
@@ -1193,29 +1156,19 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
     ```
 
     Replace that code with the following code:
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
     ```
 
     > This new query should return results for most partition keys.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the execution.
 
@@ -1225,29 +1178,19 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14000";
     ```
 
     Replace that code with the following code:
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
     ```
 
     > This new query should return results for most partition keys.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the execution.
 
@@ -1257,29 +1200,19 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14950";
     ```
 
     Replace that code with the following code:
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";
     ```
 
     > This new query should return results for most partition keys.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the execution.
 
@@ -1289,29 +1222,19 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14996";
     ```
 
     Replace that code with the following code:
 
-    ```csharp
-    string sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14998";
+    ```java
+    String sql = "SELECT * FROM students s WHERE s.financialData.tuitionBalance > 14998";
     ```
 
     > This new query should return results for most partition keys.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the execution.
 
