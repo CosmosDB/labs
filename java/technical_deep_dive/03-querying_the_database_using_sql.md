@@ -673,7 +673,15 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. In the Visual Studio Code window, double-click the **Program.java** file to open an editor tab for the file.
 
-1. Within the **Program.java** editor tab, locate the **Main** method.
+1. Within the **Program.java** editor tab, add the following imports at the top, below the package declaration: 
+
+    ```java
+    import org.json.JSONArray;
+    import org.json.JSONException;
+    import org.json.JSONObject;
+    ```
+
+1. Now locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
