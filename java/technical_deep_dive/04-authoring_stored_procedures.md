@@ -779,8 +779,8 @@ In this lab, you will author and execute multiple stored procedures within your 
                 ConnectionPolicy connectionPolicy = new ConnectionPolicy();
                 connectionPolicy.setConnectionMode(ConnectionMode.Direct);
                 client = new AsyncDocumentClient.Builder()
-                        .withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
-                        .withMasterKeyOrResourceToken("Ii9PZCoHr0LM9Cy4vABwGVWmmymmp4KeNpZUgaZaG8jhvKUSHdPKDfNETPDczjUnwpYH5NoHArZ5zeJ4xFGtNg==")
+                        .withServiceEndpoint("uri")
+                        .withMasterKeyOrResourceToken("key")
                         .withConnectionPolicy(connectionPolicy)
                         .withConsistencyLevel(ConsistencyLevel.Session)
                         .build();
