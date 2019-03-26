@@ -705,6 +705,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     ```java
     public void executeStoredProc() throws Exception {
+        System.out.println("creating documents");
         ArrayList<Object> documents = new Person(500).documentDefinitions;
         RequestOptions requestOptions = new RequestOptions();
         requestOptions.setScriptLoggingEnabled(true);
