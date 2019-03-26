@@ -705,7 +705,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     ```java
     public void executeStoredProc() throws Exception {
-        ArrayList<Object> documents = new Person(2).documentDefinitions;
+        ArrayList<Object> documents = new Person(500).documentDefinitions;
 
         System.out.println(documents);
         RequestOptions requestOptions = new RequestOptions();
@@ -809,7 +809,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
             }     
             public void executeStoredProc() throws Exception {
-                ArrayList<Object> documents = new Person(25000).documentDefinitions;
+                ArrayList<Object> documents = new Person(500).documentDefinitions;
 
                 System.out.println(documents);
                 RequestOptions requestOptions = new RequestOptions();
@@ -843,7 +843,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. Observe the results of the console project.
 
-    > This stored procedure will batch upload 25,000 documents to your collection within the specified partition key.
+    > This stored procedure will bulk upload 500 documents to your collection within the specified partition key.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -887,74 +887,55 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Results** pane, observe the results of your query.
 
-### Execute Bulk Delete Stored Procedure from .NET Core SDK
+### Execute Bulk Delete Stored Procedure from Java Async SDK
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
-
-1. Name the new file **DeleteStatus.cs** . The editor tab will automatically open for the new file.
-
-1. Paste in the following code for the ``DeleteStatus`` class:
-
-    ```csharp
-    public class DeleteStatus
-    {
-        public int Deleted { get; set; }
-        public bool Continuation { get; set; }
-    }
-    ```
-
-    > The next stored procedure returns a complex JSON object instead of a simple typed value. We will need to create a C# class to deserialize the JSON object so we can use it's data in our C# code.
-
-1. Save all of your open editor tabs.
 
 1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the **Main** method and delete any existing code:
+1. Locate the **executeStoredProc** method and delete any existing code:
 
     ```csharp
-    public static async Task Main(string[] args)
+    public void executeStoredProc() throws Exception {
     {    
                         
     }
     ```
 
-1. Replace the **Main** method with the following implementation:
+1. Replace the **executeStoredProc** method with the following:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri sprocLink = UriFactory.CreateStoredProcedureUri("FinancialDatabase", "InvestorCollection", "bulkDelete");
+    ```java
+    public void executeStoredProc() throws Exception {
 
-            bool resume = true;
-            do
-            {
-                RequestOptions options = new RequestOptions { PartitionKey = new PartitionKey("contosofinancial") };
-                string query = "SELECT * FROM investors i WHERE i.company = 'contosofinancial'";
-                StoredProcedureResponse<DeleteStatus> result = await client.ExecuteStoredProcedureAsync<DeleteStatus>(sprocLink, options, query);
-                await Console.Out.WriteLineAsync($"Batch Delete Completed.\tDeleted: {result.Response.Deleted}\tContinue: {result.Response.Continuation}");
-                resume = result.Response.Continuation;
-            }
-            while(resume);
-        }   
+        System.out.println("deleting documents");
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.setScriptLoggingEnabled(true);
+        requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));
+        
+        final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
+        String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkDelete"; 
+
+        String query = "SELECT * FROM investors i WHERE i.company = 'contosofinancial'";
+        // Execute the stored procedure
+ 
+        Object[] storedProcedureArgs = new Object[]{query};
+        client.executeStoredProcedure(sprocLink, requestOptions, storedProcedureArgs)
+                .subscribe(storedProcedureResponse -> {
+                    String storedProcResultAsString = storedProcedureResponse.getResponseAsString();
+                    successfulCompletionLatch.countDown();
+                    System.out.println(storedProcedureResponse.getActivityId());
+                }, error -> {
+                    System.err.println("an error occurred while executing the stored procedure: actual cause: "
+                                               + error.getMessage());
+                });
+
+        successfulCompletionLatch.await();        
+
     }
     ```
 
-    > This code will execute the stored procedure that deletes documents as long as the **resume** variable is set to true. The stored procedure itself always returns an object, serialized as **DeleteStatus**, that has a boolean indicating whether we should continue deleting documents and a number indicating how many documents were deleted as part of this execution. Within the do-while loop, we simply store the value of the boolean returned from the stored procedure in our **resume** variable and continue executing the stored procedure until it returns a false value indicating that all documents were deleted.
+    > This code will execute the stored procedure that deletes documents.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the console project.
 
