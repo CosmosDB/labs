@@ -1,9 +1,6 @@
 package testpackage;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import rx.Observable;
 
 import java.util.concurrent.CountDownLatch;
@@ -22,7 +19,7 @@ import com.microsoft.azure.cosmosdb.ConnectionMode;
 import com.microsoft.azure.cosmosdb.Document;
 import java.util.UUID;
 
-public class DataProgram3 {
+public class DataProgram2 {
 
     private final ExecutorService executorService;
     private final Scheduler scheduler;
@@ -34,7 +31,7 @@ public class DataProgram3 {
     private final String partitionKeyPath = "/type";
     private final int throughPut = 400;
 
-    public DataProgram3() {
+    public DataProgram2() {
         executorService = Executors.newFixedThreadPool(100);
         scheduler = Schedulers.from(executorService);
         // Sets up the requirements for each test
@@ -42,7 +39,8 @@ public class DataProgram3 {
         connectionPolicy.setConnectionMode(ConnectionMode.Direct);
         asyncClient = new AsyncDocumentClient.Builder()
                 .withServiceEndpoint("uri")
-                .withMasterKeyOrResourceToken("key")
+                .withMasterKeyOrResourceToken(
+                        "key")
                 .withConnectionPolicy(connectionPolicy).withConsistencyLevel(ConsistencyLevel.Session).build();
 
         DocumentCollection collectionDefinition = new DocumentCollection();
@@ -55,10 +53,10 @@ public class DataProgram3 {
      */
 
     public static void main(String[] args) {
-        DataProgram3 p = new DataProgram3();
+        DataProgram2 p = new DataProgram2();
 
         try {
-            p.documentUpsert_Async();
+            p.createDocument();
             System.out.println("finished");
 
         } catch (Exception e) {
@@ -87,30 +85,5 @@ public class DataProgram3 {
             }, e -> completionLatch.countDown());
             completionLatch.await();
         }
-    }
-
-    /**
-     * Upsert a document
-     */
-
-    public void documentUpsert_Async() throws Exception {
-        // Create a document
-        Document doc = new Document(String.format("{ 'id': 'example.document', 'type': 'upsertsample'}", UUID.randomUUID().toString(), 1));
-        asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, doc, null, false).toBlocking().single();
-
-        // Upsert the existing document
-        Document upsertingDocument = new Document(
-                String.format("{ 'id': 'example.document', 'type': 'upsertsample', 'new-prop' : '2'}", doc.getId(), 1));
-        Observable<ResourceResponse<Document>> upsertDocumentObservable = asyncClient
-                .upsertDocument("dbs/" + databaseName + "/colls/" + collectionId, upsertingDocument, null, false);
-
-        List<ResourceResponse<Document>> capturedResponse = Collections
-                .synchronizedList(new ArrayList<>());
-
-        upsertDocumentObservable.subscribe(resourceResponse -> {
-            capturedResponse.add(resourceResponse);
-        });
-
-        Thread.sleep(4000);
     }
 }

@@ -57,8 +57,8 @@ public class Program2 {
         executorService = Executors.newFixedThreadPool(100);
         scheduler = Schedulers.from(executorService);
         client = new AsyncDocumentClient.Builder()
-        .withServiceEndpoint("https://cosmostvk.documents.azure.com:443/")
-        .withMasterKeyOrResourceToken("Ii9PZCoHr0LM9Cy4vABwGVWmmymmp4KeNpZUgaZaG8jhvKUSHdPKDfNETPDczjUnwpYH5NoHArZ5zeJ4xFGtNg==")
+        .withServiceEndpoint("uri")
+        .withMasterKeyOrResourceToken("key")
         .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
         .build();
     }
