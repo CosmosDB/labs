@@ -208,6 +208,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     import java.util.ArrayList;
     import java.util.Collection;
     import java.util.List;
+    import java.util.Collections;
     import java.util.concurrent.CountDownLatch;
     import java.util.concurrent.ExecutorService;
     import java.util.concurrent.Executors;
@@ -491,7 +492,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Locate the **Main** method in your **Program** class and replace it with the following:
 
-    ```csharp
+    ```java
     public static void main(String[] args) {
         Program p = new Program();
 
@@ -733,252 +734,59 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ### Implement Upsert using Response Status Codes
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
 
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+1. Add the following method to your **Program** class: 
 
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+    ```java
+    public void documentUpsert_Async() throws Exception {
+        // Create a document
+        Document doc = new Document(String.format("{ 'id': 'example.document', 'type': 'upsertsample'}", UUID.randomUUID().toString(), 1));
+        asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, doc, null, false).toBlocking().single();
 
-1. Within the **Main** method, locate the following line of code: 
+        // Upsert the existing document
+        Document upsertingDocument = new Document(
+                String.format("{ 'id': 'example.document', 'type': 'upsertsample', 'new-prop' : '2'}", doc.getId(), 1));
+        Observable<ResourceResponse<Document>> upsertDocumentObservable = asyncClient
+                .upsertDocument("dbs/" + databaseName + "/colls/" + collectionId, upsertingDocument, null, false);
 
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+        List<ResourceResponse<Document>> capturedResponse = Collections
+                .synchronizedList(new ArrayList<>());
+
+        upsertDocumentObservable.subscribe(resourceResponse -> {
+            capturedResponse.add(resourceResponse);
+        });
+
+        Thread.sleep(4000);
+    }
     ```
 
-    Replace that line of code with the following code:
+1. Replace the call in your **main** method, to call the above method, as below:
 
-    ```csharp
-    Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
-    ```
+    ```java
+    public static void main(String[] args) {
+        Program p = new Program();
 
-    > Instead of having a Uri that references a collection, we will create a Uri that references a specific document. To create this Uri, you will need a third parameter specifying the unique string identifier for the document. In this example, our string id is ``example.document``.
+        try {
+            p.createDocument();
+            System.out.println("finished");
 
-1. Locate the following block of code:
-
-    ```csharp
-    object doc = new
-    {
-        Person = new Bogus.Person(),
-        Relatives = new
-        {
-            Spouse = new Bogus.Person(), 
-            Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
+        } catch (Exception e) {
+            System.err.println(String.format("failed with %s", e));
         }
-    };
-    ```
+        System.exit(0);
 
-    Replace that line of code with the following code:
-
-    ```csharp
-    object doc = new {
-        id = "example.document",
-        FirstName = "Example",
-        LastName = "Person"
-    };
-    ```
-
-    > Here we are creating a new document that has an **id** property set to a value of ``example.document``.
-
-1. Locate the following line of code:
-
-    ```csharp
-    ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
-    ```
-
-    > We will now use the **ReadDocumentAsync** method of the **DocumentClient** class to retrieve a document using the unique id.
-
-1. Locate the following line of code:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
-    ```
-
-    > This will print out the status code that was returned as a response for your operation.
-
-1. Your ``Main`` method should now look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
-            object doc = new {
-                id = "example.document",
-                FirstName = "Example",
-                LastName = "Person"
-            };
-            ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
-            await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
-        }  
     }
     ```
 
-1. Save all of your open editor tabs.
+1. Save all of your open editor tabs, and click run
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the exception message.
-
-    > You should see that an exception was thrown since a document was not found that matches the specified id.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Within the **Main** method, locate the following block of code: 
-
-    ```csharp
-    ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
-    await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    try
-    {
-        ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
-        await Console.Out.WriteLineAsync($"Success: {readResponse.StatusCode}");
-    }
-    catch (DocumentClientException dex)
-    {
-        await Console.Out.WriteLineAsync($"Exception: {dex.StatusCode}");
-    }
-    ```
-
-    > This try-catch block will handle a **DocumentClientException** throw by printing out the status code related to the exception.
-
-1. Your ``Main`` method should now look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
-            object doc = new {
-                id = "example.document",
-                FirstName = "Example",
-                LastName = "Person"
-            };
-            try
-            {
-                ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
-                await Console.Out.WriteLineAsync($"Success: {readResponse.StatusCode}");
-            }
-            catch (DocumentClientException dex)
-            {
-                await Console.Out.WriteLineAsync($"Exception: {dex.StatusCode}");
-            }
-        }  
-    }
-    ```
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the exception message.
-
-    > You should see a status code indicating that a document was not found. The catch block worked successfully.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-    > While you could manually implement upsert logic, the .NET SDK contains a useful method to implement this logic for you.
-
-1. Within the **Main** method, locate the following line of code: 
-
-    ```csharp
-    Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-    ```
-
-1. Locate the following block of code: 
-
-    ```csharp
-    try
-    {
-        ResourceResponse<Document> readResponse = await client.ReadDocumentAsync(documentLink);
-        await Console.Out.WriteLineAsync($"Success: {readResponse.StatusCode}");
-    }
-    catch (DocumentClientException dex)
-    {
-        await Console.Out.WriteLineAsync($"Exception: {dex.StatusCode}");
-    }
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    ResourceResponse<Document> readResponse = await client.UpsertDocumentAsync(collectionLink, doc);
-    await Console.Out.WriteLineAsync($"{readResponse.StatusCode}");
-    ```
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the message.
-
-    > Since we are "upserting" a document with a unique **id**, the server-side operation will be to create a new document. You should see the status code ``Created`` indicating that the create operation was completed successfully.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the message.
-
-    > Since we are "upserting" a document with the same **id**, the server-side operation will be to update the existing document with the same **id**. You should see the status code ``OK`` indicating that the update operation was completed successfully.
+    > The initial **createDocument** call within the new method creates a document, and we are then "upserting" a document with the same **id**, the server-side operation will be to update the existing document with the same **id**, and you will see the added attributes. 
 
 1. Click the **🗙** symbol to close the terminal pane.
 
 ## Troubleshooting Requests
 
-*First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
+*First, you will use the Java SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
 
 ### Reducing R/U Throughput for a Collection
 
