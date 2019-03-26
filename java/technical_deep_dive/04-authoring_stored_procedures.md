@@ -706,17 +706,13 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```java
     public void executeStoredProc() throws Exception {
         ArrayList<Object> documents = new Person(500).documentDefinitions;
-
-        System.out.println(documents);
         RequestOptions requestOptions = new RequestOptions();
         requestOptions.setScriptLoggingEnabled(true);
-        requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));
-        
+        requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));      
         final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
         String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkUpload"; 
         // Execute the stored procedure
         Object docs = documents.toArray();
-        System.out.println("docs: "+docs);
         Object[] storedProcedureArgs = new Object[]{docs};
         client.executeStoredProcedure(sprocLink, requestOptions, storedProcedureArgs)
                 .subscribe(storedProcedureResponse -> {
@@ -727,7 +723,6 @@ In this lab, you will author and execute multiple stored procedures within your 
                     System.err.println("an error occurred while executing the stored procedure: actual cause: "
                                                + error.getMessage());
                 });
-
         successfulCompletionLatch.await();        
 
     }
@@ -810,17 +805,13 @@ In this lab, you will author and execute multiple stored procedures within your 
             }     
             public void executeStoredProc() throws Exception {
                 ArrayList<Object> documents = new Person(500).documentDefinitions;
-
-                System.out.println(documents);
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.setScriptLoggingEnabled(true);
-                requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));
-                
+                requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));            
                 final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
                 String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkUpload"; 
                 // Execute the stored procedure
                 Object docs = documents.toArray();
-                System.out.println("docs: "+docs);
                 Object[] storedProcedureArgs = new Object[]{docs};
                 client.executeStoredProcedure(sprocLink, requestOptions, storedProcedureArgs)
                         .subscribe(storedProcedureResponse -> {
@@ -831,7 +822,6 @@ In this lab, you will author and execute multiple stored procedures within your 
                             System.err.println("an error occurred while executing the stored procedure: actual cause: "
                                                     + error.getMessage());
                         });
-
                 successfulCompletionLatch.await();        
 
             }
