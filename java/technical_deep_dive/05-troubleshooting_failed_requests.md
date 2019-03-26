@@ -366,7 +366,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ## Examining Response Headers
 
-*Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occured on the server-side. The .NET SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.*
+*Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occured on the server-side. The Java Async SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.*
 
 ### Observe RU Charge for Large Document
 
