@@ -148,211 +148,216 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 22. Once the import process has completed, close the ADF. You will now proceed to execute simple queries on your imported data. 
 
-### Create a .NET Core Project
+### Create a Java Project
 
-1. On your local machine, create a new folder that will be used to contain the content of your .NET Core project.
+1. On your local machine, create a new folder that will be used to contain the content of your Java project.
 
 1. In the new folder, right-click the folder and select the **Open with Code** menu option.
 
-    ![Open with Visual Studio Code](../media/05-open_with_code.jpg)
+    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
 
     > Alternatively, you can run a command prompt in your current directory and execute the ``code .`` command.
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. In the Visual Studio Code window that appears, right-click the **Explorer** under the folder you created, and select "Generate from Maven Archetype":
 
-    ![Open in Command Prompt](../media/05-open_command_prompt.jpg)
+    ![Open in Command Prompt](../media/maven1.jpg)
 
-1. In the open terminal pane, enter and execute the following command:
+1. From the options that appear, select "maven-archetype-quickstart", and then select the directory you created for the project when prompted. Maven will then prompt you to provide values for group id, artifact id, version, package. Fill these in when prompted and then confirm:
 
-    ```sh
-    dotnet new console --output .
-    ```
+    ![Open in Command Prompt](../media/maven2.jpg)
 
-    > This command will create a new .NET Core 2.1 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
-1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
+1. Once confirmed, Maven will create the project, and provide a sample App.java. For any Java class created in the project, VS Code's Java Extension will provide "run" and "debug" links directly in the code. Clicking "run" will compile and run your Java code:
 
-1. In the terminal pane, enter and execute the following command:
+    ![Open in Command Prompt](../media/maven3.jpg)
 
-    ```sh
-    dotnet add package Microsoft.Azure.DocumentDB.Core --version 1.9.1
-    ```
 
-    > This command will add the [Microsoft.Azure.DocumentDB.Core](https://www.nuget.org/packages/Microsoft.Azure.DocumentDB.Core/) NuGet package as a project dependency. The lab instructions have been tested using the ``1.9.1`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet add package Bogus --version 22.0.8
-    ```
-
-    > This command will add the [Bogus](https://www.nuget.org/packages/Bogus/) NuGet package as a project dependency. This library will allow us to quickly generate test data using a fluent syntax and minimal code. We will use this library to generate test documents to upload to our Azure Cosmos DB instance. The lab instructions have been tested using the ``22.0.8`` version of this NuGet package.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet restore
-    ```
-
-    > This command will restore all packages specified as dependencies in the project.
-
-1. In the terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
-
-    ![Project files](../media/05-project_files.jpg)
-
-1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
-
-1. Add a new **PropertyGroup** XML element to the project configuration within the **Project** element:
+1. To add the Maven project dependancies required to work with Cosmos DB, you should add the following into the pom.xml file located at the bottom of your project, within the dependancies section:
 
     ```xml
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+   <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-cosmosdb</artifactId>
+      <version>2.4.3</version>
+    </dependency>
     ```
 
-1. Your new XML should look like this:
+1. For this tutorial, you will also need to change the source and target compiler versions to Java 1.8, as we will use some lambda syntax which is only supported from Java 8 onwards. When finished, your pom.xml should look like the below:
 
-    ```xml
-    <Project Sdk="Microsoft.NET.Sdk">
-        <PropertyGroup>
-            <LangVersion>latest</LangVersion>
-        </PropertyGroup>
-        <PropertyGroup>
-            <OutputType>Exe</OutputType>
-            <TargetFramework>netcoreapp2.0</TargetFramework>
-        </PropertyGroup>
-        <ItemGroup>
-            <PackageReference Include="Bogus" Version="22.0.8" />
-            <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
-        </ItemGroup>
-    </Project>
+    ![Open in Command Prompt](../media/maven4.jpg)
+
+
+1. Once the changes are applied, ensure you click file -> save all. At this point, VS Code will recognise that you modified the pom.xml build file. Ensure that you accept the prompt to sync the dependancies:
+
+    ![Open in Command Prompt](../media/maven6.jpg)
+
+    > Once the dependencies are pulled down, you will be ready to start writing Java code for Cosmos DB.
+
+### Create AsyncDocumentClient Instance and Database
+
+*The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
+
+1. At the same level as the default "App.java" file that already exists, right click and create a new file called "Program.java":
+
+    ![Open in Command Prompt](../media/maven5.jpg)
+
+1. Within the **Program.java** editor tab, Add the following using blocks to the top of the editor:
+
+    ```java
+    package test;
+    import java.util.ArrayList;
+    import java.util.Collection;
+    import java.util.List;
+    import java.util.concurrent.CountDownLatch;
+    import java.util.concurrent.ExecutorService;
+    import java.util.concurrent.Executors;
+    import com.microsoft.azure.cosmosdb.ConnectionPolicy;
+    import com.microsoft.azure.cosmosdb.ConsistencyLevel;
+    import com.microsoft.azure.cosmosdb.DataType;
+    import com.microsoft.azure.cosmosdb.Database;
+    import com.microsoft.azure.cosmosdb.DocumentClientException;
+    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.IncludedPath;
+    import com.microsoft.azure.cosmosdb.Index;
+    import com.microsoft.azure.cosmosdb.IndexingPolicy;
+    import com.microsoft.azure.cosmosdb.PartitionKeyDefinition;
+    import com.microsoft.azure.cosmosdb.RequestOptions;
+    import com.microsoft.azure.cosmosdb.ResourceResponse;
+    import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
+    import rx.Observable;
+    import rx.Scheduler;
+    import rx.schedulers.Schedulers;
     ```
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Below the imports and package declaration, create a **Program** class in the Program.java file as below, with the following class code:
 
-    ![Open editor](../media/05-program_editor.jpg)
+    ```java
+    public class Program {
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
 
-### Create DocumentClient Instance
+        private final String databaseName = "FinancialDatabase";
+        private final String collectionId = "PeopleCollection";
+        private final String partitionKeyPath = "/type";
+        private final int throughPut = 1000;
 
-*The DocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **DocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
-
-1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
-
-    ```csharp
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using Microsoft.Azure.Documents.Linq;
-    ```
-
-1. Locate the **Program** class and replace it with the following class:
-
-    ```csharp
-    public class Program
-    {
-        public static async Task Main(string[] args)
-        {         
+        public Program() {
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            client = new AsyncDocumentClient.Builder().withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
+            .withConnectionPolicy(ConnectionPolicy.GetDefault()).withConsistencyLevel(ConsistencyLevel.Eventual)
+            .build();
         }
-    }
-    ```
 
-1. Within the **Program** class, add the following lines of code to create variables for your connection information:
+        public static void main(String[] args) {
+            Program p = new Program();
 
-    ```csharp
-    private static readonly Uri _endpointUri = new Uri("");
-    private static readonly string _primaryKey = "";
-    private static readonly string _databaseId = "FinancialDatabase";
-    private static readonly string _collectionId = "PeopleCollection";  
-    ```
-
-1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
-
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly Uri _endpointUri = new Uri("https://cosmosacct.documents.azure.com:443/");``.
-
-1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
-
-    > For example, if your **primary key** is ``NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==";``.
+            try {
+                p.createDatabase();
+                System.out.println(String.format("Database created, please hold while resources are released"));
     
-1. Locate the **Main** method:
+                //create collection...
+                p.createMultiPartitionCollection();
 
-    ```csharp
-    public static async Task Main(string[] args)
-    { 
-    }
-    ```
+            } catch (Exception e) {
+                System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
+            } finally {
+                System.out.println("close the client");
+                p.close();
+            }
+            System.exit(0);
 
-1. Within the **Main** method, add the following lines of code to author a using block that creates and disposes a **DocumentClient** instance:
+        }
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
+
+        private void createDatabase() throws Exception {
+            String databaseLink = String.format("/dbs/%s", databaseName);
+            Observable<ResourceResponse<Database>> databaseReadObs = client.readDatabase(databaseLink, null);
+            Observable<ResourceResponse<Database>> databaseExistenceObs = databaseReadObs.doOnNext(x -> {
+                System.out.println("database " + databaseName + " already exists.");
+            }).onErrorResumeNext(e -> {
+                if (e instanceof DocumentClientException) {
+                    DocumentClientException de = (DocumentClientException) e;
+                    if (de.getStatusCode() == 404) {
+                        System.out.println("database " + databaseName + " doesn't exist," + " creating it...");
+                        Database dbDefinition = new Database();
+                        dbDefinition.setId(databaseName);
+                        return client.createDatabase(dbDefinition, null);
+                    }
+                }
+                System.err.println("Reading database " + databaseName + " failed.");
+                return Observable.error(e);
+            });
+            databaseExistenceObs.toCompletable().await();
+            System.out.println("Checking database " + databaseName + " completed!\n");
+        }
+
         
-    }
-    ```
 
-1. Locate the using block within the **Main** method:
+        private DocumentCollection getMultiPartitionCollectionDefinition() {
+            DocumentCollection collectionDefinition = new DocumentCollection();
+            collectionDefinition.setId(collectionId);
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-                        
-    }
-    ```
+            PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition();
+            List<String> paths = new ArrayList<>();
+            paths.add(partitionKeyPath);
+            partitionKeyDefinition.setPaths(paths);
+            collectionDefinition.setPartitionKey(partitionKeyDefinition);
 
-1. Add the following line of code to create a variable named ``collectionLink`` that references the *self-link* Uri for the collection:
+            // Set indexing policy to be range range for string and number
+            IndexingPolicy indexingPolicy = new IndexingPolicy();
+            Collection<IncludedPath> includedPaths = new ArrayList<>();
+            IncludedPath includedPath = new IncludedPath();
+            includedPath.setPath("/*");
+            Collection<Index> indexes = new ArrayList<>();
+            Index stringIndex = Index.Range(DataType.String);
+            stringIndex.set("precision", -1);
+            indexes.add(stringIndex);
 
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-    ```
+            Index numberIndex = Index.Range(DataType.Number);
+            numberIndex.set("precision", -1);
+            indexes.add(numberIndex);
+            includedPath.setIndexes(indexes);
+            includedPaths.add(includedPath);
+            indexingPolicy.setIncludedPaths(includedPaths);
+            collectionDefinition.setIndexingPolicy(indexingPolicy);
 
-1. Your ``Program`` class definition should now look like this:
+            return collectionDefinition;
+        }
+    
+        public void createMultiPartitionCollection() throws Exception {
+            RequestOptions multiPartitionRequestOptions = new RequestOptions();
+            multiPartitionRequestOptions.setOfferThroughput(throughPut);
+            String databaseLink = String.format("/dbs/%s", databaseName);
 
-    ```csharp
-    public class Program
-    { 
-        private static readonly Uri _endpointUri = new Uri("<your uri>");
-        private static readonly string _primaryKey = "<your key>";
-        private static readonly string _databaseId = "FinancialDatabase";
-        private static readonly string _collectionId = "PeopleCollection";
+            Observable<ResourceResponse<DocumentCollection>> createCollectionObservable = client.createCollection(
+                databaseLink, getMultiPartitionCollectionDefinition(), multiPartitionRequestOptions);
 
-        public static async Task Main(string[] args)
-        {    
-            using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-            {
-                Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-            }     
+            final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+            createCollectionObservable.single() // We know there is only single result
+                    .subscribe(collectionResourceResponse -> {
+                        System.out.println(collectionResourceResponse.getActivityId());
+                        countDownLatch.countDown();
+                    }, error -> {
+                        System.err.println(
+                                "an error occurred while creating the collection: actual cause: " + error.getMessage());
+                        countDownLatch.countDown();
+                    });
+            System.out.println("creating collection...");
+            countDownLatch.await();
+        }
+
+        public void close() {
+            executorService.shutdown();
+            client.close();
         }
     }
     ```
 
-    > We will now execute build the application to make sure our code compiles successfully.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -364,93 +369,149 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ### Observe RU Charge for Large Document
 
-1. Locate the using block within the **Main** method:
+1. Create a file in your directory called PersonDetail.java, and copy the following code (be sure to specify the correct classpath for the package declaration):
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {                        
-    }
-    ```
-    
-1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named **doc**:
+    ```java
+    package testpackage;
 
-    ```csharp
-    object doc = new Bogus.Person();
-    ```
+    import java.text.DecimalFormat;
+    import java.util.ArrayList;
+    import java.util.Random;
 
-    > The **Bogus** library has a special helper class (``Bogus.Person``) that will generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
-    
-    ```js
-    {
-        "Gender": 1,
-        "FirstName": "Rosalie",
-        "LastName": "Dach",
-        "FullName": "Rosalie Dach",
-        "UserName": "Rosalie_Dach",
-        "Avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/mastermindesign/128.jpg",
-        "Email": "Rosalie27@gmail.com",
-        "DateOfBirth": "1962-02-22T21:48:51.9514906-05:00",
-        "Address": {
-            "Street": "79569 Wilton Trail",
-            "Suite": "Suite 183",
-            "City": "Caramouth",
-            "ZipCode": "85941-7829",
-            "Geo": {
-                "Lat": -62.1607,
-                "Lng": -123.9278
-            }
-        },
-        "Phone": "303.318.0433 x5168",
-        "Website": "gerhard.com",
-        "Company": {
-            "Name": "Mertz - Gibson",
-            "CatchPhrase": "Focused even-keeled policy",
-            "Bs": "architect mission-critical markets"
+    import com.github.javafaker.Faker;
+    import com.microsoft.azure.cosmosdb.Document;
+
+    public class PersonDetail {
+        Faker faker = new Faker();
+        ArrayList<Document> documentDefinitions = new ArrayList<>();  
+        
+        public PersonDetail(int number, int childnumber) throws NumberFormatException {
+            for (int i= 0; i < number;i++){ 
+                ArrayList<Document> children = new ArrayList<>(); 
+                for (int j= 0; j < childnumber;j++){  
+                    Document child= new Document(); 
+                    child.set("firstName", faker.name().firstName());
+                    child.set("lastName", faker.name().lastName());
+                    children.add(child);
+                } 
+                Document spouse= new Document(); 
+                spouse.set("firstName", faker.name().firstName());
+                spouse.set("lastName", faker.name().lastName());
+                Document relatives = new Document();
+                relatives.set("children", children);
+                relatives.set("spouse", spouse);
+                Document documentDefinition = new Document();    
+                Document address = new Document();
+                address.set("Street", faker.address().buildingNumber()+" "+faker.address().streetName());                
+                address.set("City", faker.address().city());  
+                address.set("Country", faker.address().country()); 
+                documentDefinition.set("DateOfBirth", faker.date().birthday());         
+                documentDefinition.set("firstName", faker.name().firstName());
+                documentDefinition.set("lastName", faker.name().lastName());
+                documentDefinition.set("PhoneNumber", faker.phoneNumber().phoneNumber());
+                documentDefinition.set("Company", faker.company().name());
+                documentDefinition.set("Address", address);
+                documentDefinition.set("type", "personofinterest");
+                documentDefinition.set("type", "personofinterest");
+                documentDefinition.set("Relatives", relatives);
+                documentDefinitions.add(documentDefinition);
+            }    
         }
     }
     ```
 
-1. Add a new line of code to invoke the **CreateDocumentAsync** method of the **DocumentClient** instance using the **collectionLink** and **doc** variables as parameters:
-
-    ```csharp
-    ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
-    ```
-1. After the last line of code in the using block, add a new line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
-    ```
-
-1. Your **Main** method should now look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
+    > This class will generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
+    
+    ```js
     {
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-            object doc = new Bogus.Person();
-            ResourceResponse<Document> response = await client.CreateDocumentAsync(collectionLink, doc);
-            await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
-        }   
+        "DateOfBirth": -6296557022,
+        "firstName": "Torrie",
+        "lastName": "Douglas",
+        "PhoneNumber": "(000) 540-9208 x53930",
+        "Company": "Schimmel, Langworth and Heaney",
+        "Address": {
+            "Street": "156 Phebe Canyon",
+            "City": "Smithamburgh",
+            "Country": "Eritrea"
+        },
+        "type": "personofinterest",
+        "Relatives": {
+            "children": [
+                {
+                    "firstName": "Neta",
+                    "lastName": "Block"
+                },
+                {
+                    "firstName": "Wilbert",
+                    "lastName": "Schamberger"
+                },
+                {
+                    "firstName": "Alejandro",
+                    "lastName": "McLaughlin"
+                },
+                {
+                    "firstName": "Donnetta",
+                    "lastName": "Cole"
+                }
+            ],
+            "spouse": {
+                "firstName": "Jewell",
+                "lastName": "Crooks"
+            }
+        }
     }
     ```
 
-1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
+1. Below the **main** method in your **Program** class, copy the following new method:
 
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
+    ```java
+    public void createDocument() throws Exception {
+        ArrayList<Document> documents = new PersonDetail(1, 1).documentDefinitions;
+        for (Document document : documents) {
+            // Create a document
+            Observable<ResourceResponse<Document>> createDocumentObservable = asyncClient
+                    .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
+            Observable<Double> totalChargeObservable = createDocumentObservable.map(ResourceResponse::getRequestCharge)
+                    // Map to request charge
+                    .reduce((totalCharge, charge) -> totalCharge + charge);
+            // Sum up all the charges
+            final CountDownLatch completionLatch = new CountDownLatch(1);
+            // Subscribe to the total request charge observable
+            totalChargeObservable.subscribe(totalCharge -> {
+                // Print the total charge
+                System.out.println("RU charge: "+totalCharge);
+                completionLatch.countDown();
+            }, e -> completionLatch.countDown());
+            completionLatch.await();
+        }
+    }
     ```
 
-    > This command will build and execute the console project.
+
+1. Locate the **Main** method in your **Program** class and replace it with the following:
+
+    ```csharp
+    public static void main(String[] args) {
+        Program p = new Program();
+
+        try {
+            p.createDocument();
+            System.out.println("finished");
+
+        } catch (Exception e) {
+            System.err.println(String.format("failed with %s", e));
+        }
+        System.exit(0);
+
+    }
+    ```
+
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the results of the console project.
 
-    > You should see the document creation operation use approximately 10 RUs.
+    > You should see the document creation operation use approximately 11 RUs.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -480,64 +541,24 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Results** pane, observe the results of your query.
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java project.
 
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+1. In the Visual Studio Code window, double-click the **Program.java** file to open an editor tab for the file.
 
-1. To view the RU charge for inserting a very large document, we will use the **Bogus** library to create a fictional family. To create a fictional family, we will generate two fictional parents and an array of 4 fictional children:
+1. To view the RU charge for inserting a very large document, we will increase the number of children under the "Relatives" section generated by the **PersonDetail** class. Locate the following line of code in the **createDocument** method:
 
-    ```js
-    {
-        "Person":  { ... }, 
-        "Relatives": {
-            "Spouse": { ... }, 
-            "Children": [
-                { ... }, 
-                { ... }, 
-                { ... }, 
-                { ... }
-            ]
-        }
-    }
+    ```java
+    ArrayList<Document> documents = new PersonDetail(1, 1).documentDefinitions;
     ```
+1. Replace it with the following:
 
-    Each property will have a **Bogus**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
-
-1. Within the **Program.cs** editor tab, locate the **Main** method.
-
-1. Within the **Main** method, locate the following line of code: 
-
-    ```csharp
-    object doc = new Bogus.Person();
+    ```java
+    ArrayList<Document> documents = new PersonDetail(1, 100).documentDefinitions;
     ```
+    > This will generate a document with 100 children in the Relatives section
 
-    Replace that line of code with the following code:
 
-    ```csharp
-    object doc = new
-    {
-        Person = new Bogus.Person(),
-        Relatives = new
-        {
-            Spouse = new Bogus.Person(), 
-            Children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
-        }
-    };
-    ```
-
-    > This new block of code will create the large JSON object discussed above.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run. 
 
 1. Observe the results of the console project.
 
@@ -586,25 +607,14 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         "includedPaths": [
             {
                 "path": "/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "Number",
-                        "precision": -1
-                    },
-                    {
-                        "kind": "Range",
-                        "dataType": "String",
-                        "precision": -1
-                    },
-                    {
-                        "kind": "Spatial",
-                        "dataType": "Point"
-                    }
-                ]
+                "indexes": []
             }
         ],
-        "excludedPaths": []
+        "excludedPaths": [
+            {
+                "path": "/\"_etag\"/?"
+            }
+        ]
     }
     ```
 
@@ -618,22 +628,14 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         "automatic": true,
         "includedPaths": [
             {
-                "path":"/*",
-                "indexes":[
-                    {
-                        "kind": "Range",
-                        "dataType": "String",
-                        "precision": -1
-                    },
-                    {
-                        "kind": "Range",
-                        "dataType": "Number",
-                        "precision": -1
-                    }
-                ]
+                "path": "/*",
+                "indexes": []
             }
         ],
         "excludedPaths": [
+            {
+                "path": "/\"_etag\"/?"
+            },
             {
                 "path":"/Relatives/*"
             }
@@ -667,17 +669,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     > This query will fail immediately since this property is not indexed.
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java project, and run your **Program** class again to create another document. 
 
 1. Observe the results of the console project.
 

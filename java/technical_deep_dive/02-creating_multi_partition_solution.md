@@ -161,6 +161,14 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         .build();
     ```
 
+1. For the ``uri`` value, replace this with the **URI** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+
+    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, the input parameter for **withServiceEndpoint** input will look like this: ``withServiceEndpoint("https://cosmosacct.documents.azure.com:443/")``.
+
+1. For the ``key`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account that you recorded earlier in this lab: 
+
+    > For example, if your **primary key** is ``NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==``, the input parameter for  **withMasterKeyOrResourceToken** will look like this: ``withMasterKeyOrResourceToken("NAye14XRGsHFbhpOVUWB7CMG2MOTAigdei5eNjxHNHup7oaBbXyVYSLW2lkPGeKRlZrCkgMdFpCEnOjlHpz94g==")``.
+
 1. Below the main method in the Program class, add the following methods for creating a database, and closing down the AsyncDocumentClient: 
 
     ```java
