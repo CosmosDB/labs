@@ -199,6 +199,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     import java.util.concurrent.ExecutorService;
     import java.util.concurrent.Executors;
     import java.util.concurrent.Future;
+    import com.microsoft.azure.cosmosdb.AccessCondition;
     import com.microsoft.azure.cosmosdb.ConnectionPolicy;
     import com.microsoft.azure.cosmosdb.ConsistencyLevel;
     import com.microsoft.azure.cosmosdb.DataType;
@@ -1080,7 +1081,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 1. Locate the *using* block within the **Main** method and delete any existing code:
 
     ```java
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException
     {    
 
     }
@@ -1327,125 +1328,45 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ### Reading and Querying Documents
 
-1. Locate the *using* block within the **Main** method and delete any existing code:
+1. Locate the **Main** method and delete any existing code:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-        }
+    ```java
+    public static void main(String[] args) throws InterruptedException 
+    {
+
     }
-    ```
-
-1. Add the following code to the method to create an asynchronous connection:
-
-    ```csharp
-    await client.OpenAsync();
-    ```
-    
-1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
-
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
     ```
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
-    ```csharp
-    string sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
+    ```java
+    String sql = "SELECT TOP 1 * FROM c";
     ```
 
     > This query will find a single document matching the specified unique id
 
-1. Add the following line of code to create a document query instance:
+1. Add the following lines of code to create a document query instance:
 
-    ```csharp
-    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionLink, sql).AsDocumentQuery();
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        Program p = new Program();
+        Observable<FeedResponse<Document>> documentQueryObservable = p.client
+        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
     ```
-
-1. Add the following line of code to get the first page of results and then store them in a variable of type **FeedResponse<>**:
-
-    ```csharp
-    FeedResponse<Document> response = await query.ExecuteNextAsync<Document>();
-    ```
-
-    > We only need to retrieve a single page since we are getting the ``TOP 1`` documents from the collection.
 
 1. Add the following line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
 
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    ```java
+        System.out.println(documentQueryObservable.toBlocking().single().getRequestCharge());   
     ```
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
     > You should see the amount of RUs used to query for the document in your collection.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Locate the *using* block within the **Main** method and delete any existing code:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-        }
-    }
-    ```
-
-1. Add the following code to the method to create an asynchronous connection:
-
-    ```csharp
-    await client.OpenAsync();
-    ```
-
-1. Add the following code to create a Uri referencing the document you wish to search for:
-
-    ```csharp
-    Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");   
-    ```
-
-1. Add the following code to use the **ReadDocumentAsync** method of the **DocumentClient** class to retrieve a document using the unique id:
-
-    ```csharp
-    ResourceResponse<Document> response = await client.ReadDocumentAsync(documentLink);
-    ```
-
-1. Add the following line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
-    ```
-   
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > You should see that it took fewer RUs to obtain the document directly if you have it's unique id.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -1455,51 +1376,43 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ### Observe the ETag Property 
 
-1. Locate the *using* block within the **Main** method:
+1. Locate the **Main** method and delete any existing code:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
+    ```java
+    public static void main(String[] args) throws InterruptedException 
     {
+
     }
     ```
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
+    ```java
+    System.out.println(documentQueryObservable.toBlocking().single().getRequestCharge().);
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    await Console.Out.WriteLineAsync($"ETag: {response.Resource.ETag}");    
+    ```java
+        Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
+        while (it.hasNext()) {
+               FeedResponse<Document> page = it.next();
+               List<Document> results = page.getResults();
+               for (Document doc : results) { 
+                        System.out.println(doc.getETag());
+                }
+        }   
     ```
 
     > The ETag header and the current value are included in all response messages.
    
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
     > You should see an ETag for the document.
 
-1. Enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Click run again.
 
 1. Observe the output of the console application.
 
@@ -1507,30 +1420,37 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the *using* block within the **Main** method:
 
-    ```csharp
-    using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-    {
-    }
+1. Locate the **Main** method:
+
+    ```java
+        public static void main(String[] args) throws InterruptedException {
+
+                String sql = "SELECT TOP 1 * FROM c";
+
+                FeedOptions options = new FeedOptions();
+                options.setEnableCrossPartitionQuery(true);
+                QueryProgram10 p = new QueryProgram10();
+                Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+
+                Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
+                while (it.hasNext()) {
+                        FeedResponse<Document> page = it.next();
+                        List<Document> results = page.getResults();
+                        for (Document doc : results) { 
+                                System.out.println(doc.getETag());
+                        }
+                }                
+        }
     ```
     
-1. Within the **Main** method, locate the following line of code: 
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"Existing ETag:\t{response.Resource.ETag}");    
-    ```
 
 1. Within the **using** block, add a new line of code to create an **AccessCondition** instance that will use the **ETag** from the document and specify an **If-Match** header:
 
     ```csharp
     AccessCondition cond = new AccessCondition { Condition = response.Resource.ETag, Type = AccessConditionType.IfMatch };
+
     ```
 
 1. Add a new line of code to update a property of the document using the **SetPropertyValue** method:
