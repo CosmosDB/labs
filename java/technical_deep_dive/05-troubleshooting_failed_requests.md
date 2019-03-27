@@ -40,21 +40,6 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
-1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
-
-1. In the **Add Collection** popup, perform the following actions:
-
-    1. In the **Database id** field, select the **Existing database** option and then enter the value **FinancialDatabase**.
-
-    1. In the **Collection id** field, enter the value **PeopleCollection**.
-
-    1. In the **Storage capacity** section, select the **Fixed-Size** option.
-
-    1. In the **Throughput** field, enter the value ``1000``.
-
-    1. Click the **OK** button.
-
-1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
 
 ### Retrieve Account Credentials
 
@@ -146,7 +131,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 21. After a few minutes, refresh the page and the status for the **ImportTransactions** pipeline should be listed as **Succeeded**.
 
-22. Once the import process has completed, close the ADF. You will now proceed to execute simple queries on your imported data. 
+22. Once the import process has completed, close the ADF. You will later execute queries on your imported data. 
 
 ### Create a Java Project
 
@@ -210,8 +195,10 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     import java.util.List;
     import java.util.Collections;
     import java.util.concurrent.CountDownLatch;
+    import java.util.concurrent.ExecutionException;
     import java.util.concurrent.ExecutorService;
     import java.util.concurrent.Executors;
+    import java.util.concurrent.Future;
     import com.microsoft.azure.cosmosdb.ConnectionPolicy;
     import com.microsoft.azure.cosmosdb.ConsistencyLevel;
     import com.microsoft.azure.cosmosdb.DataType;
@@ -358,7 +345,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     }
     ```
 
-1. Save all of your open editor tabs, and click run.
+1. Save all of your open editor tabs, and click run (this should give you a message saying that the database already exists as you should have created it earlier in the lab, but the collection will be created)
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -802,7 +789,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
 
-1. In the **Settings** section, locate the **Throughput** field and update it's value to **1000**.
+1. In the **Settings** section, locate the **Throughput** field and update it's value to **400**.
 
     > This is the minimum throughput that you can allocate to an *unlimited* collection.
 
@@ -814,265 +801,169 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **New File** menu option.
 
-    ![New File](../media/05-new_file.jpg)
+1. Name the new file **Transaction.java** . The editor tab will automatically open for the new file.
 
-1. Name the new file **Transaction.cs** . The editor tab will automatically open for the new file.
+1. Paste in the following code for the ``Transaction`` class (be sure that the package declaration matches your classpath):
 
-1. Paste in the following code for the ``Transaction`` class:
+    ```java
+    package testpackage;
+    import java.util.ArrayList;
+    import com.github.javafaker.Faker;
+    import com.microsoft.azure.cosmosdb.Document;
 
-    ```csharp
-    public class Transaction
-    {
-        public double amount { get; set; }
-        public bool processed { get; set; }
-        public string paidBy { get; set; }
-        public string costCenter { get; set; }
+    public class Transaction {
+        Faker faker = new Faker();
+        ArrayList<Document> documentDefinitions = new ArrayList<>();  
+        public Transaction(int number) throws NumberFormatException {
+            for (int i= 0; i < number;i++){  
+                Document documentDefinition = new Document();      
+                documentDefinition.set("amount", faker.random().nextDouble());            
+                documentDefinition.set("processed", faker.random().nextBoolean());            
+                documentDefinition.set("paidBy", faker.name().firstName() +" "+faker.name().lastName());
+                documentDefinition.set("costCenter", faker.commerce().department());
+                documentDefinitions.add(documentDefinition);
+            }      
+        }
     }
     ```
+    > As a reminder, the java faker library generates test data.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the console project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **Program.java** link in the **Explorer** pane to open the file in the editor.
 
 1. Locate the following line of code that identifies the collection that will be used by the application:
 
-    ```csharp
-    private static readonly string _collectionId = "PeopleCollection";  
+    ```java
+    private final String collectionId = "PeopleCollection"; 
     ```
 
     Replace the line of code with the following line of code:
 
     ```csharp
-    private static readonly string _collectionId = "TransactionCollection";
+    private final String collectionId = "TransactionCollection";
     ```
 
     > We will use a different collection for the next section of the lab.
 
-1. Locate the *using* block within the **Main** method and delete any existing code:
+1. Locate the **createDocument** method and replace it with the following:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
+    ```java
+     public void createDocument() throws Exception {
+        ArrayList<Document> documents = new Transaction(5000).documentDefinitions;
+        final ExecutorService executor = Executors.newFixedThreadPool(500);
+        final List<Future<?>> futures = new ArrayList<>();
+        for (Document document: documents){
+            // Create a document
+            Future<?> future = executor.submit(() -> {
+            Observable<ResourceResponse<Document>> createDocumentObservable = asyncClient
+            .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
+            System.out.println(createDocumentObservable.toBlocking().single().getResource().getId());  
+            });   
+            futures.add(future);             
+        }
+        try {
+            for (Future<?> future : futures) {
+                future.get(); // do anything you need, e.g. isDone(), ...
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
     }
     ```
 
-1. Add the following code to the method to create an asynchronous connection:
+1. Locate the **main** method and ensure you are calling the **createDocument** method:
 
-    ```csharp
-    await client.OpenAsync();
-    ```
-    
-1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
+    ```java
+        public static void main(String[] args) {
+        Program p = new Program();
 
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-    ```
+        try {
+            p.createDocument();
+            System.out.println("finished");
 
-1. Observe the code in the **Main** method.
+        } catch (Exception e) {
+            System.err.println(String.format("failed with %s", e));
+        }
+        System.exit(0);
 
-    > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
-
-1. Add the following code to create a collection of ``Transaction`` instances:
-
-    ```csharp
-    var transactions = new Bogus.Faker<Transaction>()
-        .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-        .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-        .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-        .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-        .GenerateLazy(100);
-    ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 1000 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
-    
-1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
-
-    ```csharp
-    foreach(var transaction in transactions)
-    {
     }
     ```
 
-1. Within the ``foreach`` block, add the following line of code to asynchronously create a document and save the result of the creation task to a variable:
+1. Your **Program** class should look like this:
 
-    ```csharp
-    ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, transaction);
-    ```
+    ```java
+    public class Program {
 
-    > The ``CreateDocumentAsync`` method of the ``DocumentClient`` class takes in a self-link for a collection and an object that you would like to serialize into JSON and store as a document within the specified collection.
+        private final ExecutorService executorService;
+        private final Scheduler scheduler;
+        private AsyncDocumentClient client;
 
-1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
+        private final String databaseName = "FinancialDatabase";
+        private final String collectionId = "PeopleCollection";
+        private AsyncDocumentClient asyncClient;
 
-    ```csharp
-    await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
-    ```
+        public Program() {
+            executorService = Executors.newFixedThreadPool(100);
+            scheduler = Schedulers.from(executorService);
+            // Sets up the requirements for each test
+            ConnectionPolicy connectionPolicy = new ConnectionPolicy();
+            connectionPolicy.setConnectionMode(ConnectionMode.Direct);
+            asyncClient = new AsyncDocumentClient.Builder()
+                    .withServiceEndpoint("uri")
+                    .withMasterKeyOrResourceToken("key")
+                    .withConnectionPolicy(connectionPolicy).withConsistencyLevel(ConsistencyLevel.Session).build();
 
-    > The ``ResourceResponse`` type has a property named ``Resource`` that can give you access to interesting data about a document such as it's unique id, time-to-live value, self-link, ETag, timestamp,  and attachments.
+            DocumentCollection collectionDefinition = new DocumentCollection();
+            collectionDefinition.setId(UUID.randomUUID().toString());
 
-1. Your **Main** method should look like this:
+        }
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-            var transactions = new Bogus.Faker<Transaction>()
-                .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-                .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-                .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-                .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-                .GenerateLazy(100);
-            foreach(var transaction in transactions)
-            {
-                ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionLink, transaction);    
-                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
+        /**
+        * Create a document with a programmatically set definition, in an Async manner
+        */
+
+        public static void main(String[] args) {
+            Program p = new Program();
+
+            try {
+                p.createDocument();
+                System.out.println("finished");
+
+            } catch (Exception e) {
+                System.err.println(String.format("failed with %s", e));
             }
-        }  
+            System.exit(0);
+
+        }
+
+        public void createDocument() throws Exception {
+            ArrayList<Document> documents = new Transaction(5000).documentDefinitions;
+            final ExecutorService executor = Executors.newFixedThreadPool(500);
+            final List<Future<?>> futures = new ArrayList<>();
+            for (Document document: documents){
+                // Create a document
+                Future<?> future = executor.submit(() -> {
+                Observable<ResourceResponse<Document>> createDocumentObservable = asyncClient
+                .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
+                System.out.println(createDocumentObservable.toBlocking().single().getResource().getId());  
+                });   
+                futures.add(future);             
+            }
+            try {
+                for (Future<?> future : futures) {
+                    future.get(); // do anything you need, e.g. isDone(), ...
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates documents in Azure Cosmos DB.
+    > We are going to try and create 5000 documents with 500 concurrent threads to see if we can hit out throughput limit.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > You should see a list of document ids associated with new documents that are being created by this tool.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Back in the code editor tab, locate the following lines of code:
-
-    ```csharp
-    foreach(var transaction in transactions)
-    {
-        ResourceResponse<Document> result = await client.CreateDocumentAsync(collectionSelfLink, transaction);
-        await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.Id}");
-    } 
-    ```
-
-    Replace those lines of code with the following code:
-
-    ```csharp
-    List<Task<ResourceResponse<Document>>> tasks = new List<Task<ResourceResponse<Document>>>();
-    foreach(var transaction in transactions)
-    {
-        Task<ResourceResponse<Document>> resultTask = client.CreateDocumentAsync(collectionLink, transaction);
-        tasks.Add(resultTask);
-    }    
-    Task.WaitAll(tasks.ToArray());
-    foreach(var task in tasks)
-    {
-        await Console.Out.WriteLineAsync($"Document Created\t{task.Result.Resource.Id}");
-    }  
-    ```
-
-    > We are going to attempt to run as many of these creation tasks in parallel as possible. Remember, our collection is configured at 1,000 RU/s.
-
-1. Your **Main** method should look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-            var transactions = new Bogus.Faker<Transaction>()
-                .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-                .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-                .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-                .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-                .GenerateLazy(100);
-            List<Task<ResourceResponse<Document>>> tasks = new List<Task<ResourceResponse<Document>>>();
-            foreach(var transaction in transactions)
-            {
-                Task<ResourceResponse<Document>> resultTask = client.CreateDocumentAsync(collectionLink, transaction);
-                tasks.Add(resultTask);
-            }    
-            Task.WaitAll(tasks.ToArray());
-            foreach(var task in tasks)
-            {
-                await Console.Out.WriteLineAsync($"Document Created\t{task.Result.Resource.Id}");
-            } 
-        }  
-    }
-    ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your collection does not have enough assigned throughput to handle the volume of requests.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > This query should execute successfully. We are only creating 100 documents and we most likely will not run into any throughput issues here.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Back in the code editor tab, locate the following line of code:
-
-    ```csharp
-    .GenerateLazy(100);
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    .GenerateLazy(5000);
-    ```
-
-    > We are going to try and create 5000 documents in parallel to see if we can hit out throughput limit.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe that the application will crash after some time.
 
@@ -1082,85 +973,40 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ## Tuning Queries and Reads
 
-*You will now tune your requests to Azure Cosmos DB by manipulating properties of the **FeedOptions** class in the .NET SDK.*
+*You will now tune your requests to Azure Cosmos DB by manipulating properties of the **FeedOptions** class in the Async Java SDK*
 
-### Measuing RU Charge
+### Measuring RU Charge
 
-1. Locate the *using* block within the **Main** method and delete any existing code:
+1. Locate the **Main** method and replace with the following code:
 
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
+    ```java
+        public static void main(String[] args) throws InterruptedException {
+                // as this is a multi collection enable cross partition query
+                FeedOptions options = new FeedOptions();
+                options.setEnableCrossPartitionQuery(true);
+                options.setPopulateQueryMetrics(true);
+                options.setMaxItemCount(1000);
+
+                String sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
+                Program p = new Program();
+                Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                // observable to an iterator
+                Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
+
+                while (it.hasNext()) {
+                        FeedResponse<Document> page = it.next();
+                        ConcurrentMap<String, QueryMetrics> results = page.getQueryMetrics();
+                System.out.println(results);
+                }        
+           
         }
-    }
     ```
 
-1. Add the following code to the method to create an asynchronous connection:
+    > The query will perform a cross-partition ORDER BY and only return the top 1000 out of 50000 documents. the setMaxItemCount ensures that the page size will match the query, and we will only get a single set of query metrics printed to standard out. 
 
-    ```csharp
-    await client.OpenAsync();
-    ```
-    
-1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
 
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-    ```
-
-1. Add the following lines of code to configure options for a query:
-
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        PopulateQueryMetrics = true
-    };
-    ```
-
-1. Add the following line of code that will store a SQL query in a string variable:
-
-    ```csharp
-    string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
-    ```
-
-    > This query will perform a cross-partition ORDER BY and only return the top 1000 out of 50000 documents.
-
-1. Add the following line of code to create a document query instance:
-
-    ```csharp
-    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionLink, sql, options).AsDocumentQuery();
-    ```
-
-1. Add the following line of code to get the first "page" of results:
-
-    ```csharp
-    var result = await query.ExecuteNextAsync();
-    ```
-
-    > We will not enumerate the full result set. We are only interested in the metrics for the first page of results.
-
-1. Add the following lines of code to print out all of the query metrics to the console:
-
-    ```csharp
-    foreach(string key in result.QueryMetrics.Keys)
-    {
-        await Console.Out.WriteLineAsync($"{key}\t{result.QueryMetrics[key]}");
-    }
-    ```
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
@@ -1170,29 +1016,19 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
+    ```java
+    String sql = "SELECT TOP 100 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT * FROM c WHERE c.processed = true";
+    ```java
+    String sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
     > This new query does not perform a cross-partition ORDER BY.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
@@ -1200,29 +1036,19 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    string sql = "SELECT * FROM c WHERE c.processed = true";
+    ```java
+    String sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT * FROM c";
+    ```java
+    String sql = "SELECT * FROM c";
     ```
 
     > This new query does not filter the result set.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
@@ -1230,83 +1056,53 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    string sql = "SELECT * FROM c";
+    ```java
+    String sql = "SELECT * FROM c";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT c.id FROM c";
+    ```java
+    String sql = "SELECT c.id FROM c";
     ```
 
     > This new query does not filter the result set.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
     > Observe the slight differences in the various metric values.
 
+
 ### Managing SDK Query Options
 
 1. Locate the *using* block within the **Main** method and delete any existing code:
 
-    ```csharp
-    public static async Task Main(string[] args)
+    ```java
+    public static void main(String[] args) throws InterruptedException {
     {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-        }
+
     }
     ```
 
-1. Add the following code to the method to create an asynchronous connection:
+1. Add the following additional options for a query:
 
-    ```csharp
-    await client.OpenAsync();
-    ```
-    
-1. Add the following line of code to create a variable named ``collectionLink`` that is a reference (self-link) to an existing collection:
-
-    ```csharp
-    Uri collectionLink = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-    ```
-
-1. Add the following line of code to create a high-precision timer:
-
-    ```csharp
-    Stopwatch timer = new Stopwatch();
-    ```
-
-1. Add the following lines of code to configure options for a query:
-
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = 1,
-        MaxBufferedItemCount = 0
-    }; 
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(1);
+        options.setMaxBufferedItemCount(0);
     ```
 
 1. Add the following lines of code to write various values to the console window:
 
-    ```csharp
-    await Console.Out.WriteLineAsync($"MaxItemCount:\t{options.MaxItemCount}");
-    await Console.Out.WriteLineAsync($"MaxDegreeOfParallelism:\t{options.MaxDegreeOfParallelism}");
-    await Console.Out.WriteLineAsync($"MaxBufferedItemCount:\t{options.MaxBufferedItemCount}");
+    ```java
+        System.out.println(options.getEnableCrossPartitionQuery());
+        System.out.println(options.getMaxItemCount());
+        System.out.println(options.getMaxDegreeOfParallelism());
+        System.out.println(options.getMaxBufferedItemCount());
     ```
 
 1. Add the following line of code that will store a SQL query in a string variable:
@@ -1317,67 +1113,54 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     > This query will perform a cross-partition ORDER BY on a filtered result set.
 
-1. Add the following line of code to start the timer:
+1. Add the following line of code to start a high-precision timer:
 
-    ```csharp
-    timer.Start();
+    ```java
+    long startTime = System.nanoTime(); 
     ```
 
-1. Add the following line of code to create a document query instance:
+1. Add the following code to create a document query instance and enumerate the resultset:
 
-    ```csharp
-    IDocumentQuery<Document> query = client.CreateDocumentQuery<Document>(collectionLink, sql, options).AsDocumentQuery();
-    ```
-
-1. Add the following lines of code to enumerate the result set.
-
-    ```csharp
-    while (query.HasMoreResults)  
-    {
-        var result = await query.ExecuteNextAsync<Document>();
-    }
+    ```java
+        Program p = new Program();
+        Observable<FeedResponse<Document>> documentQueryObservable = p.client
+        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+        // observable to an iterator
+        Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
+         while (it.hasNext()) {
+                FeedResponse<Document> page = it.next();
+                List<Document> results = page.getResults();
+         }
     ```
 
     > Since the results are paged, we will need to call the ``ExecuteNextAsync`` method multiple times in a while loop.
 
 1. Add the following line of code stop the timer:
 
-    ```csharp
-    timer.Stop();
+    ```java
+    long estimatedTime = System.nanoTime() - startTime;
     ```
 
 1. Add the following line of code to write the timer's results to the console window:
 
-    ```csharp
-    await Console.Out.WriteLineAsync($"Elapsed Time:\t{timer.Elapsed.TotalSeconds}");
+    ```java
+    System.out.println(estimatedTime);
     ```
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run
 
 1. Observe the output of the console application.
 
     > This initial query should take an unexpectedly long amount of time. This will require us to optimize our SDK options.
 
-1. Back in the code editor tab, locate the following line of code:
+1. Back in the code editor tab, locate the following lines of code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = 1,
-        MaxBufferedItemCount = 0
-    }; 
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(1);
+        options.setMaxBufferedItemCount(0);
     ```
 
     Replace that line of code with the following code:
@@ -1385,26 +1168,17 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     ```csharp
     FeedOptions options = new FeedOptions
     {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = 5,
-        MaxBufferedItemCount = 0
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(5);
+        options.setMaxBufferedItemCount(0);
     };   
     ```
 
-    > Setting the ``MaxDegreeOfParallelism`` property to a value of ``1`` effectively creates eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
+    > Setting the ``MaxDegreeOfParallelism`` property to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
@@ -1412,82 +1186,54 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = 5,
-        MaxBufferedItemCount = 0
-    }; 
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(5);
+        options.setMaxBufferedItemCount(0); 
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = 5,
-        MaxBufferedItemCount = -1
-    };   
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(5);
+        options.setMaxBufferedItemCount(-1); 
     ```
 
     > Setting the ``MaxBufferedItemCount`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
     > Again, this should have a slight impact on your performance time.
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = 5,
-        MaxBufferedItemCount = -1
-    }; 
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(5);
+        options.setMaxBufferedItemCount(-1); 
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
-    };   
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(-1);   
     ```
 
     > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned collect is fetched serially with respect to the query Setting the ``MaxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
@@ -1495,41 +1241,27 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 100,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
-    };     
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(100);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(-1);   
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 500,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
-    };   
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(500);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(-1);  
     ```
 
     > We are increasing the amount of items returned per "page" in an attempt to improve the performance of the query.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
@@ -1537,41 +1269,27 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 500,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
-    };   
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(500);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(-1);   
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 1000,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
-    }; 
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(1000);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(-1); 
     ```
 
     > For large queries, it is recommended that you increase the page size up to a value of 1000.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, anc click run.
 
 1. Observe the output of the console application.
 
@@ -1579,41 +1297,27 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 1000,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = -1
-    }; 
+    ```java
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(1000);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(-1);  
     ```
 
     Replace that line of code with the following code:
 
     ```csharp
-    FeedOptions options = new FeedOptions
-    {
-        EnableCrossPartitionQuery = true,
-        MaxItemCount = 1000,
-        MaxDegreeOfParallelism = -1,
-        MaxBufferedItemCount = 50000
-    };  
+        FeedOptions options = new FeedOptions();
+        options.setEnableCrossPartitionQuery(true);
+        options.setMaxItemCount(1000);
+        options.setMaxDegreeOfParallelism(-1);
+        options.setMaxBufferedItemCount(50000); 
     ```
 
-    > Parallel query is designed to pre-fetch results while the current batch of results is being processed by the client. The pre-fetching helps in overall latency improvement of a query. **MaxBufferedItemCount** is the parameter to limit the number of pre-fetched results. Setting MaxBufferedItemCount to the expected number of results returned (or a higher number) allows the query to receive maximum benefit from pre-fetching.
+    > Parallel query is designed to pre-fetch results while the current batch of results is being processed by the client. The pre-fetching helps in overall latency improvement of a query. **setMaxBufferedItemCount** is the parameter to limit the number of pre-fetched results. Setting MaxBufferedItemCount to the expected number of results returned (or a higher number) allows the query to receive maximum benefit from pre-fetching.
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
