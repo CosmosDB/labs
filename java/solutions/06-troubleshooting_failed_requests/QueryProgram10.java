@@ -64,28 +64,16 @@ public class QueryProgram10 {
                 FeedOptions options = new FeedOptions();
                 options.setEnableCrossPartitionQuery(true);
                 QueryProgram10 p = new QueryProgram10();
-
-
-                Observable<FeedResponse<Document>> document = p.client
+                Observable<FeedResponse<Document>> documentQueryObservable = p.client
                 .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
 
-                Iterator<FeedResponse<Document>> it = document.toBlocking().getIterator();
-                RequestOptions roptions;
+                Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
                 while (it.hasNext()) {
                         FeedResponse<Document> page = it.next();
                         List<Document> results = page.getResults();
                         for (Document doc : results) { 
                                 System.out.println(doc.getETag());
-                                AccessCondition cond = new AccessCondition();
-                                cond.setCondition(doc.getETag());
-                                cond.setType(AccessConditionType.IfMatch);
-                                doc.set("FirstName", "Demo");
-                                roptions = new RequestOptions();
-                                Observable<ResourceResponse<Document>> response =  p.client.replaceDocument(doc, roptions); 
-                                System.out.println(response.toBlocking().single().getResource().getETag());
-       
                         }
-                }         
-                                         
+                }                
         }
 }

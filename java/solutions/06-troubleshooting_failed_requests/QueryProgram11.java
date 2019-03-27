@@ -35,7 +35,7 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-public class QueryProgramPre10 {
+public class QueryProgram11 {
         private final ExecutorService executorService;
         private final Scheduler scheduler;
         private AsyncDocumentClient client;
@@ -45,7 +45,7 @@ public class QueryProgramPre10 {
 
         private int numberOfDocuments;
 
-        public QueryProgramPre10() {
+        public QueryProgram11() {
                 // public constructor
                 executorService = Executors.newFixedThreadPool(100);
                 scheduler = Schedulers.from(executorService);
@@ -63,17 +63,29 @@ public class QueryProgramPre10 {
 
                 FeedOptions options = new FeedOptions();
                 options.setEnableCrossPartitionQuery(true);
-                QueryProgramPre10 p = new QueryProgramPre10();
-                Observable<FeedResponse<Document>> documentQueryObservable = p.client
+                QueryProgram11 p = new QueryProgram11();
+
+
+                Observable<FeedResponse<Document>> document = p.client
                 .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
 
-                Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
+                Iterator<FeedResponse<Document>> it = document.toBlocking().getIterator();
+                RequestOptions roptions;
                 while (it.hasNext()) {
                         FeedResponse<Document> page = it.next();
                         List<Document> results = page.getResults();
                         for (Document doc : results) { 
                                 System.out.println(doc.getETag());
+                                AccessCondition cond = new AccessCondition();
+                                cond.setCondition(doc.getETag());
+                                cond.setType(AccessConditionType.IfMatch);
+                                doc.set("FirstName", "Demo");
+                                roptions = new RequestOptions();
+                                Observable<ResourceResponse<Document>> response =  p.client.replaceDocument(doc, roptions); 
+                                System.out.println(response.toBlocking().single().getResource().getETag());
+       
                         }
-                }                
+                }         
+                                         
         }
 }
