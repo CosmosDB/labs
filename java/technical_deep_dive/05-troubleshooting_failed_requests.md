@@ -1134,7 +1134,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
          }
     ```
 
-    > Since the results are paged, we will need to call the ``ExecuteNextAsync`` method multiple times in a while loop.
+    > Since the results are paged, we will need to call the ``hasNext`` method multiple times in a while loop.
 
 1. Add the following line of code stop the timer:
 
@@ -1177,7 +1177,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     };   
     ```
 
-    > Setting the ``MaxDegreeOfParallelism`` property to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
+    > Setting the ``setMaxDegreeOfParallelism`` property to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
 
 1. Save all of your open editor tabs, and click run.
 
@@ -1205,7 +1205,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         options.setMaxBufferedItemCount(-1); 
     ```
 
-    > Setting the ``MaxBufferedItemCount`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
+    > Setting the ``setMaxBufferedItemCount`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
 
 1. Save all of your open editor tabs, and click run.
 
@@ -1232,7 +1232,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         options.setMaxBufferedItemCount(-1);   
     ```
 
-    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned collect is fetched serially with respect to the query Setting the ``MaxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
+    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned collect is fetched serially with respect to the query Setting the ``setMaxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **setMaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
 
 1. Save all of your open editor tabs, and click run.
 
@@ -1425,15 +1425,12 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     ```java
         public static void main(String[] args) throws InterruptedException {
-
                 String sql = "SELECT TOP 1 * FROM c";
-
                 FeedOptions options = new FeedOptions();
                 options.setEnableCrossPartitionQuery(true);
-                QueryProgram10 p = new QueryProgram10();
+                Program p = new Program();
                 Observable<FeedResponse<Document>> documentQueryObservable = p.client
                 .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
-
                 Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
                 while (it.hasNext()) {
                         FeedResponse<Document> page = it.next();
@@ -1444,73 +1441,38 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                 }                
         }
     ```
-    
 
-1. Within the **using** block, add a new line of code to create an **AccessCondition** instance that will use the **ETag** from the document and specify an **If-Match** header:
 
-    ```csharp
-    AccessCondition cond = new AccessCondition { Condition = response.Resource.ETag, Type = AccessConditionType.IfMatch };
+1. Replace it with the following code:
 
-    ```
-
-1. Add a new line of code to update a property of the document using the **SetPropertyValue** method:
-
-    ```csharp
-    response.Resource.SetPropertyValue("FirstName", "Demo");
-    ```
-
-    > This line of code will modify a property of the document. Here we are modifying the **FirstName** property and changing it's value from **Example** to **Demo**.
-
-1. Add a new line of code to create an instance of the **RequestOptions** class using the **AccessCondition** created earlier:
-
-    ```csharp
-    RequestOptions options = new RequestOptions { AccessCondition = cond };
-    ```
-
-1. Add a new line of code to invoke the **ReplaceDocumentAsync** method passing in both the document and the options:
-
-    ```csharp
-    response = await client.ReplaceDocumentAsync(response.Resource, options);
-    ```
-
-1. Add a new line of code to print out the **ETag** of the newly updated document:
-
-    ```csharp
-    await Console.Out.WriteLineAsync($"New ETag:\t{response.Resource.ETag}"); 
-    ```
-
-1. Your **Main** method should now look like this:
-
-    ```csharp
-    public static async Task Main(string[] args)
-    {    
-        using (DocumentClient client = new DocumentClient(_endpointUri, _primaryKey))
-        {
-            await client.OpenAsync();
-            Uri documentLink = UriFactory.CreateDocumentUri(_databaseId, _collectionId, "example.document");            
-            ResourceResponse<Document> response = await client.ReadDocumentAsync(documentLink);
-            await Console.Out.WriteLineAsync($"Existing ETag:\t{response.Resource.ETag}"); 
-
-            AccessCondition cond = new AccessCondition { Condition = response.Resource.ETag, Type = AccessConditionType.IfMatch };
-            response.Resource.SetPropertyValue("FirstName", "Demo");
-            RequestOptions options = new RequestOptions { AccessCondition = cond };
-            response = await client.ReplaceDocumentAsync(response.Resource, options);
-            await Console.Out.WriteLineAsync($"New ETag:\t{response.Resource.ETag}"); 
+    ```java
+        public static void main(String[] args) throws InterruptedException {
+                String sql = "SELECT TOP 1 * FROM c";
+                FeedOptions options = new FeedOptions();
+                options.setEnableCrossPartitionQuery(true);
+                Program p = new Program();
+                Observable<FeedResponse<Document>> document = p.client
+                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                Iterator<FeedResponse<Document>> it = document.toBlocking().getIterator();
+                RequestOptions roptions;
+                while (it.hasNext()) {
+                        FeedResponse<Document> page = it.next();
+                        List<Document> results = page.getResults();
+                        for (Document doc : results) { 
+                                System.out.println(doc.getETag());
+                                AccessCondition cond = new AccessCondition();
+                                cond.setCondition(doc.getETag());
+                                cond.setType(AccessConditionType.IfMatch);
+                                doc.set("FirstName", "Demo");
+                                roptions = new RequestOptions();
+                                Observable<ResourceResponse<Document>> response =  p.client.replaceDocument(doc, roptions); 
+                                System.out.println(response.toBlocking().single().getResource().getETag());      
+                        }
+                }                                                
         }
-    }
     ```
 
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Command Prompt** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Save all of your open editor tabs, and click run.
 
 1. Observe the output of the console application.
 
