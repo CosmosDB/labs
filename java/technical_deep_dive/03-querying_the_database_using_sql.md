@@ -40,8 +40,6 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. In the **Collection Id** field, enter the value **StudentCollection**.
 
-    1. In the **Storage capacity** section, select the **Unlimited** option.
-
     1. In the **Partition key** field, enter the value ``/enrollmentYear``.
 
     1. In the **Throughput** field, enter the value ``11000``.
@@ -502,6 +500,9 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     import com.microsoft.azure.cosmosdb.ResourceResponse;
     import com.microsoft.azure.cosmosdb.internal.HttpConstants;
     import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
+    import org.json.JSONArray;
+    import org.json.JSONException;
+    import org.json.JSONObject;
     import rx.Observable;
     import rx.Scheduler;
     import rx.schedulers.Schedulers;
@@ -517,7 +518,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
             //public constructor
 
         }
-        public static void main( String[] args )
+        public static void main(String[] args) throws InterruptedException, JSONException
         {
  
         }
@@ -564,7 +565,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 1. Locate the **Main** method:
 
     ```java
-        public static void main( String[] args )
+        public static void main(String[] args) throws InterruptedException, JSONException
         {
 
         }
@@ -620,7 +621,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
         }
 
-        public static void main(String[] args) throws InterruptedException {
+        public static void main(String[] args) throws InterruptedException, JSONException {
             FeedOptions options = new FeedOptions();
             // as this is a multi collection enable cross partition query
             options.setEnableCrossPartitionQuery(true);
@@ -797,11 +798,12 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
                         String lastName = obj.getString("lastName");
                         System.out.println("***Student name***");
                         System.out.println(firstName +" "+lastName);
-                        System.out.println("***Student name***");
+                        System.out.println("*** Clubs***");
                         for (int i = 0; i < student.length(); i++) {
                                 Object club = student.getString(i);
                                 System.out.println(club);
                         }
+                        System.out.println("\n");
                         
                 }
         }

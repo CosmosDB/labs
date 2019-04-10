@@ -30,8 +30,6 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     1. In the **Collection id** field, enter the value **TransactionCollection**.
 
-    1. In the **Storage capacity** section, select the **Unlimited** option.
-
     1. In the **Partition key** field, enter the value ``/costCenter``.
 
     1. In the **Throughput** field, enter the value ``10000``.
@@ -213,6 +211,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     import com.microsoft.azure.cosmosdb.RequestOptions;
     import com.microsoft.azure.cosmosdb.ResourceResponse;
     import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
+    import java.util.UUID;
     import rx.Observable;
     import rx.Scheduler;
     import rx.schedulers.Schedulers;
@@ -358,6 +357,16 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 ### Observe RU Charge for Large Document
 
+> To help generate random data in the documents, we are going to use a java library called "javafaker", so if not already present, you will need to add the following to your pom.xml file, located at the bottom of your project, within the dependancies section (ensure you accept the "synchronize the Java classpath/configuration" warning if you have not accepted this permanently):
+
+ ```xml
+     <dependency>
+         <groupId>com.github.javafaker</groupId>
+         <artifactId>javafaker</artifactId>
+         <version>0.17.2</version>
+     </dependency>  
+ ```
+
 1. Create a file in your directory called PersonDetail.java, and copy the following code (be sure to specify the correct classpath for the package declaration):
 
     ```java
@@ -459,7 +468,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         ArrayList<Document> documents = new PersonDetail(1, 1).documentDefinitions;
         for (Document document : documents) {
             // Create a document
-            Observable<ResourceResponse<Document>> createDocumentObservable = asyncClient
+            Observable<ResourceResponse<Document>> createDocumentObservable = client
                     .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
             Observable<Double> totalChargeObservable = createDocumentObservable.map(ResourceResponse::getRequestCharge)
                     // Map to request charge
@@ -734,7 +743,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         // Upsert the existing document
         Document upsertingDocument = new Document(
                 String.format("{ 'id': 'example.document', 'type': 'upsertsample', 'new-prop' : '2'}", doc.getId(), 1));
-        Observable<ResourceResponse<Document>> upsertDocumentObservable = asyncClient
+        Observable<ResourceResponse<Document>> upsertDocumentObservable = client
                 .upsertDocument("dbs/" + databaseName + "/colls/" + collectionId, upsertingDocument, null, false);
 
         List<ResourceResponse<Document>> capturedResponse = Collections
@@ -857,7 +866,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         for (Document document: documents){
             // Create a document
             Future<?> future = executor.submit(() -> {
-            Observable<ResourceResponse<Document>> createDocumentObservable = asyncClient
+            Observable<ResourceResponse<Document>> createDocumentObservable = client
             .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
             System.out.println(createDocumentObservable.toBlocking().single().getResource().getId());  
             });   
@@ -898,11 +907,10 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
         private final ExecutorService executorService;
         private final Scheduler scheduler;
-        private AsyncDocumentClient client;
 
         private final String databaseName = "FinancialDatabase";
         private final String collectionId = "PeopleCollection";
-        private AsyncDocumentClient asyncClient;
+        private AsyncDocumentClient client;
 
         public Program() {
             executorService = Executors.newFixedThreadPool(100);
@@ -910,7 +918,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
             // Sets up the requirements for each test
             ConnectionPolicy connectionPolicy = new ConnectionPolicy();
             connectionPolicy.setConnectionMode(ConnectionMode.Direct);
-            asyncClient = new AsyncDocumentClient.Builder()
+            client = new AsyncDocumentClient.Builder()
                     .withServiceEndpoint("uri")
                     .withMasterKeyOrResourceToken("key")
                     .withConnectionPolicy(connectionPolicy).withConsistencyLevel(ConsistencyLevel.Session).build();
@@ -945,7 +953,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
             for (Document document: documents){
                 // Create a document
                 Future<?> future = executor.submit(() -> {
-                Observable<ResourceResponse<Document>> createDocumentObservable = asyncClient
+                Observable<ResourceResponse<Document>> createDocumentObservable = client
                 .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
                 System.out.println(createDocumentObservable.toBlocking().single().getResource().getId());  
                 });   
@@ -1108,8 +1116,8 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
-    ```csharp
-    string sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
+    ```Java
+    String sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     > This query will perform a cross-partition ORDER BY on a filtered result set.
@@ -1166,15 +1174,13 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     Replace that line of code with the following code:
 
-    ```csharp
-    FeedOptions options = new FeedOptions
-    {
+    ```java
         FeedOptions options = new FeedOptions();
         options.setEnableCrossPartitionQuery(true);
         options.setMaxItemCount(100);
         options.setMaxDegreeOfParallelism(5);
         options.setMaxBufferedItemCount(0);
-    };   
+ 
     ```
 
     > Setting the ``setMaxDegreeOfParallelism`` property to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
@@ -1374,7 +1380,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 *The SQL API supports optimistic concurrency control (OCC) through HTTP entity tags, or ETags. Every SQL API resource has an ETag, and the ETag is set on the server every time a document is updated. In this exercise, we will view the ETag property of a resource that is requested using the SDK.*
 
-### Observe the ETag Property 
+### Observe the ETag Property. 
 
 1. Locate the **Main** method and delete any existing code:
 
@@ -1388,7 +1394,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 1. Within the **Main** method, locate the following line of code: 
 
     ```java
-    System.out.println(documentQueryObservable.toBlocking().single().getRequestCharge().);
+    System.out.println(documentQueryObservable.toBlocking().single().getRequestCharge());
     ```
 
     Replace that line of code with the following code:

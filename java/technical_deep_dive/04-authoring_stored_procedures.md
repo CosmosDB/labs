@@ -30,8 +30,6 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     1. In the **Collection id** field, enter the value **InvestorCollection**.
 
-    1. In the **Storage capacity** section, select the **Unlimited** option.
-
     1. In the **Partition key** field, enter the value ``/company``.
 
     1. In the **Throughput** field, enter the value ``1000``.
@@ -882,7 +880,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 ### Execute Bulk Delete Stored Procedure from Java Async SDK
 
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **Program.java** link in the **Explorer** pane to open the file in the editor.
 
 1. Locate the **executeStoredProc** method and delete any existing code:
 
