@@ -1,4 +1,8 @@
-# Prerequisites
+# Workshop Powerpoint Deck
+
+- [Workshop Deck](./decks/L400-WorkshopApril2019.pptx)
+
+# Lab Prerequisites
 
 Prior to starting these labs, you must have the following operating system and software configured on your local machine:
 
@@ -31,11 +35,7 @@ Prior to starting these labs, you must have the following operating system and s
 - [Lab 4: Troubleshooting and Tuning Azure Cosmos DB Requests](technical_deep_dive/05-troubleshooting_failed_requests.md)
 - [Post-lab: Cleaning Up](technical_deep_dive/06-cleaning_up.md)
 
----
 
-# Accompanying Powerpoint Decks
-
-- [Workshop Deck](./decks/L400-WorkshopApril2019.pptx)
 
 
 ---
