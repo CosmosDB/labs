@@ -1,6 +1,7 @@
 # Workshop Powerpoint Deck
 
 - [Workshop Deck](./decks/L400-WorkshopApril2019.pptx)
+- [Sample Syllabus](./decks/CosmosDBWorkshopSyllabus2019.docx)
 
 # Lab Prerequisites
 
