@@ -42,7 +42,7 @@ In this lab, you will create an Azure Cosmos DB account.
 
     1. In the **Account Name** field, enter a globally unique value. This will be used to create the URI endpoint for your account.
 
-    1. In the **API** list, select the **SQL** option.
+    1. In the **API** list, select the **Core (SQL))** option.
 
     1. In the **Location** list, select the **West US** option.
 
@@ -56,7 +56,7 @@ In this lab, you will create an Azure Cosmos DB account.
 
     1. Click the **Review + create** button.
 
-        ![Configure Cosmos account](../../media/01-create_cosmos_settings.jpg)
+        ![Configure Cosmos account](../media/sql-core.jpg)
 
     1. After your settings are validated, click the **Create** button to begin the deployment of an Azure Cosmos DB account resource.
 

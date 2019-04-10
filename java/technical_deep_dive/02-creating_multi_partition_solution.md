@@ -308,7 +308,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     private final String partitionKeyPath = "/type";
     private final int throughPut = 400;
 
-1. Now create another method within the class, below the createDatabaseIfNotExists() method, to define the multi-partition parameters. This will set indexing policy for your collection, and include the partition key (defined as "/type" in your instance variable) and collection id (the name of the collection defined in your instance variable):
+1. Now create another method within the class, below the createDatabase() method, to define the multi-partition parameters. This will set indexing policy for your collection, and include the partition key (defined as "/type" in your instance variable) and collection id (the name of the collection defined in your instance variable):
 
     ```java
     private DocumentCollection getMultiPartitionCollectionDefinition() {
@@ -321,7 +321,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         partitionKeyDefinition.setPaths(paths);
         collectionDefinition.setPartitionKey(partitionKeyDefinition);
 
-        // Set indexing policy to be range range for string and number
+        // Set indexing policy to be range for string and number
         IndexingPolicy indexingPolicy = new IndexingPolicy();
         Collection<IncludedPath> includedPaths = new ArrayList<>();
         IncludedPath includedPath = new IncludedPath();
@@ -526,6 +526,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     }
     ```
 
+1. Save all of your open editor tabs, and click run.
 
 ### Observe Newly Created Database and Collections in the Portal
 
@@ -545,58 +546,12 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the **Azure Cosmos DB** blade, observe the new collections and database displayed in the middle of the blade.
 
-    ![New collections](../media/02-created_collections.jpg)
-
 1. Locate and click the **Data Explorer** link on the left side of the blade.
 
-    ![Data Explorer pane](../media/02-data_explorer_pane.jpg)
 
-1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection nodes. 
+1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection node. 
 
-    ![Database node](../media/02-database_node.jpg)
-
-1. Expand the **DefaultCollection** node. Within the node, click the **Scale & Settings** link.
-
-    ![Scale and settings](../media/02-scale_and_settings.jpg)
-
-1. Observe the following properties of the collection:
-
-    - Storage Capacity
-
-    - Assigned Throughput
-
-    - Indexing Policy
-
-    ![Fixed-Size collection configuration](../media/02-fixed_configuration.jpg)
-
-    > You will quickly notice that this is a fixed-size container that has a limited amount of RU/s. The indexing policy is also interesting as it implements a Hash index on string types and Range index on numeric types.
-
-    ```js
-    {
-        "indexingMode": "consistent",
-        "automatic": true,
-        "includedPaths": [
-            {
-                "path": "/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "Number",
-                        "precision": -1
-                    },
-                    {
-                        "kind": "Hash",
-                        "dataType": "String",
-                        "precision": 3
-                    }
-                ]
-            }
-        ],
-        "excludedPaths": []
-    }
-    ```
-
-1. Back in the **Data Explorer** section, expand the **CustomCollection** node. Within the node, click the **Scale & Settings** link.
+1. In the **Data Explorer** section, expand the **CustomCollection** node. Within the node, click the **Scale & Settings** link.
 
 1. Observe the following properties of the collection and compare them to the last collection:
 
@@ -617,22 +572,16 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         "includedPaths": [
             {
                 "path": "/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "Number",
-                        "precision": -1
-                    },
-                    {
-                        "kind": "Range",
-                        "dataType": "String",
-                        "precision": -1
-                    }
-                ]
+                "indexes": []
             }
         ],
-        "excludedPaths": []
+        "excludedPaths": [
+            {
+                "path": "/\"_etag\"/?"
+            }
+        ]
     }
+
     ```
     
 1. Close your browser window displaying the Azure Portal.
@@ -987,7 +936,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
-1. In the **Results** pane, observe the results of your query.
+1. In the **Results** pane, observe the results of your query (this should return the number of records in the database).
 
 1. Back in the **Data Explorer** section, right-click the database node and select the **Delete Database** option.
 
