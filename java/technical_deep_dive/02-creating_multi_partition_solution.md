@@ -733,6 +733,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         }
     }
     ```
+    > Note: generally blocking is not recommended but since this is a lab, we need to wait until the call completes and hence the block.
 
 1. Locate the **Main** method:
 
