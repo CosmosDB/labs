@@ -1,0 +1,14 @@
+title: 'Azure Cosmos DB Workshop'
+description: 'This series of workshops will give you hands-on experience working with Azure Cosmos DB using the SQL API, JavaScript and Async Java SDK.'
+remote_theme: azure-immersion/cosmos-jekyll-theme
+exclude:
+  - .build/
+  - .circleci/
+plugins:
+  - jekyll-sitemap
+  - jekyll-mentions
+  - jemoji
+markdown: kramdown
+kramdown:
+   syntax_highlighter_opts:
+      disable : true
