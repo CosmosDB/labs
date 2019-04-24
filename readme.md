@@ -27,7 +27,7 @@ Prior to starting these labs, you must have the following operating system and s
 
 ---
 
-## Labs
+## .NET Lab Guides
 
 *It is recommended to complete the labs in the order specified below:*
 
@@ -37,6 +37,13 @@ Prior to starting these labs, you must have the following operating system and s
 - [Lab 3: Authoring Azure Cosmos DB Stored Procedures using JavaScript ](dotnet/technical_deep_dive/04-authoring_stored_procedures.md)
 - [Lab 4: Troubleshooting and Tuning Azure Cosmos DB Requests](dotnet/technical_deep_dive/05-troubleshooting_failed_requests.md)
 - [Post-lab: Cleaning Up](dotnet/technical_deep_dive/06-cleaning_up.md)
+
+---
+
+## Notes
+
+1. If you are unsure of what version of the .NET Framework you have installed on your local machine, you can visit the following link to view instructions on determining your installed version: <https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed>.
+2. If you already have .NET Core installed on your local machine, you should check the version of your .NET Core installation using the ``dotnet --version`` command.
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,7 +74,7 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 
 ---
 
-## Labs
+## Java Lab Guides
 
 *It is recommended to complete the labs in the order specified below:*
 
@@ -86,11 +93,4 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 1. When installing the Java 11 SDK or higher, this is bundled with a Java Runtime Environment (JRE). Make sure the JRE path (e.g: C:\Program Files\Java\jdk-11.0.2\bin\) is present at the top of your Path variable in System variables. 
 2. If you already have Java installed on your local machine, you should check the version of your Java Runtime Environment (JRE) installation using the ``java -version`` command.
 2. If using a version of Java greater than version 8, some projects may not compile (for example the benchmarking application).
-
----
-
-## Notes
-
-1. If you are unsure of what version of the .NET Framework you have installed on your local machine, you can visit the following link to view instructions on determining your installed version: <https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed>.
-2. If you already have .NET Core installed on your local machine, you should check the version of your .NET Core installation using the ``dotnet --version`` command.
 
