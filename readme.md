@@ -78,7 +78,7 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 
 *It is recommended to complete the labs in the order specified below:*
 
-- [Pre-lab: Creating an Azure Cosmos DB account](java/technical_deep_dive/01-getting_started.md)
+- [Pre-lab: Creating an Azure Cosmos DB account](dotnet/technical_deep_dive/01-getting_started.md)
 - [Lab 1: Creating a partitioned solution using Azure Cosmos DB](java/technical_deep_dive/02-creating_multi_partition_solution.md)
 - [Lab 2: Querying an Azure Cosmos DB Database using the SQL API](java/technical_deep_dive/03-querying_the_database_using_sql.md)
 - [Lab 3: Authoring Azure Cosmos DB Stored Procedures using JavaScript ](java/technical_deep_dive/04-authoring_stored_procedures.md)
