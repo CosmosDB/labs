@@ -3,6 +3,9 @@
 - [Workshop Deck](./decks/L400-WorkshopApril2019.pptx)
 - [Sample Schedule](./decks/CosmosDBWorkshopSchedule2019.docx)
 
+In addition to the above workshop decks, we have four hands-on labs. Each lab is designed to take 60-90 minutes and can be either self-paced or instructor-led labs. We have labs available for our .NET sdk and Java sdk below:
+
+
 # .NET Labs
 
 **.NET Lab Prerequisites**
