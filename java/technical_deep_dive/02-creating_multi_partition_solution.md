@@ -307,6 +307,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     private final String collectionId = "CustomCollection";
     private final String partitionKeyPath = "/type";
     private final int throughPut = 400;
+    ```
 
 1. Now create another method within the class, below the createDatabase() method, to define the multi-partition parameters. This will set indexing policy for your collection, and include the partition key (defined as "/type" in your instance variable) and collection id (the name of the collection defined in your instance variable):
 

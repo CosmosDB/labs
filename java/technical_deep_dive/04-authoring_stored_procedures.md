@@ -617,6 +617,7 @@ In this lab, you will author and execute multiple stored procedures within your 
             }    
         }
     }
+    ```
 
 
 1. Create a new file called "Program.java" (or delete the contents of the existing file if already created)
@@ -641,6 +642,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     import com.microsoft.azure.cosmosdb.ConnectionMode;
     import com.microsoft.azure.cosmosdb.Document;
     import java.util.UUID;
+    
     ```
 
 1. Create a **Program** class in the Program.java file as below, with the following class variables, a public constructor and main method:
