@@ -36,7 +36,7 @@ Prior to starting these labs, you must have the following operating system and s
 
 - [Pre-lab: Creating an Azure Cosmos DB account](dotnet/technical_deep_dive/01-getting_started.md)
 - [Lab 1: Creating a partitioned solution using Azure Cosmos DB](dotnet/technical_deep_dive/02-creating_multi_partition_solution.md)
-- [Lab 2: Querying an Azure Cosmos DB Database using the SQL API](dotnet/echnical_deep_dive/03-querying_the_database_using_sql.md)
+- [Lab 2: Querying an Azure Cosmos DB Database using the SQL API](dotnet/technical_deep_dive/03-querying_the_database_using_sql.md)
 - [Lab 3: Authoring Azure Cosmos DB Stored Procedures using JavaScript ](dotnet/technical_deep_dive/04-authoring_stored_procedures.md)
 - [Lab 4: Troubleshooting and Tuning Azure Cosmos DB Requests](dotnet/technical_deep_dive/05-troubleshooting_failed_requests.md)
 - [Post-lab: Cleaning Up](dotnet/technical_deep_dive/06-cleaning_up.md)
