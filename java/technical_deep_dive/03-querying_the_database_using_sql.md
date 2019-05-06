@@ -4,11 +4,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Azure Data Factory (ADF)** to import existing data into your collection.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and Container that you will use throughout the lab. You will also use the **Azure Data Factory (ADF)** to import existing data into your Container.
 
-### Create Azure Cosmos DB Database and Collection
+### Create Azure Cosmos DB Database and Container
 
-*You will now create a database and collection within your Azure Cosmos DB account.*
+*You will now create a database and Container within your Azure Cosmos DB account.*
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -26,11 +26,11 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ![Overview pane](../media/03-overview.jpg)
 
-1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
+1. At the top of the **Azure Cosmos DB** blade, click the **Add Container** button.
 
-    ![Add collection](../media/03-add_collection.jpg)
+    ![Add Container](../media/03-add_Container.jpg)
 
-1. In the **Add Collection** popup, perform the following actions:
+1. In the **Add Container** popup, perform the following actions:
 
     1. In the **Database id** field, select the **Create new** option and enter the value **UniversityDatabase**.
 
@@ -38,7 +38,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
         > Provisioning throughput for a database allows you to share the throughput among all the containers that belong to that database. Within an Azure Cosmos DB database, you can have a set of containers which shares the throughput as well as containers, which have dedicated throughput.
 
-    1. In the **Collection Id** field, enter the value **StudentCollection**.
+    1. In the **Container Id** field, enter the value **StudentContainer**.
 
     1. In the **Partition key** field, enter the value ``/enrollmentYear``.
 
@@ -50,9 +50,9 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     1. Click the **OK** button.
 
-    ![Add collection](../media/04-add_collection_settings.jpg)
+    ![Add Container](../media/04-add_Container_settings.jpg)
 
-1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
+1. Wait for the creation of the new **database** and **Container** to finish before moving on with this lab.
 
 ### Retrieve Account Credentials
 
@@ -66,7 +66,7 @@ In this lab, you will query an Azure Cosmos DB database instance using the SQL l
 
     ![Credentials](../media/03-keys.jpg)
 
-### Import Lab Data Into Collection
+### Import Lab Data Into Container
 
 You will use **Azure Data Factory (ADF)** to import the JSON array stored in the **students.json** file from Azure Blob Storage.
 
@@ -135,7 +135,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_destconnectionnext.jpg)
 
-17. Select your collection from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB collection.
+17. Select your Container from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB Container.
 
     ![](../media/03-adf_correcttable.jpg)
 
@@ -159,11 +159,11 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 ## Executing Simple Queries
 
-*The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to query the data stored in our collection.*
+*The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to query the data stored in our Container.*
 
 ### Validate Imported Data
 
-*First, you will validate that the data was successfully imported into your collection using the **Documents** view in the **Data Explorer**.*
+*First, you will validate that the data was successfully imported into your Container using the **Documents** view in the **Data Explorer**.*
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -183,11 +183,11 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![Data Explorer pane](../media/03-data_explorer_pane.jpg)
 
-1. In the **Data Explorer** section, expand the **UniversityDatabase** database node and then expand the **StudentCollection** collection node. 
+1. In the **Data Explorer** section, expand the **UniversityDatabase** database node and then expand the **StudentContainer** Container node. 
 
-    ![Collection node](../media/03-collection_node.jpg)
+    ![Container node](../media/03-Container_node.jpg)
 
-1. Within the **StudentCollection** node, click the **Documents** link to view a subset of the various documents in the collection. Select a few of the documents and observe the properties and structure of the documents.
+1. Within the **StudentContainer** node, click the **Documents** link to view a subset of the various documents in the Container. Select a few of the documents and observe the properties and structure of the documents.
 
     ![Documents](../media/03-documents.jpg)
 
@@ -207,7 +207,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     SELECT * FROM students s WHERE s.enrollmentYear = 2017
     ```
 
-    > This first query will select all properties from all documents in the collection where the students where enrolled in 2017. You will notice that we are using the alias ``s`` to refer to the collection.
+    > This first query will select all properties from all documents in the Container where the students where enrolled in 2017. You will notice that we are using the alias ``s`` to refer to the Container.
 
     ![Query editor](../media/03-query_editor.jpg)
 
@@ -416,7 +416,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 ## Use Java Async SDK to Query Azure Cosmos DB
 
-*After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB collection, you are now going to use the Java Async SDK to issue similar queries.*
+*After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB Container, you are now going to use the Java Async SDK to issue similar queries.*
 
 ### Create a Java Project
 
@@ -467,7 +467,17 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 *The AsyncDocumentClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **AsyncDocumentClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
 
-1. At the same level as the default "App.java" file that already exists, right click and create a new file called "Program.java":
+1. Here you will use org.json to parse JSON in Java, so you will need to add the library as a dependency in your pom.xml file (don't forget to accept sync prompt) :
+
+    ```xml
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20090211</version>
+    </dependency> 
+    ```
+    
+2. At the same level as the default "App.java" file that already exists, right click and create a new file called "Program.java":
 
     ![Open in Command Prompt](../media/maven5.jpg)
 
@@ -476,8 +486,8 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ```java
     package test;
     import java.util.ArrayList;
-    import java.util.Collection;
-    import java.util.Collections;
+    import java.util.Container;
+    import java.util.Containers;
     import java.util.Iterator;
     import java.util.List;
     import java.util.concurrent.CountDownLatch;
@@ -489,7 +499,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     import com.microsoft.azure.cosmosdb.Database;
     import com.microsoft.azure.cosmosdb.Document;
     import com.microsoft.azure.cosmosdb.DocumentClientException;
-    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.DocumentContainer;
     import com.microsoft.azure.cosmosdb.FeedOptions;
     import com.microsoft.azure.cosmosdb.FeedResponse;
     import com.microsoft.azure.cosmosdb.IncludedPath;
@@ -533,7 +543,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         private AsyncDocumentClient client;
 
         private final String databaseName = "UniversityDatabase";
-        private final String collectionId = "StudentCollection";
+        private final String ContainerId = "StudentContainer";
     ```
 
 
@@ -575,7 +585,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ```java
             FeedOptions options = new FeedOptions();
-            // as this is a multi collection enable cross partition query
+            // as this is a multi Container enable cross partition query
             options.setEnableCrossPartitionQuery(true);
             // note that setMaxItemCount sets the number of items to return in a single page
             // result
@@ -583,7 +593,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
             String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
             Program p = new Program();
             Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                            .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                            .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
             // observable to an iterator
             Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
@@ -606,7 +616,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         private AsyncDocumentClient client;
 
         private final String databaseName = "UniversityDatabase";
-        private final String collectionId = "StudentCollection";
+        private final String ContainerId = "StudentContainer";
 
         private int numberOfDocuments;
 
@@ -623,7 +633,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
         public static void main(String[] args) throws InterruptedException, JSONException {
             FeedOptions options = new FeedOptions();
-            // as this is a multi collection enable cross partition query
+            // as this is a multi Container enable cross partition query
             options.setEnableCrossPartitionQuery(true);
             // note that setMaxItemCount sets the number of items to return in a single page
             // result
@@ -631,7 +641,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
             String sql = "SELECT TOP 5 s.studentAlias FROM coll s WHERE s.enrollmentYear = 2018 ORDER BY s.studentAlias";
             Program p = new Program();
             Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                            .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                            .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
             // observable to an iterator
             Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
@@ -729,7 +739,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         }
     ```
 
-    > Our new query will need to iterate twice. First, we will iterate the collection of students and then we will iterate the collection of clubs for each student.
+    > Our new query will need to iterate twice. First, we will iterate the Container of students and then we will iterate the Container of clubs for each student.
 
 1. Finally, within the **Main** method, locate the following line of code: 
 
@@ -985,14 +995,14 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
         FeedOptions options = new FeedOptions();
         PartitionKey partitionKey = new PartitionKey(2016);
         options.setPartitionKey(partitionKey);        
-        // as this is a multi collection enable cross partition query
+        // as this is a multi Container enable cross partition query
         options.setEnableCrossPartitionQuery(true);
         // note that setMaxItemCount sets the number of items to return in a single page result
         options.setMaxItemCount(5000);
         String sql = "select * from s where s.projectedGraduationYear = 2020 ";
         Program p = new Program();
         Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
         // observable to an iterator
         Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
@@ -1058,7 +1068,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ```java
         public static void main(String[] args) throws InterruptedException, JSONException {
                 FeedOptions options = new FeedOptions();
-                // as this is a multi collection enable cross partition query
+                // as this is a multi Container enable cross partition query
                 options.setEnableCrossPartitionQuery(true);
                 // note that setMaxItemCount sets the number of items to return in a single page result
                 options.setMaxItemCount(2000);
@@ -1067,7 +1077,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
                 String sql = "SELECT * FROM s where s.age < 18";
                 Program p = new Program();
                 Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
                 // observable to an iterator
                 Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
@@ -1117,7 +1127,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ```java
         public static void main(String[] args) throws InterruptedException, JSONException {
                 FeedOptions options = new FeedOptions();
-                // as this is a multi collection enable cross partition query
+                // as this is a multi Container enable cross partition query
                 options.setEnableCrossPartitionQuery(true);
                 // note that setMaxItemCount sets the number of items to return in a single page result
                 options.setMaxItemCount(1);
@@ -1126,7 +1136,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
                 String sql = "SELECT * FROM students s WHERE s.academicStatus.suspension = true";
                 Program p = new Program();
                 Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
                 // observable to an iterator
                 Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 

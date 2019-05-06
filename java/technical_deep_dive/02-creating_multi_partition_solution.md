@@ -9,7 +9,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. The Java Async SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and Container that you will use throughout the lab. The Java Async SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.
 
 ### Retrieve Account Credentials
 
@@ -95,7 +95,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     ```java
     package test;
     import java.util.ArrayList;
-    import java.util.Collection;
+    import java.util.Container;
     import java.util.List;
     import java.util.concurrent.CountDownLatch;
     import java.util.concurrent.ExecutorService;
@@ -105,7 +105,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     import com.microsoft.azure.cosmosdb.DataType;
     import com.microsoft.azure.cosmosdb.Database;
     import com.microsoft.azure.cosmosdb.DocumentClientException;
-    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.DocumentContainer;
     import com.microsoft.azure.cosmosdb.IncludedPath;
     import com.microsoft.azure.cosmosdb.Index;
     import com.microsoft.azure.cosmosdb.IndexingPolicy;
@@ -296,7 +296,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. In the Visual Studio Code window, select the "run" option (from "run" and "debug") that should appear within your class file (or compile and run the code in your java IDE of choice). After the code has compiled and run, you should be able to view the database in Data Explorer from the Azure portal. 
 
 
-### Create an Unlimited Collection using the SDK
+### Create an Unlimited Container using the SDK
 
 *Unlimited containers have higher storage and throughput limits. To create a container as unlimited, you must specify a partition key and a minimum throughput of 400 RU/s. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](../media/https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).*
 
@@ -304,30 +304,30 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Go back to your Program class and add three new instance variables:
 
     ```java
-    private final String collectionId = "CustomCollection";
+    private final String ContainerId = "CustomContainer";
     private final String partitionKeyPath = "/type";
     private final int throughPut = 400;
     ```
 
-1. Now create another method within the class, below the createDatabase() method, to define the multi-partition parameters. This will set indexing policy for your collection, and include the partition key (defined as "/type" in your instance variable) and collection id (the name of the collection defined in your instance variable):
+1. Now create another method within the class, below the createDatabase() method, to define the multi-partition parameters. This will set indexing policy for your Container, and include the partition key (defined as "/type" in your instance variable) and Container id (the name of the Container defined in your instance variable):
 
     ```java
-    private DocumentCollection getMultiPartitionCollectionDefinition() {
-        DocumentCollection collectionDefinition = new DocumentCollection();
-        collectionDefinition.setId(collectionId);
+    private DocumentContainer getMultiPartitionContainerDefinition() {
+        DocumentContainer ContainerDefinition = new DocumentContainer();
+        ContainerDefinition.setId(ContainerId);
 
         PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition();
         List<String> paths = new ArrayList<>();
         paths.add(partitionKeyPath);
         partitionKeyDefinition.setPaths(paths);
-        collectionDefinition.setPartitionKey(partitionKeyDefinition);
+        ContainerDefinition.setPartitionKey(partitionKeyDefinition);
 
         // Set indexing policy to be range for string and number
         IndexingPolicy indexingPolicy = new IndexingPolicy();
-        Collection<IncludedPath> includedPaths = new ArrayList<>();
+        Container<IncludedPath> includedPaths = new ArrayList<>();
         IncludedPath includedPath = new IncludedPath();
         includedPath.setPath("/*");
-        Collection<Index> indexes = new ArrayList<>();
+        Container<Index> indexes = new ArrayList<>();
         Index stringIndex = Index.Range(DataType.String);
         stringIndex.set("precision", -1);
         indexes.add(stringIndex);
@@ -338,41 +338,41 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         includedPath.setIndexes(indexes);
         includedPaths.add(includedPath);
         indexingPolicy.setIncludedPaths(includedPaths);
-        collectionDefinition.setIndexingPolicy(indexingPolicy);
+        ContainerDefinition.setIndexingPolicy(indexingPolicy);
 
-        return collectionDefinition;
+        return ContainerDefinition;
     }
     ```
-     > By default, all Azure Cosmos DB data is indexed. Although many customers are happy to let Azure Cosmos DB automatically handle all aspects of indexing, you can specify a custom indexing policy for collections. This indexing policy we created is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.   
+     > By default, all Azure Cosmos DB data is indexed. Although many customers are happy to let Azure Cosmos DB automatically handle all aspects of indexing, you can specify a custom indexing policy for Containers. This indexing policy we created is very similar to the default indexing policy created by the SDK but it implements a **Range** index on string types instead of a **Hash** index.   
 
-1. Now, below this method, add another method that will create the multi partition collection. This will also set the throughput value:
+1. Now, below this method, add another method that will create the multi partition Container. This will also set the throughput value:
 
     ```java
-    public void createMultiPartitionCollection() throws Exception {
+    public void createMultiPartitionContainer() throws Exception {
         RequestOptions multiPartitionRequestOptions = new RequestOptions();
         multiPartitionRequestOptions.setOfferThroughput(throughPut);
         String databaseLink = String.format("/dbs/%s", databaseName);
 
-        Observable<ResourceResponse<DocumentCollection>> createCollectionObservable = client.createCollection(
-            databaseLink, getMultiPartitionCollectionDefinition(), multiPartitionRequestOptions);
+        Observable<ResourceResponse<DocumentContainer>> createContainerObservable = client.createContainer(
+            databaseLink, getMultiPartitionContainerDefinition(), multiPartitionRequestOptions);
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        createCollectionObservable.single() // We know there is only single result
-                .subscribe(collectionResourceResponse -> {
-                    System.out.println(collectionResourceResponse.getActivityId());
+        createContainerObservable.single() // We know there is only single result
+                .subscribe(ContainerResourceResponse -> {
+                    System.out.println(ContainerResourceResponse.getActivityId());
                     countDownLatch.countDown();
                 }, error -> {
                     System.err.println(
-                            "an error occurred while creating the collection: actual cause: " + error.getMessage());
+                            "an error occurred while creating the Container: actual cause: " + error.getMessage());
                     countDownLatch.countDown();
                 });
-        System.out.println("creating collection...");
+        System.out.println("creating Container...");
         countDownLatch.await();
     }
     ```
 
-1. Finally, add a call to the new createMultiPartitionCollection() nethod in the main method of your Program class:
+1. Finally, add a call to the new createMultiPartitionContainer() nethod in the main method of your Program class:
 
     ```java
     public static void main(String[] args) {
@@ -382,8 +382,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             p.createDatabase();
             System.out.println(String.format("Database created, please hold while resources are released"));
  
-            //create collection...
-            p.createMultiPartitionCollection();
+            //create Container...
+            p.createMultiPartitionContainer();
             
         } catch (Exception e) {
             System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
@@ -408,7 +408,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private AsyncDocumentClient client;
 
         private final String databaseName = "EntertainmentDatabase";
-        private final String collectionId = "CustomCollection";
+        private final String ContainerId = "CustomContainer";
         private final String partitionKeyPath = "/type";
         private final int throughPut = 400;
 
@@ -428,8 +428,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                 p.createDatabase();
                 System.out.println(String.format("Database created, please hold while resources are released"));
     
-                //create collection...
-                p.createMultiPartitionCollection();
+                //create Container...
+                p.createMultiPartitionContainer();
 
             } catch (Exception e) {
                 System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
@@ -466,22 +466,22 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
         
 
-        private DocumentCollection getMultiPartitionCollectionDefinition() {
-            DocumentCollection collectionDefinition = new DocumentCollection();
-            collectionDefinition.setId(collectionId);
+        private DocumentContainer getMultiPartitionContainerDefinition() {
+            DocumentContainer ContainerDefinition = new DocumentContainer();
+            ContainerDefinition.setId(ContainerId);
 
             PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition();
             List<String> paths = new ArrayList<>();
             paths.add(partitionKeyPath);
             partitionKeyDefinition.setPaths(paths);
-            collectionDefinition.setPartitionKey(partitionKeyDefinition);
+            ContainerDefinition.setPartitionKey(partitionKeyDefinition);
 
             // Set indexing policy to be range range for string and number
             IndexingPolicy indexingPolicy = new IndexingPolicy();
-            Collection<IncludedPath> includedPaths = new ArrayList<>();
+            Container<IncludedPath> includedPaths = new ArrayList<>();
             IncludedPath includedPath = new IncludedPath();
             includedPath.setPath("/*");
-            Collection<Index> indexes = new ArrayList<>();
+            Container<Index> indexes = new ArrayList<>();
             Index stringIndex = Index.Range(DataType.String);
             stringIndex.set("precision", -1);
             indexes.add(stringIndex);
@@ -492,31 +492,31 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             includedPath.setIndexes(indexes);
             includedPaths.add(includedPath);
             indexingPolicy.setIncludedPaths(includedPaths);
-            collectionDefinition.setIndexingPolicy(indexingPolicy);
+            ContainerDefinition.setIndexingPolicy(indexingPolicy);
 
-            return collectionDefinition;
+            return ContainerDefinition;
         }
     
-        public void createMultiPartitionCollection() throws Exception {
+        public void createMultiPartitionContainer() throws Exception {
             RequestOptions multiPartitionRequestOptions = new RequestOptions();
             multiPartitionRequestOptions.setOfferThroughput(throughPut);
             String databaseLink = String.format("/dbs/%s", databaseName);
 
-            Observable<ResourceResponse<DocumentCollection>> createCollectionObservable = client.createCollection(
-                databaseLink, getMultiPartitionCollectionDefinition(), multiPartitionRequestOptions);
+            Observable<ResourceResponse<DocumentContainer>> createContainerObservable = client.createContainer(
+                databaseLink, getMultiPartitionContainerDefinition(), multiPartitionRequestOptions);
 
             final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-            createCollectionObservable.single() // We know there is only single result
-                    .subscribe(collectionResourceResponse -> {
-                        System.out.println(collectionResourceResponse.getActivityId());
+            createContainerObservable.single() // We know there is only single result
+                    .subscribe(ContainerResourceResponse -> {
+                        System.out.println(ContainerResourceResponse.getActivityId());
                         countDownLatch.countDown();
                     }, error -> {
                         System.err.println(
-                                "an error occurred while creating the collection: actual cause: " + error.getMessage());
+                                "an error occurred while creating the Container: actual cause: " + error.getMessage());
                         countDownLatch.countDown();
                     });
-            System.out.println("creating collection...");
+            System.out.println("creating Container...");
             countDownLatch.await();
         }
 
@@ -529,7 +529,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Save all of your open editor tabs, and click run.
 
-### Observe Newly Created Database and Collections in the Portal
+### Observe Newly Created Database and Containers in the Portal
 
 1. In a new window, sign in to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -545,16 +545,16 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     ![Cosmos resource](../media/02-cosmos_resource.jpg)
 
-1. In the **Azure Cosmos DB** blade, observe the new collections and database displayed in the middle of the blade.
+1. In the **Azure Cosmos DB** blade, observe the new Containers and database displayed in the middle of the blade.
 
 1. Locate and click the **Data Explorer** link on the left side of the blade.
 
 
-1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the collection node. 
+1. In the **Data Explorer** section, expand the **EntertainmentDatabase** database node and then observe the Container node. 
 
-1. In the **Data Explorer** section, expand the **CustomCollection** node. Within the node, click the **Scale & Settings** link.
+1. In the **Data Explorer** section, expand the **CustomContainer** node. Within the node, click the **Scale & Settings** link.
 
-1. Observe the following properties of the collection and compare them to the last collection:
+1. Observe the following properties of the Container and compare them to the last Container:
 
     - Storage Capacity
 
@@ -564,7 +564,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
     - Indexing Policy
 
-    > You configured all of these values when you created this collection using the SDK. You should take time to look at the custom indexing policy you created using the SDK.
+    > You configured all of these values when you created this Container using the SDK. You should take time to look at the custom indexing policy you created using the SDK.
 
     ```js
     {
@@ -587,9 +587,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
     
 1. Close your browser window displaying the Azure Portal.
 
-## Populate a Collection with Documents using the SDK
+## Populate a Container with Documents using the SDK
 
-> You will now use the Async Java SDK to populate your collection with various documents of varying schemas. These documents will be serialized instances of multiple Java classes that you will create in your project. To help generate random data in the documents, we are going to use a java library called "javafaker", so you will need to add the following to your pom.xml file, located at the bottom of your project, within the dependancies section (ensure you accept the "synchronize the Java classpath/configuration" warning if you have not accepted this permanently):
+> You will now use the Async Java SDK to populate your Container with various documents of varying schemas. These documents will be serialized instances of multiple Java classes that you will create in your project. To help generate random data in the documents, we are going to use a java library called "javafaker", so you will need to add the following to your pom.xml file, located at the bottom of your project, within the dependancies section (ensure you accept the "synchronize the Java classpath/configuration" warning if you have not accepted this permanently):
 
  ```xml
      <dependency>
@@ -679,7 +679,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Close all open editor tabs.
 
-### Populate Unlimited Collection with Data
+### Populate Unlimited Container with Data
 
 1. Open **Program.java** in the **Explorer** pane to open the file in the editor. Remove all methods except the main() method, and remove the contents of the main method. When done your program class should look as below (with your uri and key):
 
@@ -691,7 +691,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private AsyncDocumentClient client;
 
         private final String databaseName = "EntertainmentDatabase";
-        private final String collectionId = "CustomCollection";
+        private final String ContainerId = "CustomContainer";
         private AsyncDocumentClient asyncClient;
         private final String partitionKeyPath = "/type";
         private final int throughPut = 400;
@@ -709,8 +709,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                     .withConsistencyLevel(ConsistencyLevel.Session)
                     .build();
 
-            DocumentCollection collectionDefinition = new DocumentCollection();
-            collectionDefinition.setId(UUID.randomUUID().toString());
+            DocumentContainer ContainerDefinition = new DocumentContainer();
+            ContainerDefinition.setId(UUID.randomUUID().toString());
         
         }
 
@@ -728,7 +728,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         ArrayList<Document> documents = new PurchaseFoodOrBeverage(500).documentDefinitions;
         for (Document document: documents){
             // Create a document
-            asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false)
+            asyncClient.createDocument("dbs/" + databaseName + "/colls/" + ContainerId, document, null, false)
             .toBlocking().single().getResource();
             System.out.println("inserting: "+document);
         }
@@ -771,7 +771,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
         private AsyncDocumentClient client;
 
         private final String databaseName = "EntertainmentDatabase";
-        private final String collectionId = "CustomCollection";
+        private final String ContainerId = "CustomContainer";
         private AsyncDocumentClient asyncClient;
         private final String partitionKeyPath = "/type";
         private final int throughPut = 400;
@@ -790,8 +790,8 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
                     .withConsistencyLevel(ConsistencyLevel.Session)
                     .build();
 
-            DocumentCollection collectionDefinition = new DocumentCollection();
-            collectionDefinition.setId(UUID.randomUUID().toString());
+            DocumentContainer ContainerDefinition = new DocumentContainer();
+            ContainerDefinition.setId(UUID.randomUUID().toString());
         
         }
 
@@ -811,7 +811,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             ArrayList<Document> documents = new PurchaseFoodOrBeverage(500).documentDefinitions;
             for (Document document: documents){
                 // Create a document
-                asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false)
+                asyncClient.createDocument("dbs/" + databaseName + "/colls/" + ContainerId, document, null, false)
                 .toBlocking().single().getResource();
                 System.out.println("inserting: "+document);
             }
@@ -830,7 +830,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Populate Unlimited Collection with Data of Different Types
+### Populate Unlimited Container with Data of Different Types
 
 1. Locate the **createDocument** method and change the documents array to use the **WatchLiveTelevisionChannel** class. It should now look like the below:
 
@@ -839,7 +839,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
             ArrayList<Document> documents = new WatchLiveTelevisionChannel(500).documentDefinitions;
             for (Document document: documents){
                 // Create a document
-                asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false)
+                asyncClient.createDocument("dbs/" + databaseName + "/colls/" + ContainerId, document, null, false)
                 .toBlocking().single().getResource();
                 System.out.println("inserting: "+document);
             }
@@ -859,9 +859,9 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 
 
-## Benchmark your Collection using a Java Application
+## Benchmark your Container using a Java Application
 
-> In the next part of this lab, you will test a large dataset against your collection using a benchmarking tool available on GitHub.com. 
+> In the next part of this lab, you will test a large dataset against your Container using a benchmarking tool available on GitHub.com. 
 
 ### Clone Existing Java Project
 
@@ -893,7 +893,7 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 1. Verify the project built with no errors (note: a JDK higher than version 8 may not compile). The navigate to the target folder by typing **cd benchmark\target**. You can then run the benchmark tool, replacing the text "uri" and "key" with the values from your account (ensure the jar file name is correct for the version of the jar present in the folder):
 
     ```sh
-    java -jar azure-cosmosdb-benchmark-2.4.3-jar-with-dependencies.jar -serviceEndpoint uri -masterKey key -databaseId EntertainmentDatabase -collectionId CustomCollection -consistencyLevel Eventual -concurrency 2 -numberOfOperations 10 -operation WriteLatency -connectionMode Direct
+    java -jar azure-cosmosdb-benchmark-2.4.3-jar-with-dependencies.jar -serviceEndpoint uri -masterKey key -databaseId EntertainmentDatabase -ContainerId CustomContainer -consistencyLevel Eventual -concurrency 2 -numberOfOperations 10 -operation WriteLatency -connectionMode Direct
     ```
 
 1. You can experiment with the values "concurrency" (number of concurrent requests in the simulated app) and "numberOfOperations" (number of documents that will be inserted by the benchmark tool). By default, the tool will use the document id as the partition key, but you can experiment with this in the code, if you prefer. 
@@ -916,11 +916,11 @@ In this lab, you will create multiple Azure Cosmos DB containers. Some of the co
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the database node and then observe the collection node.
+1. In the **Data Explorer** section, expand the database node and then observe the Container node.
 
 1. click the **Scale & Settings** link.
 
-1. Observe the following properties of the collection:
+1. Observe the following properties of the Container:
 
     - Storage Capacity
 

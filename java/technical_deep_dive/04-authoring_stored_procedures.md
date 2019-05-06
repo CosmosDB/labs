@@ -4,11 +4,11 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and Container that you will use throughout the lab.
 
-### Create Azure Cosmos DB Database and Collection
+### Create Azure Cosmos DB Database and Container
 
-*You will now create a database and collection within your Azure Cosmos DB account.*
+*You will now create a database and Container within your Azure Cosmos DB account.*
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -20,15 +20,15 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
-1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
+1. At the top of the **Azure Cosmos DB** blade, click the **Add Container** button.
 
-1. In the **Add Collection** popup, perform the following actions:
+1. In the **Add Container** popup, perform the following actions:
 
     1. In the **Database id** field, select the **Create new** option and enter the value **FinancialDatabase**.
 
     1. Ensure the **Provision database throughput** option is not selected.
 
-    1. In the **Collection id** field, enter the value **InvestorCollection**.
+    1. In the **Container id** field, enter the value **InvestorContainer**.
 
     1. In the **Partition key** field, enter the value ``/company``.
 
@@ -36,7 +36,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     1. Click the **OK** button.
 
-1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
+1. Wait for the creation of the new **database** and **Container** to finish before moving on with this lab.
 
 ### Retrieve Account Credentials
 
@@ -56,9 +56,9 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then expand the **InvestorCollection** collection node. 
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then expand the **InvestorContainer** Container node. 
 
-1. Within the **InvestorCollection** node, click the **Documents** link.
+1. Within the **InvestorContainer** node, click the **Documents** link.
 
 ### Create Simple Stored Procedure
 
@@ -109,9 +109,9 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```js
     function createDocument(doc) {
         var context = getContext();
-        var collection = context.getCollection();
-        var accepted = collection.createDocument(
-            collection.getSelfLink(),
+        var Container = context.getContainer();
+        var accepted = Container.createDocument(
+            Container.getSelfLink(),
             doc,
             function (err, newDoc) {
                 if (err) throw new Error('Error' + err.message);
@@ -140,7 +140,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Result** pane at the bottom of the tab, observe the results of the stored procedure's execution.
 
-    > You should see a new document in your collection. Azure Cosmos DB has assigned additional fields to the document such as ``id`` and ``_etag``.
+    > You should see a new document in your Container. Azure Cosmos DB has assigned additional fields to the document such as ``id`` and ``_etag``.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -170,10 +170,10 @@ In this lab, you will author and execute multiple stored procedures within your 
     function createDocumentWithLogging(doc) {
         console.log("procedural-start ");
         var context = getContext();
-        var collection = context.getCollection();
+        var Container = context.getContainer();
         console.log("metadata-retrieved ");
-        var accepted = collection.createDocument(
-            collection.getSelfLink(),
+        var accepted = Container.createDocument(
+            Container.getSelfLink(),
             doc,
             function (err, newDoc) {
                 console.log("callback-started ");
@@ -205,7 +205,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Result** pane at the bottom of the tab, observe the results of the stored procedure's execution.
 
-    > You should see the unique id of a new document in your collection.
+    > You should see the unique id of a new document in your Container.
 
 1. Click the *console.log* link in the **Result** pane to view the log data for your stored procedure execution.
 
@@ -222,8 +222,8 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```js
     function createDocumentWithFunction(document) {
         var context = getContext();
-        var collection = context.getCollection();
-        if (!collection.createDocument(collection.getSelfLink(), document, documentCreated))
+        var Container = context.getContainer();
+        if (!Container.createDocument(Container.getSelfLink(), document, documentCreated))
             return;
         function documentCreated(error, newDocument) {
             if (error) throw new Error('Error' + error.message);
@@ -266,7 +266,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Result** pane at the bottom of the tab, observe the results of the stored procedure's execution.
 
-    > You should see a new document in your collection. Azure Cosmos DB has assigned additional fields to the document such as ``id`` and ``_etag``.
+    > You should see a new document in your Container. Azure Cosmos DB has assigned additional fields to the document such as ``id`` and ``_etag``.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -295,7 +295,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     ```js
     function createTwoDocuments(companyName, industry, taxRate) {
         var context = getContext();
-        var collection = context.getCollection();
+        var Container = context.getContainer();
         var firstDocument = {
             company: companyName,
             industry: industry
@@ -307,10 +307,10 @@ In this lab, you will author and execute multiple stored procedures within your 
                 rate: taxRate
             }
         };
-        var firstAccepted = collection.createDocument(collection.getSelfLink(), firstDocument, 
+        var firstAccepted = Container.createDocument(Container.getSelfLink(), firstDocument, 
             function (firstError, newFirstDocument) {
                 if (firstError) throw new Error('Error' + firstError.message);
-                var secondAccepted = collection.createDocument(collection.getSelfLink(), secondDocument,
+                var secondAccepted = Container.createDocument(Container.getSelfLink(), secondDocument,
                     function (secondError, newSecondDocument) {
                         if (secondError) throw new Error('Error' + secondError.message);      
                         context.getResponse().setBody({
@@ -348,14 +348,14 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Result** pane at the bottom of the tab, observe the results of the stored procedure's execution.
 
-    > You should see a new document in your collection. Azure Cosmos DB has assigned additional fields to the document such as ``id`` and ``_etag``.
+    > You should see a new document in your Container. Azure Cosmos DB has assigned additional fields to the document such as ``id`` and ``_etag``.
 
 1. Replace the contents of the *stored procedure editor* with the following JavaScript code:
 
     ```js
     function createTwoDocuments(companyName, industry, taxRate) {
         var context = getContext();
-        var collection = context.getCollection();
+        var Container = context.getContainer();
         var firstDocument = {
             company: companyName,
             industry: industry
@@ -367,11 +367,11 @@ In this lab, you will author and execute multiple stored procedures within your 
                 rate: taxRate
             }
         };
-        var firstAccepted = collection.createDocument(collection.getSelfLink(), firstDocument, 
+        var firstAccepted = Container.createDocument(Container.getSelfLink(), firstDocument, 
             function (firstError, newFirstDocument) {
                 if (firstError) throw new Error('Error' + firstError.message);
                 console.log('Created: ' + newFirstDocument.id);
-                var secondAccepted = collection.createDocument(collection.getSelfLink(), secondDocument,
+                var secondAccepted = Container.createDocument(Container.getSelfLink(), secondDocument,
                     function (secondError, newSecondDocument) {
                         if (secondError) throw new Error('Error' + secondError.message); 
                         console.log('Created: ' + newSecondDocument.id);                   
@@ -442,8 +442,8 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     ```js
     function bulkUpload(docs) {
-        var collection = getContext().getCollection();
-        var collectionLink = collection.getSelfLink();
+        var Container = getContext().getContainer();
+        var ContainerLink = Container.getSelfLink();
         var count = 0;
         if (!docs) throw new Error("The array is undefined or null.");
         var docsLength = docs.length;
@@ -453,7 +453,7 @@ In this lab, you will author and execute multiple stored procedures within your 
         }
         tryCreate(docs[count], callback);
         function tryCreate(doc, callback) {
-            var isAccepted = collection.createDocument(collectionLink, doc, callback);
+            var isAccepted = Container.createDocument(ContainerLink, doc, callback);
             if (!isAccepted) getContext().getResponse().setBody(count);
         }
         function callback(err, doc, options) {
@@ -482,8 +482,8 @@ In this lab, you will author and execute multiple stored procedures within your 
 
     ```js
     function bulkDelete(query) {
-        var collection = getContext().getCollection();
-        var collectionLink = collection.getSelfLink();
+        var Container = getContext().getContainer();
+        var ContainerLink = Container.getSelfLink();
         var response = getContext().getResponse();
         var responseBody = {
             deleted: 0,
@@ -493,7 +493,7 @@ In this lab, you will author and execute multiple stored procedures within your 
         tryQueryAndDelete();
         function tryQueryAndDelete(continuation) {
             var requestOptions = {continuation: continuation};
-            var isAccepted = collection.queryDocuments(collectionLink, query, requestOptions, function (err, retrievedDocs, responseOptions) {
+            var isAccepted = Container.queryDocuments(ContainerLink, query, requestOptions, function (err, retrievedDocs, responseOptions) {
                 if (err) throw err;
                 if (retrievedDocs.length > 0) {
                     tryDelete(retrievedDocs);
@@ -510,7 +510,7 @@ In this lab, you will author and execute multiple stored procedures within your 
         }
         function tryDelete(documents) {
             if (documents.length > 0) {
-                var isAccepted = collection.deleteDocument(documents[0]._self, {}, function (err, responseOptions) {
+                var isAccepted = Container.deleteDocument(documents[0]._self, {}, function (err, responseOptions) {
                     if (err) throw err;
                     responseBody.deleted++;
                     documents.shift();
@@ -632,7 +632,7 @@ In this lab, you will author and execute multiple stored procedures within your 
     import java.util.concurrent.Executors;
     import com.microsoft.azure.cosmosdb.ConnectionPolicy;
     import com.microsoft.azure.cosmosdb.ConsistencyLevel;
-    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.DocumentContainer;
     import com.microsoft.azure.cosmosdb.PartitionKey;
     import com.microsoft.azure.cosmosdb.RequestOptions;
     import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
@@ -670,7 +670,7 @@ In this lab, you will author and execute multiple stored procedures within your 
         private AsyncDocumentClient client;
 
         private final String databaseName = "FinancialDatabase";
-        private final String collectionId = "InvestorCollection";
+        private final String ContainerId = "InvestorContainer";
     ```
 
 
@@ -711,7 +711,7 @@ In this lab, you will author and execute multiple stored procedures within your 
         requestOptions.setScriptLoggingEnabled(true);
         requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));      
         final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
-        String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkUpload"; 
+        String sprocLink = "dbs/" + databaseName + "/colls/" + ContainerId + "/sprocs/bulkUpload"; 
         // Execute the stored procedure
         Object docs = documents.toArray();
         Object[] storedProcedureArgs = new Object[]{docs};
@@ -765,7 +765,7 @@ In this lab, you will author and execute multiple stored procedures within your 
             private AsyncDocumentClient client;
 
             private final String databaseName = "FinancialDatabase";
-            private final String collectionId = "InvestorCollection";
+            private final String ContainerId = "InvestorContainer";
 
 
             public Program() {
@@ -781,8 +781,8 @@ In this lab, you will author and execute multiple stored procedures within your 
                         .withConsistencyLevel(ConsistencyLevel.Session)
                         .build();
 
-                DocumentCollection collectionDefinition = new DocumentCollection();
-                collectionDefinition.setId(UUID.randomUUID().toString());
+                DocumentContainer ContainerDefinition = new DocumentContainer();
+                ContainerDefinition.setId(UUID.randomUUID().toString());
             
             }
 
@@ -811,7 +811,7 @@ In this lab, you will author and execute multiple stored procedures within your 
                 requestOptions.setScriptLoggingEnabled(true);
                 requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));            
                 final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
-                String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkUpload"; 
+                String sprocLink = "dbs/" + databaseName + "/colls/" + ContainerId + "/sprocs/bulkUpload"; 
                 // Execute the stored procedure
                 Object docs = documents.toArray();
                 Object[] storedProcedureArgs = new Object[]{docs};
@@ -835,7 +835,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. Observe the results of the console project.
 
-    > This stored procedure will bulk upload 500 documents to your collection within the specified partition key.
+    > This stored procedure will bulk upload 500 documents to your Container within the specified partition key.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -851,7 +851,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **InvestorCollection** node.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **InvestorContainer** node.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -904,7 +904,7 @@ In this lab, you will author and execute multiple stored procedures within your 
         requestOptions.setPartitionKey(new PartitionKey("contosofinancial"));
         
         final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
-        String sprocLink = "dbs/" + databaseName + "/colls/" + collectionId + "/sprocs/bulkDelete"; 
+        String sprocLink = "dbs/" + databaseName + "/colls/" + ContainerId + "/sprocs/bulkDelete"; 
 
         String query = "SELECT * FROM investors i WHERE i.company = 'contosofinancial'";
         // Execute the stored procedure
@@ -951,7 +951,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **InvestorCollection** node.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **InvestorContainer** node.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 

@@ -52,7 +52,7 @@ In this lab, you will create an Azure Cosmos DB account.
 
     1. Ensure the **Multi-region Writes** option is set to **Disable**.
 
-        > With Azure Cosmos DB multi-master support, you can perform writes on containers of data (for example, collections, graphs, tables) distributed anywhere in the world. You can update data in any region that is associated with your database account. These data updates can propagate asynchronously. 
+        > With Azure Cosmos DB multi-master support, you can perform writes on containers of data (for example, Containers, graphs, tables) distributed anywhere in the world. You can update data in any region that is associated with your database account. These data updates can propagate asynchronously. 
 
     1. Click the **Review + create** button.
 

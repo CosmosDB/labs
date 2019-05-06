@@ -4,11 +4,11 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and Container that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your Container.
 
-### Create Azure Cosmos DB Database and Collection
+### Create Azure Cosmos DB Database and Container
 
-*You will now create a database and collection within your Azure Cosmos DB account.*
+*You will now create a database and Container within your Azure Cosmos DB account.*
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -20,15 +20,15 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Overview** link on the left side of the blade.
 
-1. At the top of the **Azure Cosmos DB** blade, click the **Add Collection** button.
+1. At the top of the **Azure Cosmos DB** blade, click the **Add Container** button.
 
-1. In the **Add Collection** popup, perform the following actions:
+1. In the **Add Container** popup, perform the following actions:
 
     1. In the **Database id** field, select the **Create new** option and enter the value **FinancialDatabase**.
 
     1. Ensure the **Provision database throughput** option is not selected.
 
-    1. In the **Collection id** field, enter the value **TransactionCollection**.
+    1. In the **Container id** field, enter the value **TransactionContainer**.
 
     1. In the **Partition key** field, enter the value ``/costCenter``.
 
@@ -36,7 +36,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     1. Click the **OK** button.
 
-1. Wait for the creation of the new **database** and **collection** to finish before moving on with this lab.
+1. Wait for the creation of the new **database** and **Container** to finish before moving on with this lab.
 
 
 ### Retrieve Account Credentials
@@ -51,7 +51,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
     ![Credentials](../media/05-keys.jpg)
 
-### Import Lab Data Into Collection
+### Import Lab Data Into Container
 
 You will use **Azure Data Factory (ADF)** to import the JSON array stored in the **students.json** file from Azure Blob Storage.
 
@@ -111,7 +111,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 16. Select your newly created **targetcosmosdb** connection as the Destination date store.
 
-17. Select your collection from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB collection.
+17. Select your Container from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB Container.
 
 ![](../media/03-adf_correcttable.jpg)
 
@@ -189,9 +189,9 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     ```java
     package test;
     import java.util.ArrayList;
-    import java.util.Collection;
+    import java.util.Container;
     import java.util.List;
-    import java.util.Collections;
+    import java.util.Containers;
     import java.util.concurrent.CountDownLatch;
     import java.util.concurrent.ExecutionException;
     import java.util.concurrent.ExecutorService;
@@ -203,7 +203,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     import com.microsoft.azure.cosmosdb.DataType;
     import com.microsoft.azure.cosmosdb.Database;
     import com.microsoft.azure.cosmosdb.DocumentClientException;
-    import com.microsoft.azure.cosmosdb.DocumentCollection;
+    import com.microsoft.azure.cosmosdb.DocumentContainer;
     import com.microsoft.azure.cosmosdb.IncludedPath;
     import com.microsoft.azure.cosmosdb.Index;
     import com.microsoft.azure.cosmosdb.IndexingPolicy;
@@ -226,7 +226,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         private AsyncDocumentClient client;
 
         private final String databaseName = "FinancialDatabase";
-        private final String collectionId = "PeopleCollection";
+        private final String ContainerId = "PeopleContainer";
         private final String partitionKeyPath = "/type";
         private final int throughPut = 1000;
 
@@ -246,8 +246,8 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                 p.createDatabase();
                 System.out.println(String.format("Database created, please hold while resources are released"));
     
-                //create collection...
-                p.createMultiPartitionCollection();
+                //create Container...
+                p.createMultiPartitionContainer();
 
             } catch (Exception e) {
                 System.err.println(String.format("DocumentDB GetStarted failed with %s", e));
@@ -284,22 +284,22 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
         
 
-        private DocumentCollection getMultiPartitionCollectionDefinition() {
-            DocumentCollection collectionDefinition = new DocumentCollection();
-            collectionDefinition.setId(collectionId);
+        private DocumentContainer getMultiPartitionContainerDefinition() {
+            DocumentContainer ContainerDefinition = new DocumentContainer();
+            ContainerDefinition.setId(ContainerId);
 
             PartitionKeyDefinition partitionKeyDefinition = new PartitionKeyDefinition();
             List<String> paths = new ArrayList<>();
             paths.add(partitionKeyPath);
             partitionKeyDefinition.setPaths(paths);
-            collectionDefinition.setPartitionKey(partitionKeyDefinition);
+            ContainerDefinition.setPartitionKey(partitionKeyDefinition);
 
             // Set indexing policy to be range range for string and number
             IndexingPolicy indexingPolicy = new IndexingPolicy();
-            Collection<IncludedPath> includedPaths = new ArrayList<>();
+            Container<IncludedPath> includedPaths = new ArrayList<>();
             IncludedPath includedPath = new IncludedPath();
             includedPath.setPath("/*");
-            Collection<Index> indexes = new ArrayList<>();
+            Container<Index> indexes = new ArrayList<>();
             Index stringIndex = Index.Range(DataType.String);
             stringIndex.set("precision", -1);
             indexes.add(stringIndex);
@@ -310,31 +310,31 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
             includedPath.setIndexes(indexes);
             includedPaths.add(includedPath);
             indexingPolicy.setIncludedPaths(includedPaths);
-            collectionDefinition.setIndexingPolicy(indexingPolicy);
+            ContainerDefinition.setIndexingPolicy(indexingPolicy);
 
-            return collectionDefinition;
+            return ContainerDefinition;
         }
     
-        public void createMultiPartitionCollection() throws Exception {
+        public void createMultiPartitionContainer() throws Exception {
             RequestOptions multiPartitionRequestOptions = new RequestOptions();
             multiPartitionRequestOptions.setOfferThroughput(throughPut);
             String databaseLink = String.format("/dbs/%s", databaseName);
 
-            Observable<ResourceResponse<DocumentCollection>> createCollectionObservable = client.createCollection(
-                databaseLink, getMultiPartitionCollectionDefinition(), multiPartitionRequestOptions);
+            Observable<ResourceResponse<DocumentContainer>> createContainerObservable = client.createContainer(
+                databaseLink, getMultiPartitionContainerDefinition(), multiPartitionRequestOptions);
 
             final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-            createCollectionObservable.single() // We know there is only single result
-                    .subscribe(collectionResourceResponse -> {
-                        System.out.println(collectionResourceResponse.getActivityId());
+            createContainerObservable.single() // We know there is only single result
+                    .subscribe(ContainerResourceResponse -> {
+                        System.out.println(ContainerResourceResponse.getActivityId());
                         countDownLatch.countDown();
                     }, error -> {
                         System.err.println(
-                                "an error occurred while creating the collection: actual cause: " + error.getMessage());
+                                "an error occurred while creating the Container: actual cause: " + error.getMessage());
                         countDownLatch.countDown();
                     });
-            System.out.println("creating collection...");
+            System.out.println("creating Container...");
             countDownLatch.await();
         }
 
@@ -345,7 +345,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     }
     ```
 
-1. Save all of your open editor tabs, and click run (this should give you a message saying that the database already exists as you should have created it earlier in the lab, but the collection will be created)
+1. Save all of your open editor tabs, and click run (this should give you a message saying that the database already exists as you should have created it earlier in the lab, but the Container will be created)
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -469,7 +469,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         for (Document document : documents) {
             // Create a document
             Observable<ResourceResponse<Document>> createDocumentObservable = client
-                    .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
+                    .createDocument("dbs/" + databaseName + "/colls/" + ContainerId, document, null, false);
             Observable<Double> totalChargeObservable = createDocumentObservable.map(ResourceResponse::getRequestCharge)
                     // Map to request charge
                     .reduce((totalCharge, charge) -> totalCharge + charge);
@@ -523,7 +523,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **PeopleCollection** node.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **PeopleContainer** node.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -533,7 +533,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     SELECT TOP 2 * FROM coll ORDER BY coll._ts DESC
     ```
 
-    > This query will return the latest two documents added to your collection.
+    > This query will return the latest two documents added to your Container.
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
@@ -574,7 +574,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **PeopleCollection** node.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then observe select the **PeopleContainer** node.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -584,7 +584,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     SELECT * FROM coll WHERE IS_DEFINED(coll.Relatives)
     ```
 
-    > This query will return the only document in your collection with a property named **Children**.
+    > This query will return the only document in your Container with a property named **Children**.
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
@@ -594,7 +594,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Scale & Settings** option.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleContainer** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Indexing Policy** field and observe the current default indexing policy:
 
@@ -643,7 +643,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     > This new policy will exclude the ``/Relatives/*`` path from indexing effectively removing the **Children** property of your large JSON document from the index.
 
-1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
+1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the Container's index.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -685,7 +685,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Scale & Settings** option.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleContainer** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Indexing Policy** field and replace the indexing policy with a new policy:
 
@@ -715,7 +715,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     > This new policy removes the ``/Relatives/*`` path from the excluded path list so that the path can be indexed again.
 
-1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the collection's index.
+1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the Container's index.
 
 1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
 
@@ -727,7 +727,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Click the **Execute Query** button in the query tab to run the query. 
 
-    > This query should now work. If you see an empty result set, this is because the indexer has not finished indexing all of the documents in the collection. Simply rerun the query until you see a non-empty result set.
+    > This query should now work. If you see an empty result set, this is because the indexer has not finished indexing all of the documents in the Container. Simply rerun the query until you see a non-empty result set.
 
 ### Implement Upsert using Response Status Codes
 
@@ -738,15 +738,15 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     public void documentUpsert_Async() throws Exception {
         // Create a document
         Document doc = new Document(String.format("{ 'id': 'example.document', 'type': 'upsertsample'}", UUID.randomUUID().toString(), 1));
-        asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, doc, null, false).toBlocking().single();
+        asyncClient.createDocument("dbs/" + databaseName + "/colls/" + ContainerId, doc, null, false).toBlocking().single();
 
         // Upsert the existing document
         Document upsertingDocument = new Document(
                 String.format("{ 'id': 'example.document', 'type': 'upsertsample', 'new-prop' : '2'}", doc.getId(), 1));
         Observable<ResourceResponse<Document>> upsertDocumentObservable = client
-                .upsertDocument("dbs/" + databaseName + "/colls/" + collectionId, upsertingDocument, null, false);
+                .upsertDocument("dbs/" + databaseName + "/colls/" + ContainerId, upsertingDocument, null, false);
 
-        List<ResourceResponse<Document>> capturedResponse = Collections
+        List<ResourceResponse<Document>> capturedResponse = Containers
                 .synchronizedList(new ArrayList<>());
 
         upsertDocumentObservable.subscribe(resourceResponse -> {
@@ -785,7 +785,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 *First, you will use the Java SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
 
-### Reducing R/U Throughput for a Collection
+### Reducing R/U Throughput for a Container
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -797,11 +797,11 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionContainer** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Throughput** field and update it's value to **400**.
 
-    > This is the minimum throughput that you can allocate to an *unlimited* collection.
+    > This is the minimum throughput that you can allocate to an *unlimited* Container.
 
 1. Click the **Save** button at the top of the section to persist your new throughput allocation.
 
@@ -842,19 +842,19 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Double-click the **Program.java** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the following line of code that identifies the collection that will be used by the application:
+1. Locate the following line of code that identifies the Container that will be used by the application:
 
     ```java
-    private final String collectionId = "PeopleCollection"; 
+    private final String ContainerId = "PeopleContainer"; 
     ```
 
     Replace the line of code with the following line of code:
 
     ```csharp
-    private final String collectionId = "TransactionCollection";
+    private final String ContainerId = "TransactionContainer";
     ```
 
-    > We will use a different collection for the next section of the lab.
+    > We will use a different Container for the next section of the lab.
 
 1. Locate the **createDocument** method and replace it with the following:
 
@@ -867,7 +867,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
             // Create a document
             Future<?> future = executor.submit(() -> {
             Observable<ResourceResponse<Document>> createDocumentObservable = client
-            .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
+            .createDocument("dbs/" + databaseName + "/colls/" + ContainerId, document, null, false);
             System.out.println(createDocumentObservable.toBlocking().single().getResource().getId());  
             });   
             futures.add(future);             
@@ -909,7 +909,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         private final Scheduler scheduler;
 
         private final String databaseName = "FinancialDatabase";
-        private final String collectionId = "PeopleCollection";
+        private final String ContainerId = "PeopleContainer";
         private AsyncDocumentClient client;
 
         public Program() {
@@ -923,8 +923,8 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                     .withMasterKeyOrResourceToken("key")
                     .withConnectionPolicy(connectionPolicy).withConsistencyLevel(ConsistencyLevel.Session).build();
 
-            DocumentCollection collectionDefinition = new DocumentCollection();
-            collectionDefinition.setId(UUID.randomUUID().toString());
+            DocumentContainer ContainerDefinition = new DocumentContainer();
+            ContainerDefinition.setId(UUID.randomUUID().toString());
 
         }
 
@@ -954,7 +954,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                 // Create a document
                 Future<?> future = executor.submit(() -> {
                 Observable<ResourceResponse<Document>> createDocumentObservable = client
-                .createDocument("dbs/" + databaseName + "/colls/" + collectionId, document, null, false);
+                .createDocument("dbs/" + databaseName + "/colls/" + ContainerId, document, null, false);
                 System.out.println(createDocumentObservable.toBlocking().single().getResource().getId());  
                 });   
                 futures.add(future);             
@@ -990,7 +990,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
     ```java
         public static void main(String[] args) throws InterruptedException {
-                // as this is a multi collection enable cross partition query
+                // as this is a multi Container enable cross partition query
                 FeedOptions options = new FeedOptions();
                 options.setEnableCrossPartitionQuery(true);
                 options.setPopulateQueryMetrics(true);
@@ -999,7 +999,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                 String sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
                 Program p = new Program();
                 Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
                 // observable to an iterator
                 Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
 
@@ -1133,7 +1133,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     ```java
         Program p = new Program();
         Observable<FeedResponse<Document>> documentQueryObservable = p.client
-        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
         // observable to an iterator
         Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
          while (it.hasNext()) {
@@ -1358,7 +1358,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
         options.setEnableCrossPartitionQuery(true);
         Program p = new Program();
         Observable<FeedResponse<Document>> documentQueryObservable = p.client
-        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+        .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
     ```
 
 1. Add the following line of code to print out the value of the **RequestCharge** property of the **ResourceResponse<>** instance:
@@ -1371,7 +1371,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
 
 1. Observe the output of the console application.
 
-    > You should see the amount of RUs used to query for the document in your collection.
+    > You should see the amount of RUs used to query for the document in your Container.
 
 
 1. Click the **🗙** symbol to close the terminal pane.
@@ -1436,7 +1436,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                 options.setEnableCrossPartitionQuery(true);
                 Program p = new Program();
                 Observable<FeedResponse<Document>> documentQueryObservable = p.client
-                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
                 Iterator<FeedResponse<Document>> it = documentQueryObservable.toBlocking().getIterator();
                 while (it.hasNext()) {
                         FeedResponse<Document> page = it.next();
@@ -1458,7 +1458,7 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
                 options.setEnableCrossPartitionQuery(true);
                 Program p = new Program();
                 Observable<FeedResponse<Document>> document = p.client
-                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.collectionId, sql, options);
+                .queryDocuments("dbs/" + p.databaseName + "/colls/" + p.ContainerId, sql, options);
                 Iterator<FeedResponse<Document>> it = document.toBlocking().getIterator();
                 RequestOptions roptions;
                 while (it.hasNext()) {
