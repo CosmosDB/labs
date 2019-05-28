@@ -1,6 +1,9 @@
 # Workshop Powerpoint Deck
 
+**Two Day Suggested Schedule**
 - [Sample Schedule](./decks/CosmosDBWorkshopSchedule2019.docx)
+
+**Deep-Dive Powerpoint Decks**
 - [Overview, Value Proposition & Use Cases](./decks/Overview-Value-Proposition-Use-Cases.pptx)
 - [Resource Model](./decks/Resource-Model.pptx)
 - [Request Units & Billing](./decks/Request-Units-Billing.pptx)
