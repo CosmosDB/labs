@@ -4,7 +4,7 @@ In this lab, you will use the .NET SDK to tune an Azure Cosmos DB request to opt
 
 ## Setup
 
-> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Data Migration Tool** to import existing data into your collection.
+> Before you start this lab, you will need to create an Azure Cosmos DB database and collection that you will use throughout the lab. You will also use the **Azure Data Factory** to import existing data into your collection.
 
 ### Create Azure Cosmos DB Database and Collection
 
@@ -104,7 +104,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 9. Name the source **TransactionsJson** and select **Use SAS URI** as the Authentication method. Please use the following SAS URI for read-only access to this Blob Storage container:  
 
-https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2020-03-11T08:08:39Z&st=2018-11-10T02:08:39Z&spr=https&sig=ZSwZhcBdwLVIMRj94pxxGojWwyHkLTAgnL43BkbWKyg%3D
+https://cosmoslabs.blob.core.windows.net/?sv=2018-03-28&ss=bfqt&srt=sco&sp=rl&se=2020-04-01T13:14:14Z&st=2018-11-06T06:14:14Z&spr=https&sig=8HltMx1smolMcSmOhfVdC3drxtmTkq2%2BfJ8574uK60A%3D
 
 ![adf-properties](../media/05-adf_newlinkedservice.jpg)
 
