@@ -738,7 +738,19 @@ https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwd
     public void documentUpsert_Async() throws Exception {
         // Create a document
         Document doc = new Document(String.format("{ 'id': 'example.document', 'type': 'upsertsample'}", UUID.randomUUID().toString(), 1));
-        asyncClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, doc, null, false).toBlocking().single();
+
+        ConnectionPolicy connPol = new ConnectionPolicy();
+
+        connPol.setConnectionMode(ConnectionMode.Direct);
+
+        AsyncDocumentClient docClient = new AsyncDocumentClient.Builder()
+            .withServiceEndpoint("uri")
+            .withMasterKeyOrResourceToken("key")
+            .withConnectionPolicy(connPol)
+            .withConsistencyLevel(ConsistencyLevel.Session)
+            .build();
+
+        docClient.createDocument("dbs/" + databaseName + "/colls/" + collectionId, doc, null, false);
 
         // Upsert the existing document
         Document upsertingDocument = new Document(
