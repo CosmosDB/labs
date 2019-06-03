@@ -111,7 +111,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_choosestudents.jpg)
 
-11. Ensure that **Copy file recursively** and **Binary Copy** are not checked off. Also ensure that **Compression Type** is "none".
+11.  Do not check **Copy file recursively** or **Binary Copy**. Also ensure that **Compression Type** is "none".
 
     ![](../media/03-adf_source_next.jpg)
 
