@@ -105,7 +105,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_blob.jpg)
 
-9. Name the source **StudentsJson** and select **Use SAS URI** as the Authentication method. Please use the following SAS URI for read-only access to this Blob Storage container: https://cosmosdblabs.blob.core.windows.net/?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2020-03-11T08:08:39Z&st=2018-11-10T02:08:39Z&spr=https&sig=ZSwZhcBdwLVIMRj94pxxGojWwyHkLTAgnL43BkbWKyg%3D
+9. Name the source **StudentsJson** and select **Use SAS URI** as the Authentication method. Please use the following SAS URI for read-only access to this Blob Storage container: https://cosmoslabs.blob.core.windows.net/?sv=2018-03-28&ss=bfqt&srt=sco&sp=rl&se=2020-04-01T13:14:14Z&st=2018-11-06T06:14:14Z&spr=https&sig=8HltMx1smolMcSmOhfVdC3drxtmTkq2%2BfJ8574uK60A%3D
 
     ![](../media/03-adf_connecttoblob.jpg)
 
@@ -113,7 +113,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_choosestudents.jpg)
 
-11. Ensure that **Copy file recursively** and **Binary Copy** are not checked off. Also ensure that **Compression Type** is "none".
+11. Do not check **Copy file recursively** and **Binary Copy**. Also ensure that **Compression Type** is "none".
 
     ![](../media/03-adf_source_next.jpg)
 

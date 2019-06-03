@@ -1,7 +1,21 @@
 # Workshop Powerpoint Deck
 
-- [Workshop Deck- Last Updated April 2019](./decks/L400-WorkshopApril2019.pptx)
+**Two Day Suggested Schedule**
 - [Sample Schedule](./decks/CosmosDBWorkshopSchedule2019.docx)
+
+**Deep-Dive Powerpoint Decks**
+- [Overview, Value Proposition & Use Cases](./decks/Overview-Value-Proposition-Use-Cases.pptx)
+- [Resource Model](./decks/Resource-Model.pptx)
+- [Request Units & Billing](./decks/Request-Units-Billing.pptx)
+- [Data Modeling](./decks/Data-Modeling.pptx)
+- [Partitioning](./decks/Partitioning.pptx)
+- [SQL API Query](./decks/SQL-API-Query.pptx)
+- [Server Side Programming](./decks/Server-Side-Programming.pptx)
+- [Troubleshooting](./decks/Troubleshooting.pptx)
+- [Concurrency](./decks/Concurrency.pptx)
+- [Change Feed](./decks/Change-Feed.pptx)
+- [Global Distribution](./decks/Global-Distribution.pptx)
+
 
 In addition to the above workshop decks, we have four hands-on labs. Each lab is designed to take 60-90 minutes and can be either self-paced or instructor-led labs. We have labs available for our .NET sdk and Java sdk below:
 
