@@ -111,7 +111,7 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 2. If you already have Java installed on your local machine, you should check the version of your Java Runtime Environment (JRE) installation using the ``java -version`` command.
 2. If using a version of Java greater than version 8, some projects may not compile (for example the benchmarking application).
 
-# MongoDB API
+# Node.js Labs
 
 **Cosmos DB Lab Prerequisites**
 
