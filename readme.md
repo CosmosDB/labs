@@ -111,3 +111,20 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 2. If you already have Java installed on your local machine, you should check the version of your Java Runtime Environment (JRE) installation using the ``java -version`` command.
 2. If using a version of Java greater than version 8, some projects may not compile (for example the benchmarking application).
 
+# MongoDB API
+
+**Cosmos DB Lab Prerequisites**
+
+An Azure subscription. You can get one free through [Visual Studio Dev Essentials](https://visualstudio.microsoft.com/dev-essentials/)
+
+**Cosmos DB Lab Guides**
+
+*It is recommended to complete the labs in the order specified below:*
+
+- [Creating DevOps Projects for Node.js app powered by Azure Cosmos DB](cosmosdb/cosmos-db.md#creating-devops-projects-for-nodejs-app-powered-by-azure-cosmos-db)
+- [Configure Azure DevOps and an Azure subscription](cosmosdb/cosmos-db.md#configure-azure-devops-and-an-azure-subscription)
+- [Examine the Azure Cosmos DB](cosmosdb/cosmos-db.md#examine-the-azure-cosmos-db)
+- [Examine the CI pipeline](cosmosdb/cosmos-db.md#examine-the-ci-pipeline)
+- [Examine the CD pipeline](cosmosdb/cosmos-db.md#examine-the-cd-pipeline)
+- [Commit the changes to Git and automatically deploy them to Azure](cosmosdb/cosmos-db.md#commit-the-changes-to-git-and-automatically-deploy-them-to-azure)
+- [Clean up resources](cosmosdb/cosmos-db.md#clean-up-resources)
