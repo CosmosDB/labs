@@ -121,10 +121,4 @@ An Azure subscription. You can get one free through [Visual Studio Dev Essential
 
 *It is recommended to complete the labs in the order specified below:*
 
-- [Creating DevOps Projects for Node.js app powered by Azure Cosmos DB](cosmosdb/cosmos-db.md#creating-devops-projects-for-nodejs-app-powered-by-azure-cosmos-db)
-- [Configure Azure DevOps and an Azure subscription](cosmosdb/cosmos-db.md#configure-azure-devops-and-an-azure-subscription)
-- [Examine the Azure Cosmos DB](cosmosdb/cosmos-db.md#examine-the-azure-cosmos-db)
-- [Examine the CI pipeline](cosmosdb/cosmos-db.md#examine-the-ci-pipeline)
-- [Examine the CD pipeline](cosmosdb/cosmos-db.md#examine-the-cd-pipeline)
-- [Commit the changes to Git and automatically deploy them to Azure](cosmosdb/cosmos-db.md#commit-the-changes-to-git-and-automatically-deploy-them-to-azure)
-- [Clean up resources](cosmosdb/cosmos-db.md#clean-up-resources)
+- [Creating DevOps Projects for Node.js app powered by Azure Cosmos DB](devops/devops.md)

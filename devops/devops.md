@@ -2,11 +2,11 @@
 
 [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/) is a globally distributed database service that's designed to provide low latency, elastic scalability of throughput, well-defined semantics for data consistency, and high availability. It provides five APIs to suit the needs of your application:  
 
-- SQL (document database)
+- SQL
 
-- Gremlin (graph database)
+- Gremlin
 
-- MongoDB (document database)
+- MongoDB
 
 - Azure Table
 
