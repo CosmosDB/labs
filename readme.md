@@ -119,6 +119,4 @@ An Azure subscription. You can get one free through [Visual Studio Dev Essential
 
 **Cosmos DB Lab Guides**
 
-*It is recommended to complete the labs in the order specified below:*
-
 - [Creating DevOps Projects for Node.js app powered by Azure Cosmos DB](devops/devops.md)
