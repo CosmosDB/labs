@@ -111,12 +111,6 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 2. If you already have Java installed on your local machine, you should check the version of your Java Runtime Environment (JRE) installation using the ``java -version`` command.
 2. If using a version of Java greater than version 8, some projects may not compile (for example the benchmarking application).
 
-# Node.js Labs
+# Misc Labs
 
-**Cosmos DB Lab Prerequisites**
-
-An Azure subscription. You can get one free through [Visual Studio Dev Essentials](https://visualstudio.microsoft.com/dev-essentials/)
-
-**Cosmos DB Lab Guides**
-
-- [Creating DevOps Projects for Node.js app powered by Azure Cosmos DB](devops/devops.md)
+- [Creating Azure DevOps Projects for Node.js app powered by Azure Cosmos DB MongoDB API](devops/devops.md)
