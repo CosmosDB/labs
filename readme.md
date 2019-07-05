@@ -1,4 +1,4 @@
-# Workshop Powerpoint Deck
+# Workshop PowerPoint Deck
 
 **Two Day Suggested Schedule**
 - [Sample Schedule](./decks/CosmosDBWorkshopSchedule2019.docx)
@@ -17,12 +17,54 @@
 - [Global Distribution](./decks/Global-Distribution.pptx)
 
 
-In addition to the above workshop decks, we have four hands-on labs. Each lab is designed to take 60-90 minutes and can be either self-paced or instructor-led labs. We have labs available for our .NET sdk and Java sdk below:
+In addition to the above workshop decks, we have hands-on labs. We have labs available for our .NET sdk and Java sdk below:
 
-
-# .NET Labs
+# .NET (V2) Labs
 
 **.NET Lab Prerequisites**
+
+Prior to starting these labs, you must have the following operating system and software configured on your local machine:
+
+**Operating System**
+
+- 64-bit Windows 10 Operating System
+    - [download](https://www.microsoft.com/windows/get-windows-10)
+- Microsoft .NET Framework 4.5.1 or higher <sup>1</sup>
+    - [download](http://go.microsoft.com/fwlink/?LinkId=863262)
+
+**Software**
+
+| Software | Download Link |
+| --- | --- |
+| Git | [/git-scm.com/downloads](https://git-scm.com/downloads) |
+| .NET Core 2.1 (or greater) SDK <sup>2</sup> | [/download.microsoft.com/dotnet-sdk-2.1](https://download.microsoft.com/download/E/2/6/E266C257-F7AF-4E79-8EA2-DF26031C84E2/dotnet-sdk-2.1.103-win-gs-x64.exe) |
+| Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
+
+---
+
+**.NET Lab Guides**
+
+*It is recommended to complete the labs in the order specified below:*
+
+- [Pre-lab: Creating an Azure Cosmos DB account](dotnetV2/technical_deep_dive/01-getting_started.md)
+- [Lab 1: Creating a partitioned solution using Azure Cosmos DB](dotnetV2/technical_deep_dive/02-creating_multi_partition_solution.md)
+- [Lab 2: Querying an Azure Cosmos DB Database using the SQL API](dotnetV2/technical_deep_dive/03-querying_the_database_using_sql.md)
+- [Lab 3: Authoring Azure Cosmos DB Stored Procedures using JavaScript ](dotnetV2/technical_deep_dive/04-authoring_stored_procedures.md)
+- [Lab 4: Troubleshooting and Tuning Azure Cosmos DB Requests](dotnetV2/technical_deep_dive/05-troubleshooting_failed_requests.md)
+- [Post-lab: Cleaning Up](dotnetV2/technical_deep_dive/06-cleaning_up.md)
+
+---
+
+**Notes**
+
+1. If you are unsure of what version of the .NET Framework you have installed on your local machine, you can visit the following link to view instructions on determining your installed version: <https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed>.
+2. If you already have .NET Core installed on your local machine, you should check the version of your .NET Core installation using the ``dotnet --version`` command.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# .NET (V3) Labs
+
+**.NET (V3) Lab Prerequisites**
 
 Prior to starting these labs, you must have the following operating system and software configured on your local machine:
 
@@ -48,12 +90,18 @@ Prior to starting these labs, you must have the following operating system and s
 
 *It is recommended to complete the labs in the order specified below:*
 
-- [Pre-lab: Creating an Azure Cosmos DB account](dotnet/technical_deep_dive/01-getting_started.md)
-- [Lab 1: Creating a partitioned solution using Azure Cosmos DB](dotnet/technical_deep_dive/02-creating_multi_partition_solution.md)
-- [Lab 2: Querying an Azure Cosmos DB Database using the SQL API](dotnet/technical_deep_dive/03-querying_the_database_using_sql.md)
-- [Lab 3: Authoring Azure Cosmos DB Stored Procedures using JavaScript ](dotnet/technical_deep_dive/04-authoring_stored_procedures.md)
-- [Lab 4: Troubleshooting and Tuning Azure Cosmos DB Requests](dotnet/technical_deep_dive/05-troubleshooting_failed_requests.md)
-- [Post-lab: Cleaning Up](dotnet/technical_deep_dive/06-cleaning_up.md)
+- [Pre-lab: Creating an Azure Cosmos DB account](dotnet/labs/00-account_setup.md)
+- [Lab 1: Creating a partitioned collection with the .NET SDK](dotnet/labs/01-creating_partitioned_collection.md)
+- [Lab 2: Load data into Cosmos DB with ADF](dotnet/labs/02-load_data_with_adf.md)
+- Lab 3: Querying in Azure Cosmos DB - coming soon
+- Lab 4: Indexing in Cosmos DB - coming soon
+- [Lab 5: Build simple .NET console app](dotnet/labs/05-build_net_app.md)
+- [Lab 6: Multi-Document Transactions](dotnet/labs/06-multi-document-transactions.md)
+- [Lab 7: Long-Running Multi-Document Transactions with Continuation Tokens](dotnet/labs/07-transactions-with-continuation.md)
+- [Lab 8: Change Feed with Azure Functions](dotnet/labs/08-change_feed_with_azure_functions.md)
+- [Lab 9: Troubleshooting Performance](dotnet/labs/09-troubleshooting-performance.md)
+- [Lab 10: Optimistic Concurrency Control](dotnet/labs/10-concurrency-control.md)
+- [Post-lab: Cleaning Up](dotnet/labs/11-cleaning_up.md)
 
 ---
 
@@ -61,9 +109,6 @@ Prior to starting these labs, you must have the following operating system and s
 
 1. If you are unsure of what version of the .NET Framework you have installed on your local machine, you can visit the following link to view instructions on determining your installed version: <https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed>.
 2. If you already have .NET Core installed on your local machine, you should check the version of your .NET Core installation using the ``dotnet --version`` command.
-
-
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 # Java Labs
@@ -87,7 +132,6 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 | Visual Studio Code | [/code.visualstudio.com/download](https://go.microsoft.com/fwlink/?Linkid=852157) |
 | Java Extension Pack (if using VS Code) | [/vscode-java-pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) |
 | Maven | [/maven.apache.org/](https://maven.apache.org/) |
-
 
 ---
 
