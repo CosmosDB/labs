@@ -1,5 +1,4 @@
 ﻿using System;
-using Bogus;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Scripts;
@@ -20,10 +19,10 @@ namespace MultiDocTransactions
         {
             using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
             {
-                Microsoft.Azure.Cosmos.Database database = client.GetDatabase(_databaseId);
+                Database database = client.GetDatabase(_databaseId);
                 Container container = database.GetContainer(_containerId);
 
-                List<Food> foods = new Faker<Food>()
+                List<Food> foods = new Bogus.Faker<Food>()
                 .RuleFor(p => p.Id, f => (-1 - f.IndexGlobal).ToString())
                 .RuleFor(p => p.Description, f => f.Commerce.ProductName())
                 .RuleFor(p => p.ManufacturerName, f => f.Company.CompanyName())
