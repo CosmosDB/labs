@@ -244,7 +244,7 @@ _You will now implement stored procedures that may execute longer than the bound
             Database database = client.GetDatabase(_databaseId);
             Container container = database.GetContainer(_containerId);
 
-            List<Food> foods = new Faker<Food>()
+            List<Food> foods = new Bogus.Faker<Food>()
             .RuleFor(p => p.Id, f => (-1 - f.IndexGlobal).ToString())
             .RuleFor(p => p.Description, f => f.Commerce.ProductName())
             .RuleFor(p => p.ManufacturerName, f => f.Company.CompanyName())
