@@ -30,7 +30,7 @@ In this lab, you will populate an Azure Cosmos DB container from an existing set
 
     1. In the **Database id** field, select the **Create new** option and enter the value **ImportDatabase**.
 
-    1. Ensure the **Provision database throughput** option is not selected.
+    1. Do not check the **Provision database throughput** option.
 
         > Provisioning throughput for a database allows you to share the throughput among all the containers that belong to that database. Within an Azure Cosmos DB database, you can have a set of containers which shares the throughput as well as containers, which have dedicated throughput.
 
@@ -78,7 +78,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ![](../media/03-adf_author&monitor.jpg)
     ![](../media/03-adf_copydata.jpg)
 
-1. Edit basic properties for this data copy. You should name the task **ImportNutrition** and select to **Run once now**
+1. Edit basic properties for this data copy. You should name the task **ImportNutrition** and select to **Run once now**. Do not select **nable git**.
 
    ![adf-properties](../media/03-adf_properties.jpg)
 
@@ -96,7 +96,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_choosestudents.jpg)
 
-1. Do not check **Copy file recursively** and **Binary Copy**. Also ensure that other fields are empty.
+1. Do not check **Copy file recursively** or **Binary Copy**. Also ensure that other fields are empty.
 
     ![](../media/03-adf_source_next.jpg)
 
