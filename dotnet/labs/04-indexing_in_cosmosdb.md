@@ -230,7 +230,7 @@ You should observe that this query has a very high RU charge even though only a 
 
 Also observe the **Query Metrics** below:
 
-![1564780108561](../media/04-querymetrics.jpg)
+![query-metrics](../media/04-querymetrics.JPG)
 
 If a query does not use the index, the **Index hit document count** will be 0. We can see above that the query needed to retrieve 5,187 documents and ultimately ended up only returning 1 document.
 
@@ -436,7 +436,7 @@ When you upload sample data, Azure Cosmos DB will automatically create a geo-spa
 
 Geo-spatial indexing is by default, disabled. This indexing policy will turn on geo-spatial indexing for all possible GeoJSON types which include Points, Polygons, and LineStrings. Similar to range indexes and composite indexes, there are no precision settings for geo-spatial indexes.
 
-(Learn more about querying geo-spatial data in Azure Cosmos DB)[https://docs.microsoft.com/en-us/azure/cosmos-db/geospatial#introduction-to-spatial-data].
+[Learn more about querying geo-spatial data in Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/geospatial#introduction-to-spatial-data).
 
 ### Query the Volcano Data
 
