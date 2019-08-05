@@ -35,10 +35,10 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
-    dotnet add package Microsoft.Azure.Cosmos --version 3.0.0.18-preview
+    dotnet add package Microsoft.Azure.Cosmos --version 3.0.0
     ```
 
-    > This command will add the [Microsoft.Azure.Cosmos](https://www.nuget.org/packages/Microsoft.Azure.Cosmos/) NuGet package as a project dependency. The lab instructions have been tested using the ``3.0.0.18-preview`` version of this NuGet package.
+    > This command will add the [Microsoft.Azure.Cosmos](https://www.nuget.org/packages/Microsoft.Azure.Cosmos/) NuGet package as a project dependency. The lab instructions have been tested using the ``3.0.0`` version of this NuGet package.
 
 1. In the terminal pane, enter and execute the following command:
 
@@ -93,7 +93,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
         </PropertyGroup>        
         <ItemGroup>
             <PackageReference Include="Bogus" Version="22.0.8" />
-            <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.0.0.18-preview" />
+            <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.0.0" />
         </ItemGroup>        
     </Project>
     ```

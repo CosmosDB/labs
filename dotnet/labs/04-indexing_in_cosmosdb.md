@@ -401,7 +401,7 @@ When you upload sample data, Azure Cosmos DB will automatically create a geo-spa
 
 1. Navigate back to the **VolcanoesContainer** in the Azure Portal and click the **Items** section.
 2. Select **Upload Item**
-3. In the popup, navigate to the volcano.json file. If you followed the pre-lab steps, this will file be <FOLDER NAME HERE>. Otherwise, you can download the file [here](path-to-volcano) and save it locally.
+3. In the popup, navigate to the volcano.json file. This file is available [here](../setup/VolcanoData.json). If you followed the prelab steps, you already downloaded this file in your **setup** folder.
 
 ### Create geo-spatial indexes in the **Volcanoes** container
 

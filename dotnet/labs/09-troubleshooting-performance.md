@@ -823,17 +823,17 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
-    string sql = "SELECT * FROM c";
-    ```
+     ```csharp
+     string sql = "SELECT * FROM c";
+     ```
 
-    Replace that line of code with the following code:
+     Replace that line of code with the following code:
 
-    ```csharp
-    string sql = "SELECT c.id FROM c";
-    ```
+     ```csharp
+     string sql = "SELECT c.id FROM c";
+     ```
 
-    > This new query does not filter the result set.
+     > This new query does not filter the result set.
 
 1. Save all of your open editor tabs.
 
@@ -1137,6 +1137,20 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ### Reading and Querying Items
 
+1. Return to the **Azure Portal** (<http://portal.azure.com>).
+
+1. On the left side of the portal, click the **Resource groups** link.
+
+1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
+
+1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
+
+1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+
+1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Items** option.
+
+1. Take note of the **id** property value of any document as well as that document's **partition key**.
+
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
@@ -1147,18 +1161,20 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
             var database = client.GetDatabase(_databaseId);
             var peopleContainer = database.GetContainer(_peopleCollectionId);
             var transactionContainer = database.GetContainer(_transactionCollectionId);
-
+    
         }
     }
     ```
 
-1. Add the following line of code that will store a SQL query in a string variable:
+    
+
+1. Add the following line of code that will store a SQL query in a string variable (replacing **example.document** with the **id ** value that you noted earlier):
 
     ```csharp
     string sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
     ```
 
-    > This query will find a single item matching the specified unique id
+    > This query will find a single item matching the specified unique id.
 
 1. Add the following line of code to create a item query instance:
 
@@ -1335,8 +1351,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 1. Add the following code to retrieve the current RU/sec setting for the container:
 
     ```csharp
-    ThroughputResponse response = await peopleContainer.ReadThroughputAsync();
-    int? current = response.Resource.Throughput;
+    int? throughput = await peopleContainer.ReadThroughputAsync();
     ```
 
     > Note that the type of the **Throughput** property is a nullable value. Provisioned throughput can be set either at the container or database level. If set at the database level, this property read from the **Container** will return null. When set at the container level, the same method on **Database** will return null.
@@ -1344,7 +1359,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 1. Add the following line of code to print out the provisioned throughput value:
 
     ```csharp
-    await Console.Out.WriteLineAsync($"{current} RU per sec");
+    await Console.Out.WriteLineAsync($"{throughput} RU per sec");
     ```
 
 1. Add the following code to update the RU/sec setting for the container:

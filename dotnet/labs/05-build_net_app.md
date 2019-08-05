@@ -93,7 +93,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
    Read Candies, HERSHEY''S POT OF GOLD Almond Bar
    ```
 
-### Executing a Query Against a Single Cosmos DB Partition Using a SQL Item Query
+### Executing a Query Against a Single Cosmos DB Partition Using a SQL Query
 
 1.  Return to Visual Studio Code
 
@@ -112,27 +112,25 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
 1.  Create a SQL Query against your data, as follows:
 
     ```csharp
-    string sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets'";
+    string sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
     ```
 
     > This query will select all food where the foodGroup is set to the value `Sweets`. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
 
-1.  Add the following code to execute and read the results of this query
+1. Add the following code to execute and read the results of this query
 
-    ```csharp
-    FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1, PartitionKey = new PartitionKey("Sweets")});
-    foreach (Food food in await queryA.ReadNextAsync())
-    {
-        await Console.Out.WriteLineAsync($"{food.Description} by {food.ManufacturerName}");
-        foreach (Serving serving in food.Servings)
-        {
-            await Console.Out.WriteLineAsync($"\t{serving.Amount} {serving.Description}");
-        }
-        await Console.Out.WriteLineAsync();
-    }
-    ```
-
-    > Note that we have included the **PartitionKey** in the **QueryRequestOptions** to execute this query as a single-partition query. Omitting the partition key option will run all queries as cross-partition, which can have performance and cost impacts.
+   ```csharp
+   FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1, PartitionKey = new PartitionKey("Sweets")});
+   foreach (Food food in await queryA.ReadNextAsync())
+   {
+       await Console.Out.WriteLineAsync($"{food.Description} by {food.ManufacturerName}");
+       foreach (Serving serving in food.Servings)
+       {
+           await Console.Out.WriteLineAsync($"\t{serving.Amount} {serving.Description}");
+       }
+       await Console.Out.WriteLineAsync();
+   }
+   ```
 
 1.  Save all of your open tabs in Visual Studio Code
 
@@ -158,7 +156,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
     ...
     ```
 
-### Executing a Query Against Multiple Cosmos DB Partitions Using a SQL Item Query With Paging
+### Executing a Query Against Multiple Cosmos DB Partitions Using a SQL Query With Paging
 
 1.  Return to Visual Studio Code
 
@@ -171,7 +169,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
 1.  Following your `foreach` loop, create a SQL Query against your data, as follows:
 
     ```csharp
-    string sqlB = @"SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE f.manufacturerName != null";
+    string sqlB = @"SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
     ```
 
 1.  Add the following line of code after the definition of `sqlB` to create your next item query:
