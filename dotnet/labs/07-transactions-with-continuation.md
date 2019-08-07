@@ -215,7 +215,7 @@ _You will now implement stored procedures that may execute longer than the bound
 1. Within the **while** block, add the following lines of code to execute the stored procedure:
 
    ```csharp
-   StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<IEnumerable<Food>, int>(new PartitionKey("Energy Bars"), "bulkUpload", foods.Skip(pointer));
+   StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), new dynamic[] {foods.Skip(pointer)});
    ```
 
    > This line of code will execute the stored procedure using three parameters; the partition key for the data set you are executing against, the name of the stored procedure, and a list of **food** objects to send to the stored procedure.
@@ -254,7 +254,7 @@ _You will now implement stored procedures that may execute longer than the bound
             int pointer = 0;
             while (pointer < foods.Count)
             {
-                StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<IEnumerable<Food>, int>(new PartitionKey("Energy Bars"), "bulkUpload", foods.Skip(pointer));
+                StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), new dynamic[] {foods.Skip(pointer)});
                 pointer += result.Resource;
                 await Console.Out.WriteLineAsync($"{pointer} Total Items\t{result.Resource} Items Uploaded in this Iteration");
             }
@@ -347,12 +347,13 @@ _You will now implement stored procedures that may execute longer than the bound
         {
             Database database = client.GetDatabase(_databaseId);
             Container container = database.GetContainer(_containerId);
-
+   
             bool resume = true;
             do
             {
                 string query = "SELECT * FROM foods f WHERE f.foodGroup = 'Energy Bars'";
-                StoredProcedureExecuteResponse<DeleteStatus> result = await container.Scripts.ExecuteStoredProcedureAsync<string, DeleteStatus>(new PartitionKey("Energy Bars"), "bulkDelete", query);
+                 StoredProcedureExecuteResponse<DeleteStatus> result = await container.Scripts.ExecuteStoredProcedureAsync<DeleteStatus>("bulkDelete", new PartitionKey("Energy Bars"),  new dynamic[] {query});
+                
                 await Console.Out.WriteLineAsync($"Batch Delete Completed.\tDeleted: {result.Resource.Deleted}\tContinue: {result.Resource.Continuation}");
                 resume = result.Resource.Continuation;
             }
