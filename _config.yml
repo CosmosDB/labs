@@ -1,5 +1,5 @@
 title: 'Azure Cosmos DB Workshop'
-description: 'This series of workshops will give you hands-on experience working with Azure Cosmos DB using the SQL API, JavaScript and .NET Core SDK.'
+description: 'This series of workshops will give you hands-on experience working with Azure Cosmos DB using the SQL API'
 remote_theme: timsander1/cosmos-theme
 exclude:
   - .build/
