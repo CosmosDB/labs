@@ -317,7 +317,7 @@ _Azure Functions provide a quick and easy way to hook up with the Cosmos DB Chan
 1. In your terminal pane, enter and execute the following command:
 
    ```sh
-   dotnet add package Microsoft.Azure.Cosmos --version 3.0.0.18-preview
+   dotnet add package Microsoft.Azure.Cosmos --version 3.0.0
    ```
 
 1. In your terminal pane, enter and execute the following command:
