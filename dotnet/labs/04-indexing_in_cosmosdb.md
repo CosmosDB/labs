@@ -82,31 +82,13 @@ If you want to only index the manufacturerName, foodGroup, and nutrients array w
         "indexingMode": "consistent",
         "includedPaths": [
             {
-                "path": "/manufacturerName/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "String"
-                    }
-                ]
+                "path": "/manufacturerName/*"         
             },
             {
-                "path": "/foodGroup/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "String"
-                    }
-                ]
-            }
+                "path": "/foodGroup/*"
+            },
             {
-                "path": "/nutrients/[]/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "String"
-                    }
-                ]
+                "path": "/nutrients/[]/*"
             }
         ],
         "excludedPaths": [
@@ -126,31 +108,13 @@ In this next example, the indexing policy would explicitly specify that the nutr
         "indexingMode": "consistent",
         "includedPaths": [
             {
-                "path": "/manufacturerName/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "String"
-                    }
-                ]
+                "path": "/manufacturerName/*"
             },
             {
-                "path": "/foodGroup/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "String"
-                    }
-                ]
+                "path": "/foodGroup/*"
             },
             {
-                "path": "/nutrients/[]/nutritionValue/*",
-                "indexes": [
-                    {
-                        "kind": "Range",
-                        "dataType": "String"
-                    }
-                ]
+                "path": "/nutrients/[]/nutritionValue/*"
             }
         ],
         "excludedPaths": [

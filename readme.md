@@ -1,6 +1,11 @@
 # Workshop PowerPoint Deck
 
+
+
+
+
 **Two Day Suggested Schedule**
+
 - [Sample Schedule](./decks/CosmosDBWorkshopSchedule2019.docx)
 
 **Deep-Dive Powerpoint Decks**
