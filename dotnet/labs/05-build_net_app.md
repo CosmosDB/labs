@@ -162,9 +162,9 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
 
     > If you've closed Visual Studio code, re-open it from the command line with the following command:
 
-        ```sh
-        code .
-        ```
+    ```sh
+    code .
+    ```
 
 1.  Following your `foreach` loop, create a SQL Query against your data, as follows:
 
