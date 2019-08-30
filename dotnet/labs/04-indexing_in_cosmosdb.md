@@ -324,7 +324,7 @@ This query will not run without an additional composite index. You can modify th
                 "path": "/manufacturerName",
                 "order": "ascending"
             }
-        ],
+        ]
     ]
 }
 ```
