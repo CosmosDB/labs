@@ -223,7 +223,7 @@ _You will now implement stored procedures that may execute longer than the bound
 1. Still within the **while** block, add the following line of code to store the number returned by the stored procedure in the **pointer** variable:
 
    ```csharp
-   pointer += result.Response;
+   pointer += result.Resource;
    ```
 
    > Every time the stored procedure returns how many documents were processed, we will increment the counter.
