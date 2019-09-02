@@ -117,6 +117,8 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
    ```
 
    > Each time a set of changes is received, the Func<T> defined in **CreateChangeFeedProcessorBuilder** will be called. We're skipping the handling of those changes for the moment.
+   
+   > Ignore any errors (build) at this moment. 
 
 1. In order for our processor to run, we have to start it. Following the definition of **processor** add the following line of code:
 
@@ -158,10 +160,9 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
                    var container = db.GetContainer(_containerId);
                    var destinationContainer = db.GetContainer(_destinationContainerId);
 
-                   Container leaseContainer = await db.CreateContainerIfNotExistsAsync(
-                       id: "consoleLeases",
-                       partitionKeyPath: "/id",
-                       throughput: 400);
+                   ContainerProperties leaseContainerProperties = new ContainerProperties("consoleLeases", "/id");
+                   Container leaseContainer = await db.CreateContainerIfNotExistsAsync(leaseContainerProperties, throughput: 400);
+
 
                    var builder = container.GetChangeFeedProcessorBuilder(
                        "migrationProcessor",
