@@ -216,7 +216,8 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
 
     foreach (var doc in input)
     {
-        tasks.Add(destinationContainer.CreateItemAsync(doc, new PartitionKey(doc.BuyerState)));
+        PartitionKey pk = new PartitionKey((string)((Newtonsoft.Json.Linq.JObject)doc)["BuyerState"]);
+        tasks.Add(destinationContainer.CreateItemAsync(doc, pk));
     }
 
     return Task.WhenAll(tasks);
