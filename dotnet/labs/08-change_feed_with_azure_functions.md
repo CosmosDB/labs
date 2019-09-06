@@ -629,7 +629,7 @@ _The Materialized View pattern is used to generate pre-populated views of data i
 
                        foreach (var key in stateDict.Keys)
                        {
-                           var query = new QueryDefinition("select * from StateSales s where s.State = @state").UseParameter("@state", key);
+                           var query = new QueryDefinition("select * from StateSales s where s.State = @state").WithParameter("@state", key);
 
                             var resultSet = container.GetItemQueryIterator<StateCount>(query, requestOptions: new QueryRequestOptions() { PartitionKey = new Microsoft.Azure.Cosmos.PartitionKey(key), MaxItemCount = 1 });
 
