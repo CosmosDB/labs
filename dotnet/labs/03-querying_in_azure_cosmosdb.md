@@ -125,8 +125,8 @@ WHERE food.foodGroup = "Fruits and Fruit Juices" AND food.servings[0].descriptio
 ORDER BY food.servings[0].weightInGrams DESC
 ```
 
-You can learn more about configuring Order By for your collections in the later Indexing Lab or [here](
-https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-order-by)
+You can learn more about configuring the required indexes for an Order By clause in the later Indexing Lab or by reading [our docs](
+https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-order-by).
 
 ## Limiting query result size
 
@@ -190,7 +190,7 @@ WHERE food.id = "21421"
 
 ## JOIN within your documents
 
-Azure Cosmos DB’s JOIN supports intra-document and self-joins. Azure Cosmos DB does not support JOINS across documents or containers.
+Azure Cosmos DB’s JOIN supports intra-document and self-joins. Azure Cosmos DB does not support JOINs across documents or containers.
 
 In an earlier query example we returned a result with attributes of just the first serving of the food.servings array. By using the join syntax below, we can now return an item in the result for every item within the serving array while still being able to project the attributes from elsewhere in the item.
 
@@ -236,7 +236,7 @@ AND food.id > "42178"
 
 ## Correlated subqueries
 
-In many scenarios, a subquery may be effective. A correlated subquery is a query that references values from an outer query. We will walk through some of the most useful examples here but you should read our [subquery doc](https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-subquery) to learn more.
+In many scenarios, a subquery may be effective. A correlated subquery is a query that references values from an outer query. We will walk through some of the most useful examples here. You can [learn more about subqueries](https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-subquery).
 
 There are two types of subqueries: Multi-value subqueries and scalar subqueries. Multi-value subqueries return a set of documents and are always used within the FROM clause. A scalar subquery expression is a subquery that evaluates to a single value.
 
@@ -294,3 +294,5 @@ FROM c
 JOIN n IN c.nutrients
 WHERE n.units= "mg" AND n.nutritionValue > 0
 ```
+
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 

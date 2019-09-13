@@ -2,11 +2,9 @@
 
 In this lab, you will populate an Azure Cosmos DB container from an existing set of data using tools built in to Azure. After importing, you will use the Azure portal to view your imported data.
 
-## Setup
-
 > Before you start this lab, you will need to create an Azure Cosmos DB database and container that you will use throughout the lab. You will also use the **Azure Data Factory (ADF)** to import existing data into your container.
 
-### Create Azure Cosmos DB Database and Container
+## Create Azure Cosmos DB Database and Container
 
 *You will now create a database and container within your Azure Cosmos DB account.*
 
@@ -42,19 +40,9 @@ In this lab, you will populate an Azure Cosmos DB container from an existing set
 
     1. Click the **OK** button.
 
-    ![Add container](../media/04-add_collection_settings.jpg)
-
 1. Wait for the creation of the new **database** and **container** to finish before moving on with this lab.
 
-### Retrieve Account Credentials
-
-*The .NET SDK requires credentials to connect to your Azure Cosmos DB account. You will collect and store these credentials for use throughout the lab.*
-
-1. On the left side of the **Azure Cosmos DB** blade, locate the **Settings** section and click the **Keys** link. In the **Keys** pane, record the values in the **CONNECTION STRING**, **URI** and **PRIMARY KEY** fields. You will use these values later in this lab.
-
-    ![Credentials](../media/03-keys.jpg)
-
-### Import Lab Data Into Container
+## Import Lab Data Into Container
 
 You will use **Azure Data Factory (ADF)** to import the JSON array stored in the **nutrition.json** file from Azure Blob Storage.
 
@@ -138,11 +126,9 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
 1. Once the import process has completed, close the ADF. You will now proceed to validate your imported data. 
 
-## Executing Simple Queries
+## Validate Imported Data
 
 *The Azure Cosmos DB Data Explorer allows you to view documents and run queries directly within the Azure Portal. In this exercise, you will use the Data Explorer to view the data stored in our container.*
-
-### Validate Imported Data
 
 *You will validate that the data was successfully imported into your container using the **Items** view in the **Data Explorer**.*
 

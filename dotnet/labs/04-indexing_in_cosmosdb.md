@@ -75,7 +75,7 @@ Within the **FoodCollection**, documents have this schema (some properties were 
 }
 ```
 
-If you want to only index the manufacturerName, foodGroup, and nutrients array with a range index, you should define the following index policy:
+If you wanted to only index the manufacturerName, foodGroup, and nutrients array with a range index, you should define the following index policy:
 
 ```json
 {
@@ -125,7 +125,7 @@ In this next example, the indexing policy would explicitly specify that the nutr
     }
 ```
 
-Finally, it's important to understand the difference between the '*' and '?' characters. The '*' character indicates that Azure Cosmos DB should index every path beyond that specific node. The '?' character indicates that Azure Cosmos DB should index no further paths beyond this node. In the above example, there are no additional paths under nutritionValue. If we were to modify the document and add a path here, having the wildcard character '*'  in the above example would ensure that the property is indexed without explicitly mentioning the name.
+Finally, it's important to understand the difference between the `*` and `?` characters. The `*` character indicates that Azure Cosmos DB should index every path beyond that specific node. The `?` character indicates that Azure Cosmos DB should index no further paths beyond this node. In the above example, there are no additional paths under nutritionValue. If we were to modify the document and add a path here, having the wildcard character '*'  in the above example would ensure that the property is indexed without explicitly mentioning the name.
 
 ### Understand query requirements
 
@@ -198,7 +198,7 @@ If a query does not use the index, the **Index hit document count** will be 0. W
 
 ### Edit the indexing policy by excluding paths
 
-In addition to manually including certain paths to be indexed, you can exclude particular paths. In many cases, this approach can be simpler since it will allow all new properties in your document to be indexed by default. If there is a property that you are certain you will never use in your query, you should explicitly exclude this path.
+In addition to manually including certain paths to be indexed, you can exclude specific paths. In many cases, this approach can be simpler since it will allow all new properties in your document to be indexed by default. If there is a property that you are certain you will never use in your queries, you should explicitly exclude this path.
 
 We will create an indexing policy to index every path except for the **description** property.
 
@@ -260,7 +260,7 @@ This query will fail with the following error:
 
 In order to run a query that has an ORDER BY clause with one property, the default range index is sufficient. Queries with multiple properties in the ORDER BY clause require a composite index.
 
-1. Still within the **FoodCollection** node, click the **Scale & Settings** link. In the **Indexing Policy** section, you will add a composite index.
+4. Still within the **FoodCollection** node, click the **Scale & Settings** link. In the **Indexing Policy** section, you will add a composite index.
 
 Replace the **Indexing Policy** with the following text:
 
@@ -299,7 +299,7 @@ Replace the **Indexing Policy** with the following text:
 }
 ```
 
-1. **Save** this new indexing policy. The update should take approximately 10-15 seconds to apply to your container.
+5. **Save** this new indexing policy. The update should take approximately 10-15 seconds to apply to your container.
 
 This indexing policy defines a composite index that allows for the following ORDER BY queries. Test each of these by running them in your existing open query tab in the **Data Explorer**.
 
@@ -442,10 +442,10 @@ Geo-spatial indexing is by default, disabled. This indexing policy will turn on 
 ```sql
 SELECT *
 FROM volcanoes v
-WHERE ST_DISTANCE(v.Location, { 
-	"type": "Point", 
-	"coordinates": [-122.19, 47.36] 
-	}) < 100 * 1000
+WHERE ST_DISTANCE(v.Location, {
+"type": "Point",
+"coordinates": [-122.19, 47.36]
+}) < 100 * 1000
 AND v.Type = "Stratovolcano"
 AND v["Last Known Eruption"] = "Last known eruption from 1800-1899, inclusive"
 ```
@@ -460,7 +460,7 @@ If you specify points within a Polygon in a counter-clockwise order, you will de
 
 We can explore this concept through sample queries.
 
-1. Navigate back to the **VolcanoesContainer** in the Azure Portal and click the **New SQL Query**. Paste the following SQL query and select **Execute Query**. 
+1. Navigate back to the **VolcanoesContainer** in the Azure Portal and click the **New SQL Query**. Paste the following SQL query and select **Execute Query**.
 
 ```sql
 SELECT *
@@ -496,7 +496,7 @@ WHERE ST_WITHIN(v.Location, {
     })
 ```
 
-3. You should now see many items returned. There are thousands of volcanoes located outside our small rectangle region.
+You should now see many items returned. There are thousands of volcanoes located outside our small rectangle region.
 
 When creating a GeoJSON polygon, whether it be inside a query or item, the order of the coordinates specified matters. Azure Cosmos DB will not reject coordinates that indicate the inverse of a polygon's shape. In addition, GeoJSON requires that you specify coordinates in the format: (latitude, longitude).
 
@@ -537,3 +537,5 @@ You will not need the **VolcanoContainer** during additional lab sections. You s
 2. Select the three dots near your **VolcanoContainer**. From the menu, select **Delete Container**. 
 3. Confirm the container's name and delete the container.
 4. Close your browser window. You have now completed the indexing lab section.
+
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 

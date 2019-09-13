@@ -4,7 +4,7 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-### Create a .NET Core Project
+## Create a .NET Core Project
 
 1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab05 folder that will be used to contain the content of your .NET Core project.
 
@@ -52,9 +52,9 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
    > We are now going to implement a sample query to make sure our client connection code works.
 
-### Execute a Query against Cosmos DB Using ReadItemAsync
+## Read a single Document in Azure Cosmos DB Using ReadItemAsync
 
-_ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
+_ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ In Azure Cosmos DB, this is the most efficient method of reading a single document.
 
 1. Locate the using block within the **Main** method:
 
@@ -93,7 +93,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
    Read Candies, HERSHEY''S POT OF GOLD Almond Bar
    ```
 
-### Executing a Query Against a Single Cosmos DB Partition Using a SQL Query
+## Execute a Query Against a Single Azure Cosmos DB Partition 
 
 1.  Return to Visual Studio Code
 
@@ -115,12 +115,12 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
     string sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
     ```
 
-    > This query will select all food where the foodGroup is set to the value `Sweets`. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
+    > This query will select all food where the foodGroup is set to the value `Sweets`. It will also only select documents that have description, manufacturerName, and servings properties defined. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
 
 1. Add the following code to execute and read the results of this query
 
    ```csharp
-   FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1, PartitionKey = new PartitionKey("Sweets")});
+   FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1});
    foreach (Food food in await queryA.ReadNextAsync())
    {
        await Console.Out.WriteLineAsync($"{food.Description} by {food.ManufacturerName}");
@@ -156,7 +156,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
     ...
     ```
 
-### Executing a Query Against Multiple Cosmos DB Partitions Using a SQL Query With Paging
+### Execute a Query Against Multiple Azure Cosmos DB Partitions
 
 1.  Return to Visual Studio Code
 
@@ -178,7 +178,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
     FeedIterator<Food> queryB = container.GetItemQueryIterator<Food>(sqlB, requestOptions: new QueryRequestOptions{MaxConcurrency = 5, MaxItemCount = 100});
     ```
 
-    > Take note of the differences in this call to **GetItemQueryIterator** as compared to the previous section. **maxConcurrency** is set to `5` and we are limited the **MaxItemCount** to 100 items. This will result in paging if there are more than 100 items that match the query.
+    > Take note of the differences in this call to **GetItemQueryIterator** as compared to the previous section. **maxConcurrency** is set to `5` and we are limiting the **MaxItemCount** to `100` items. This will result in paging if there are more than 100 items that match the query.
 
 1.  Add the following lines of code to page through the results of this query using a while loop.
 
@@ -214,4 +214,6 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID_
         [19065] Candies, ALMOND JOY Candy Bar   Hershey Food Corp.
     ```
 
-    > Note that the results are coming form multiple partitions.
+> Note that the results are coming from multiple partitions.
+
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 
