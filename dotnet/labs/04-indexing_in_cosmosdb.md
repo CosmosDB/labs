@@ -82,7 +82,7 @@ If you want to only index the manufacturerName, foodGroup, and nutrients array w
         "indexingMode": "consistent",
         "includedPaths": [
             {
-                "path": "/manufacturerName/*"         
+                "path": "/manufacturerName/*"
             },
             {
                 "path": "/foodGroup/*"
@@ -127,8 +127,6 @@ In this next example, the indexing policy would explicitly specify that the nutr
 
 Finally, it's important to understand the difference between the '*' and '?' characters. The '*' character indicates that Azure Cosmos DB should index every path beyond that specific node. The '?' character indicates that Azure Cosmos DB should index no further paths beyond this node. In the above example, there are no additional paths under nutritionValue. If we were to modify the document and add a path here, having the wildcard character '*'  in the above example would ensure that the property is indexed without explicitly mentioning the name.
 
-
-
 ### Understand query requirements
 
 Before modifying indexing policy, it's important to understand how the data is used the collection. If your workload is write-heavy or your documents are large, you should only index necessary paths. This will significantly decrease the amount of RU's required for inserts, updates, and deletes.
@@ -147,9 +145,9 @@ SELECT * FROM c WHERE c.manufacturerName = <manufacturerName>
 SELECT * FROM c WHERE c.foodGroup = <foodGroup>
 ```
 
-These queries only require that a range index be defined on manufacturerName and foodGroup, respectively. We can modify the indexing policy to index only these properties.
+These queries only require that a range index be defined on **manufacturerName** and **foodGroup**, respectively. We can modify the indexing policy to index only these properties.
 
-### Edit the Indexing Policy
+### Edit the indexing policy by including paths
 
 1. Navigate back to the **FoodCollection** in the Azure Portal and click the **Scale & Settings** link. In the **Indexing Policy** section, replace the existing json file with the following:
 
@@ -174,7 +172,7 @@ These queries only require that a range index be defined on manufacturerName and
 
 This new indexing policy will create a range index on only the manufacturerName and foodGroup properties. It will remove range indexes on all other properties. Click **Save**. Azure Cosmos DB will update the index in the container, using your excess provisioned throughput to make the updates.
 
-During the container re-indexing, write performance is unaffected. However, queries may return inconsistent results.
+During the container re-indexing, write performance is unaffected. However, queries may return incomplete results.
 
 1. After defining the new indexing policy, navigate to your **FoodCollection** and select the **Add New SQL Query** icon. Paste the following SQL query and select **Execute Query**:
 
@@ -182,7 +180,7 @@ During the container re-indexing, write performance is unaffected. However, quer
 SELECT * FROM c WHERE c.manufacturerName = "Kellogg, Co."
 ```
 
-Navigate to the **Query Stats** tab. You should observe that this query still has a low RU charge, even after removing some properties from the index. Because the manufacturerName was the only property used as a filter in the query, it was the only index that was required.
+Navigate to the **Query Stats** tab. You should observe that this query still has a low RU charge, even after removing some properties from the index. Because the **manufacturerName** was the only property used as a filter in the query, it was the only index that was required.
 
 Now, replace the query text with the following and select **Execute Query**:
 
@@ -198,15 +196,49 @@ Also observe the **Query Metrics** below:
 
 If a query does not use the index, the **Index hit document count** will be 0. We can see above that the query needed to retrieve 5,187 documents and ultimately ended up only returning 1 document.
 
-<h3> Obsolete Indexing Policy attributes</h3>
+### Edit the indexing policy by excluding paths
 
-When working with indexing policies, you may encounter the following attributes that are now obsolete:
+In addition to manually including certain paths to be indexed, you can exclude particular paths. In many cases, this approach can be simpler since it will allow all new properties in your document to be indexed by default. If there is a property that you are certain you will never use in your query, you should explicitly exclude this path.
 
-- `automatic` is a boolean defined at the root of an indexing policy. It is now ignored and can be set to `true`, when the tool you are using requires it.
-- `precision` is a number defined at the index level for included paths. It is now ignored and can be set to `-1`, when the tool you are using requires it.
-- `hash` is an index kind that is now replaced by the range kind.
+We will create an indexing policy to index every path except for the **description** property.
 
+1. Navigate back to the **FoodCollection** in the Azure Portal and click the **Scale & Settings** link. In the **Indexing Policy** section, replace the existing json file with the following:
 
+```json
+{
+        "indexingMode": "consistent",
+        "includedPaths": [
+            {
+                "path": "/*"
+            }
+        ],
+        "excludedPaths": [
+            {
+                "path": "/description/*"
+            }
+        ]
+    }
+```
+
+This new indexing policy will create a range index on every property except for the description. Click **Save**. Azure Cosmos DB will update the index in the container, using your excess provisioned throughput to make the updates.
+
+During the container re-indexing, write performance is unaffected. However, queries may return incomplete results.
+
+1. After defining the new indexing policy, navigate to your **FoodCollection** and select the **Add New SQL Query** icon. Paste the following SQL query and select **Execute Query**:
+
+```sql
+SELECT * FROM c WHERE c.manufacturerName = "Kellogg, Co."
+```
+
+Navigate to the **Query Stats** tab. You should observe that this query still has a low RU charge since manufacturerName is indexed.
+
+Now, replace the query text with the following and select **Execute Query**:
+
+```sql
+SELECT * FROM c WHERE c.description = "Bread, blue corn, somiviki (Hopi)"
+```
+
+You should observe that this query has a very high RU charge even though only a single document is returned. This is because the `description` property is explicitly excluded in the indexing policy.
 
 ## Adding a Composite Index
 
@@ -217,7 +249,7 @@ For ORDER BY queries that order by multiple properties, a composite index is req
 3. Select the icon to add a **New SQL Query**. Paste the following SQL query and select **Execute Query**
 
 ```sql
-    SELECT * FROM c ORDER BY c.foodGroup asc, c.manufacturerName asc
+    SELECT * FROM c ORDER BY c.foodGroup ASC, c.manufacturerName ASC
 ```
 
 This query will fail with the following error:
@@ -272,14 +304,14 @@ Replace the **Indexing Policy** with the following text:
 This indexing policy defines a composite index that allows for the following ORDER BY queries. Test each of these by running them in your existing open query tab in the **Data Explorer**.
 
 ```sql
-    SELECT * FROM c ORDER BY c.foodGroup asc, c.manufacturerName asc
-    SELECT * FROM c ORDER BY c.foodGroup desc, c.manufacturerName desc
+    SELECT * FROM c ORDER BY c.foodGroup ASC, c.manufacturerName ASC
+    SELECT * FROM c ORDER BY c.foodGroup DESC, c.manufacturerName DESC
 ```
 
 Now, try to run the following query, which the current composite index does not support.
 
 ```sql
-    SELECT * FROM c ORDER BY c.foodGroup desc, c.manufacturerName asc
+    SELECT * FROM c ORDER BY c.foodGroup DESC, c.manufacturerName ASC
 ```
 
 This query will not run without an additional composite index. You can modify the indexing policy to include an additional composite index.
@@ -391,6 +423,7 @@ When you upload sample data, Azure Cosmos DB will automatically create a geo-spa
             "types": [
                 "Point",
                 "Polygon",
+                "MultiPolygon",
                 "LineString"
             ]
         }
@@ -398,7 +431,7 @@ When you upload sample data, Azure Cosmos DB will automatically create a geo-spa
 }
 ```
 
-Geo-spatial indexing is by default, disabled. This indexing policy will turn on geo-spatial indexing for all possible GeoJSON types which include Points, Polygons, and LineStrings. Similar to range indexes and composite indexes, there are no precision settings for geo-spatial indexes.
+Geo-spatial indexing is by default, disabled. This indexing policy will turn on geo-spatial indexing for all possible GeoJSON types which include Points, Polygons, MultiPolygon, and LineStrings. Similar to range indexes and composite indexes, there are no precision settings for geo-spatial indexes.
 
 [Learn more about querying geo-spatial data in Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/geospatial#introduction-to-spatial-data).
 
@@ -417,7 +450,7 @@ AND v.Type = "Stratovolcano"
 AND v["Last Known Eruption"] = "Last known eruption from 1800-1899, inclusive"
 ```
 
-1. Observe the **Query Stats** for this operation. Because the container has a geo-spatial index for Points, this query consumed a small amount of RU's.
+Observe the **Query Stats** for this operation. Because the container has a geo-spatial index for Points, this query consumed a small amount of RU's.
 
 > This query returns all the Stratovolcanoes that last erupted between 1800 and 1899 that are within 100 km of the coordinates (122.19, 47.36). These are the coordinates of Redmond, WA.
 
@@ -444,7 +477,8 @@ WHERE ST_WITHIN(v.Location, {
     })
 ```
 
-1. In this case, there are 8 volcanoes located within this rectangle.
+In this case, there are 8 volcanoes located within this rectangle.
+
 2. In the *Query Editor* replace the text with the following query:
 
 ```sql
@@ -462,7 +496,7 @@ WHERE ST_WITHIN(v.Location, {
     })
 ```
 
-1. You should now see many items returned. There are thousands of volcanoes located outside our small rectangle region.
+3. You should now see many items returned. There are thousands of volcanoes located outside our small rectangle region.
 
 When creating a GeoJSON polygon, whether it be inside a query or item, the order of the coordinates specified matters. Azure Cosmos DB will not reject coordinates that indicate the inverse of a polygon's shape. In addition, GeoJSON requires that you specify coordinates in the format: (latitude, longitude).
 

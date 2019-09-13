@@ -22,7 +22,7 @@ You will begin by running basic queries with `SELECT`, `WHERE`, and `FROM` claus
 2. In the **Data Explorer** section, expand the **NutritionDatabase** database node and then expand the **FoodCollection** container node.
 3. Within the **FoodCollection** node, click the **Items** link.
 4. View the items within the container. Observe how these documents have many properties, including arrays.
-5. Run the below query by clicking the **New SQL Query**. Paste the following SQL query and select **Execute Query**.
+5. Click **New SQL Query**. Paste the following SQL query and select **Execute Query**.
 
 ```sql
 SELECT *
@@ -30,12 +30,12 @@ FROM food
 WHERE food.foodGroup = "Snacks" and food.id = "19015"
 ```
 
-6. You will see that the query returned the single document matching the id for "19015" in the "Snacks" foodGroup.
-7. Explore the schema of this document as it is representative of the items within the **FoodCollection** container that we will be working with for the remainder of this section.
+6. You will see that the query returned the single document where id is "19015" and the foodGroup is "Snacks".
+7. Explore the structure of this item as it is representative of the items within the **FoodCollection** container that we will be working with for the remainder of this section.
 
 ## Dot and quoted property projection accessors
 
-You can choose which properties of the document to project into the result using the dot notation Node1.Node2.Node3…..Nodex. If you just wanted to return only the item's id you could run the query below:
+You can choose which properties of the document to project into the result using the dot notation. If you wanted to return only the item's id you could run the query below:
 by clicking the **New SQL Query**. Paste the following SQL query and selecting **Execute Query**.
 
 ```sql
@@ -49,14 +49,14 @@ Though less common, you can also access properties using the quoted property ope
 ```sql
 SELECT food["id"]
 FROM food
-WHERE food.["foodGroup"] = "Snacks" and food.["id"] = "19015"
+WHERE food["foodGroup"] = "Snacks" and food["id"] = "19015"
 ```
 
 ## WHERE clauses
 
 Let’s explore WHERE clauses. You can add complex scalar expressions including arithmetic, comparison and logical operators in the WHERE clause.
 
-1. Run the below query by clicking the **New SQL Query**. Paste the following SQL query and then clicking **Execute Query**.
+1. Run the below query by clicking the **New SQL Query**. Paste the following SQL query and then click **Execute Query**.
 
 ```sql
 SELECT food.id,
@@ -68,7 +68,7 @@ FROM food
 WHERE (food.manufacturerName = "The Coca-Cola Company" AND food.version > 0)
 ```
 
-This query will return the id, description, servings, tags, foodGroup, manufacturerName and version for items with "The Coca-Cola Company" for manufacturerName and a version greater than 0
+This query will return the id, description, servings, tags, foodGroup, manufacturerName and version for items with "The Coca-Cola Company" for manufacturerName and a version greater than 0.
 
 Your first result document should be:
 
@@ -118,19 +118,19 @@ Azure Cosmos DB supports adding an ORDER BY clause to sort results based on one 
 ```sql
 SELECT food.description, 
 food.foodGroup, 
-food.servings[0].description AS servingDescription, 
-food.servings[0].weightInGrams AS servingWeight 
+food.servings[0].description AS servingDescription,
+food.servings[0].weightInGrams AS servingWeight
 FROM food
 WHERE food.foodGroup = "Fruits and Fruit Juices" AND food.servings[0].description = "cup"
 ORDER BY food.servings[0].weightInGrams DESC
 ```
 
 You can learn more about configuring Order By for your collections in the later Indexing Lab or [here](
-https://azure.microsoft.com/en-us/services/cosmos-db/#configure-an-indexing-policy-for-order-by)
+https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-order-by)
 
 ## Limiting query result size
 
-Azure Cosmos DB now supports the TOP keyword. TOP can be used to limit the number of returning values from a query. 
+Azure Cosmos DB supports the TOP keyword. TOP can be used to limit the number of returning values from a query.
 Run the query below to see the top 20 results.
 
 ```sql
@@ -205,7 +205,7 @@ JOIN serving IN food.servings
 WHERE food.id = "03226"
 ```
 
-JOINs are useful if you need to filter on properties within an example. Run the below example that has filter after the intra-document JOIN.
+JOINs are useful if you need to filter on properties within an array. Run the below example that has filter after the intra-document JOIN.
 
 ```sql
 SELECT VALUE COUNT(1)
@@ -217,7 +217,7 @@ WHERE t.name = 'infant formula' AND s.amount > 1
 
 ## System functions
 
-Azure Cosmos DB supports a number of built-in functions for common operations. They cover mathematical functions like ABS, FLOOR and ROUND and type checking functions like IS_ARRAY, IS_BOOL and IS_DEFINED. To find a full list of supported built-in functions, head over to our query [page](https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-system-functions).
+Azure Cosmos DB supports a number of built-in functions for common operations. They cover mathematical functions like ABS, FLOOR and ROUND and type checking functions like IS_ARRAY, IS_BOOL and IS_DEFINED. [Learn more about supported system functions](https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-system-functions).
 
 Run the query below to see example use of some system functions
 
@@ -244,7 +244,7 @@ There are two types of subqueries: Multi-value subqueries and scalar subqueries.
 
 You can optimize JOIN expressions with a subquery.
 
-Consider the following query which performs and self-join and then applies a filter on name, nutritionValue, and amount. We can use a subquery to filter out joined array items before joining with the next expression.
+Consider the following query which performs a self-join and then applies a filter on name, nutritionValue, and amount. We can use a subquery to filter out the joined array items before joining with the next expression.
 
 ```sql
 SELECT VALUE COUNT(1)
@@ -268,7 +268,7 @@ JOIN (SELECT VALUE s FROM s IN c.servings WHERE s.amount > 1)
 
 ### Scalar subqueries
 
-One use case of scalar subqueries is rewriting ARRAY_CONTAINS as EXISTS. EXISTS provides additional functionality than ARRAY_CONTAINS.
+One use case of scalar subqueries is rewriting ARRAY_CONTAINS as EXISTS.
 
 Consider the following query that uses ARRAY_CONTAINS:
 
