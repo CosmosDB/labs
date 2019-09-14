@@ -364,7 +364,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.relatives)
+    SELECT * FROM coll WHERE IS_NULL(coll.relatives)=false
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
@@ -374,7 +374,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.relatives) ORDER BY coll.relatives.Spouse.FirstName
+    SELECT * FROM coll WHERE IS_NULL(coll.relatives)=false ORDER BY coll.relatives.Spouse.FirstName
     ```
 
 1. Click the **Execute Query** button in the query tab to run the query. 
@@ -395,7 +395,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Observe the results of the console project.
 
-    > You should see a difference in the number of RUs required to create this item. This is due to the indexer skipping the paths you excluded.
+    > You should see a lower number of RUs required to create this item. This is due to the indexer skipping the paths you excluded.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
