@@ -269,7 +269,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 1. In the query tab, replace the contents of the *query editor* with the following SQL query:
 
     ```sql
-    SELECT * FROM coll WHERE IS_DEFINED(coll.relatives)
+    SELECT * FROM coll WHERE IS_NULL(coll.relatives)=false
     ```
 
     > This query will return the only item in your container with a property named **Children**.
