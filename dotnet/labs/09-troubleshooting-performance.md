@@ -6,7 +6,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ## Create a .NET Core Project
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab09 folder that will be used to contain the content of your .NET Core project.
+1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab09 folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
 
 1. In the Lab09 folder, right-click the folder and select the **Open with Code** menu option.
 
@@ -1165,8 +1165,6 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
         }
     }
     ```
-
-    
 
 1. Add the following line of code that will store a SQL query in a string variable (replacing **example.document** with the **id ** value that you noted earlier):
 
