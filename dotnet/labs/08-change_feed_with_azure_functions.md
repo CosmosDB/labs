@@ -135,7 +135,7 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
    using System.Threading;
    using System.Threading.Tasks;
    using Microsoft.Azure.Cosmos;
-
+   
    namespace ChangeFeedConsole
    {
        class Program
@@ -144,9 +144,9 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
            private static readonly string _primaryKey = "<your-primary-key>";
            private static readonly string _databaseId = "StoreDatabase";
            private static readonly string _containerId = "CartContainer";
-
+   
            private static readonly string _destinationContainerId = "CartContainerByState";
-
+   
            static async Task Main(string[] args)
            {
                using (var client = new CosmosClient(_endpointUrl, _primaryKey))
@@ -154,12 +154,10 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
                    var db = client.GetDatabase(_databaseId);
                    var container = db.GetContainer(_containerId);
                    var destinationContainer = db.GetContainer(_destinationContainerId);
-
-                   Container leaseContainer = await db.CreateContainerIfNotExistsAsync(
-                       id: "consoleLeases",
-                       partitionKeyPath: "/id",
-                       throughput: 400);
-
+   
+   				ContainerProperties leaseContainerProperties = new 								ContainerProperties("consoleLeases", "/id");
+   				Container leaseContainer = await 					   		                       db.CreateContainerIfNotExistsAsync(leaseContainerProperties,                       throughput: 400);
+   
                    var builder = container.GetChangeFeedProcessorBuilder(
                        "migrationProcessor",
                        (
@@ -169,18 +167,18 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
                        Console.WriteLine(input.Count + " Changes Received");
                        //todo: Add processor code here
                    });
-
+   
                    var processor = builder
                                    .WithInstanceName("changeFeedConsole")
                                    .WithLeaseContainer(leaseContainer)
                                    .Build();
-
+   
                    await processor.StartAsync();
                    Console.WriteLine("Started Change Feed Processor");
                    Console.WriteLine("Press any key to stop the processor...");
-
+   
                    Console.ReadKey();
-
+   
                    Console.WriteLine("Stopping Change Feed Processor");
                    await processor.StopAsync();
                }
