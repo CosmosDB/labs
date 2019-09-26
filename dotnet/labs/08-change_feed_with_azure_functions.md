@@ -93,11 +93,8 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
 1. In order to consume the change feed we make use of a **Lease Container**. Add the following lines of code in place of `//todo: Add lab code here` to create the lease container:
 
    ```csharp
-   Container leaseContainer = await db.CreateContainerIfNotExists(
-       id: "consoleLeases",
-       partitionKey: "/id",
-       throughput: 400
-   );
+   ContainerProperties leaseContainerProperties = new ContainerProperties("consoleLeases", "/id");
+   Container leaseContainer = await db.CreateContainerIfNotExistsAsync(leaseContainerProperties, throughput: 400);
    ```
 
    > The **Lease Container** stores information to allow for parallel processing of the change feed, and acts as a book mark for where we last processed changes from the feed.
