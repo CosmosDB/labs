@@ -14,6 +14,8 @@ namespace DataGenerator
         private static readonly string _databaseId = "StoreDatabase";
         private static readonly string _containerId = "CartContainer";
 
+        private static CosmosClient cosmosClient = new CosmosClient(_endpointUrl, _primaryKey);
+
         private Randomizer _random = new Randomizer();
 
         static async Task Main(string[] args)
@@ -27,6 +29,7 @@ namespace DataGenerator
                 foreach (var action in GenerateActions())
                 {
                     tasks.Add(AddItem(action));
+                    await Task.Delay(10);
                     Console.Write("*");
                 }
             }
@@ -37,13 +40,10 @@ namespace DataGenerator
 
         private static async Task AddItem(CartAction item)
         {
-            using (var client = new CosmosClient(_endpointUrl, _primaryKey))
-            {
-                var db = client.GetDatabase(_databaseId);
+                var db = cosmosClient.GetDatabase(_databaseId);
                 var container = db.GetContainer(_containerId);
 
                 await container.CreateItemAsync(item, new PartitionKey(item.Item));
-            }
         }
 
         private static List<CartAction> GenerateActions()

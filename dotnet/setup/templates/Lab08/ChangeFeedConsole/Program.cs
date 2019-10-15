@@ -16,11 +16,11 @@ namespace ChangeFeedConsole
 
         private static readonly string _destinationContainerId = "CartContainerByState";
 
+        private static CosmosClient cosmosClient = new CosmosClient(_endpointUrl, _primaryKey);
+
         static async Task Main(string[] args)
         {
-            using (var client = new CosmosClient(_endpointUrl, _primaryKey))
-            {
-                var db = client.GetDatabase(_databaseId);
+                var db = cosmosClient.GetDatabase(_databaseId);
                 var container = db.GetContainer(_containerId);
                 var destinationContainer = db.GetContainer(_destinationContainerId);
 
@@ -34,7 +34,6 @@ namespace ChangeFeedConsole
                 Console.WriteLine("Stopping Change Feed Processor");
 
                 //todo: Add stop code here
-            }
-        }
-    }
+         }
+      }
 }

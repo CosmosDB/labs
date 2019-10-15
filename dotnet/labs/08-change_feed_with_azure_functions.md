@@ -24,7 +24,7 @@ _In order to simulate data flowing into our store, in the form of actions on an 
 
    > For example, if your **url** is `https://cosmosacct.documents.azure.com:443/`, your new variable assignment will look like this: `private static readonly string _endpointUrl = "https://cosmosacct.documents.azure.com:443/";`.
 
-   > For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`.
+   > For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`
 
 ### Create Function to Add Documents to Cosmos DB
 
@@ -32,7 +32,7 @@ _The key functionality of the console application is to add documents to our Cos
 
 1. Within the **program.cs** file in the **DataGenerator** folder, locate the **AddItem** method. The purpose of this method is to add an instance of **CartAction** to our CosmosDB Container.
 
-   > If you'd like to review how to add documents to a CosmosDB container, [refer to Lab05](05-build_net_app.md).
+   > If you'd like to review how to add documents to a CosmosDB container, [refer to Lab01git ](01-creating_partitioned_collection.md).
 
 ### Create a Function to Generate Random Shopping Data
 
@@ -144,19 +144,18 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
            private static readonly string _primaryKey = "<your-primary-key>";
            private static readonly string _databaseId = "StoreDatabase";
            private static readonly string _containerId = "CartContainer";
-   
            private static readonly string _destinationContainerId = "CartContainerByState";
+           private static CosmosClient cosmosClient = new CosmosClient(_endpointUrl, _primaryKey);
    
            static async Task Main(string[] args)
            {
-               using (var client = new CosmosClient(_endpointUrl, _primaryKey))
-               {
-                   var db = client.GetDatabase(_databaseId);
+
+                   var db = cosmosClient.GetDatabase(_databaseId);
                    var container = db.GetContainer(_containerId);
                    var destinationContainer = db.GetContainer(_destinationContainerId);
    
-   				ContainerProperties leaseContainerProperties = new 								ContainerProperties("consoleLeases", "/id");
-   				Container leaseContainer = await 					   		                       db.CreateContainerIfNotExistsAsync(leaseContainerProperties,                       throughput: 400);
+   				ContainerProperties leaseContainerProperties = new ContainerProperties("consoleLeases", "/id");
+   				Container leaseContainer = await  db.CreateContainerIfNotExistsAsync(leaseContainerProperties, throughput: 400);
    
                    var builder = container.GetChangeFeedProcessorBuilder(
                        "migrationProcessor",
@@ -181,7 +180,7 @@ _The first use case we'll explore for Cosmos DB Change Feed is Live Migration. A
    
                    Console.WriteLine("Stopping Change Feed Processor");
                    await processor.StopAsync();
-               }
+               
            }
        }
    }
@@ -427,6 +426,7 @@ _The Materialized View pattern is used to generate pre-populated views of data i
     private static readonly string _primaryKey = "<your-primary-key>";
     private static readonly string _databaseId = "StoreDatabase";
     private static readonly string _containerId = "StateSales";
+    private static CosmosClient cosmosClient = new CosmosClient(_endpointUrl, _primaryKey);
    ```
 
 ### Add a new Class for StateSales Data
@@ -494,13 +494,10 @@ _The Materialized View pattern is used to generate pre-populated views of data i
 1. Following the conclusion of this _foreach_ loop, add the typical code to connect to our destination container:
 
    ```csharp
-   using(var client = new CosmosClient(_endpointUrl, _primaryKey))
-   {
-       var db = client.GetDatabase(_databaseId);
+       var db = cosmosClient.GetDatabase(_databaseId);
        var container = db.GetContainer(_containerId);
 
        //todo - Next steps go here
-   }
    ```
 
 1. Because we're dealing with an aggregate collection, we'll be either creating or updating a document for each entry in our dictionary. For starters, we need to check to see if the document we care about exists. Add the following code:
@@ -510,7 +507,7 @@ _The Materialized View pattern is used to generate pre-populated views of data i
 
    foreach (var key in stateDict.Keys)
    {
-       var query = new QueryDefinition("select * from StateSales s where s.State = @state").UseParameter("@state", key);
+       var query = new QueryDefinition("select * from StateSales s where s.State = @state").WithParameter("@state", key);
 
         var resultSet = container.GetItemQueryIterator<StateCount>(query, requestOptions: new QueryRequestOptions() { PartitionKey = new Microsoft.Azure.Cosmos.PartitionKey(key), MaxItemCount = 1 });
 
@@ -583,6 +580,7 @@ _The Materialized View pattern is used to generate pre-populated views of data i
            private static readonly string _primaryKey = "<primary-key>";
            private static readonly string _databaseId = "StoreDatabase";
            private static readonly string _containerId = "StateSales";
+           private static CosmosClient cosmosClient = new CosmosClient(_endpointUrl, _primaryKey);
 
            [FunctionName("MaterializedViewFunction")]
            public static async Task Run([CosmosDBTrigger(
@@ -615,9 +613,7 @@ _The Materialized View pattern is used to generate pre-populated views of data i
                        }
                    }
 
-                   using (var client = new CosmosClient(_endpointUrl, _primaryKey))
-                   {
-                       var db = client.GetDatabase(_databaseId);
+                       var db = cosmosClient.GetDatabase(_databaseId);
                        var container = db.GetContainer(_containerId);
 
                        var tasks = new List<Task>();
@@ -651,7 +647,6 @@ _The Materialized View pattern is used to generate pre-populated views of data i
                        }
 
                        await Task.WhenAll(tasks);
-                   }
                }
            }
        }
