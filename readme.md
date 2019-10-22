@@ -120,7 +120,8 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-**Appendix: Stickers**
+# Appendix: Stickers
+
 Adobe Illustrator files for printing cosmic stickers (e.g. stickermule)
 - [2x2 inch black circle](./stickers/2x2-circle-template-CosmosBlack.ai)
 - [2x2 inch clear circle](./stickers/2x2-clear-sticker-template-CosmosClear.ai)
