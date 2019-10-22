@@ -21,6 +21,8 @@
 - [Change Feed](./decks/Change-Feed.pptx)
 - [Global Distribution](./decks/Global-Distribution.pptx)
 
+**References**
+- [Use-Case cheat sheet (1-pager)](./decks/1Pager-Use-Cases.pptx)
 
 In addition to the above workshop decks, we have hands-on labs. We have labs available for our .NET sdk and Java sdk below:
 # .NET (V3) Labs
@@ -116,6 +118,10 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 2. If you already have Java installed on your local machine, you should check the version of your Java Runtime Environment (JRE) installation using the ``java -version`` command.
 2. If using a version of Java greater than version 8, some projects may not compile (for example the benchmarking application).
 
-# Misc Labs
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- [Creating Azure DevOps Projects for Node.js app powered by Azure Cosmos DB MongoDB API](devops/devops.md)
+**Appendix: Stickers**
+Adobe Illustrator files for printing cosmic stickers (e.g. stickermule)
+- [2x2 inch black circle](./stickers/2x2-circle-template-CosmosBlack.ai)
+- [2x2 inch clear circle](./stickers/2x2-clear-sticker-template-CosmosClear.ai)
+- [Die-cut color logo](./stickers/cosmos-die-cut-sticker-template-v2.ai)
