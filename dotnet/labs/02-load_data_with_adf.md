@@ -44,7 +44,7 @@ In this lab, you will populate an Azure Cosmos DB container from an existing set
 
 ## Import Lab Data Into Container
 
-You will use **Azure Data Factory (ADF)** to import the JSON array stored in the **nutrition.json** file from Azure Blob Storage.
+You will use **Azure Data Factory (ADF)** to import the JSON array stored in the **nutrition.json** file from Azure Blob Storage. If you are completing the lab through Microsoft Hands-on Labs, you can use the pre-created Data Factory within your resource group. You do not need to do Steps 1-4 in this section and can proceed to Step 5 by opening your Data Factory (named importNutritionData with a random number suffix).
 
 1. On the left side of the portal, click the **Resource groups** link.
 
@@ -58,7 +58,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![Add adf](../media/03-add_adf.jpg)
 
-1. Search for **Data Factory** and select it. Create a new **Data Factory**. You should name this data factory **importnutritiondata** with a unique number appended and select the relevant Azure subscription. You should ensure your existing **cosmoslabs** resource group is selected as well as a Version **V2**. Select **East US** as the region. Click **create**.
+1. Search for **Data Factory** and select it. Create a new **Data Factory**. You should name this data factory **importnutritiondata** with a unique number appended and select the relevant Azure subscription. You should ensure your existing **cosmoslabs** resource group is selected as well as a Version **V2**. Select **East US** as the region. Do not select **Enable GIT** (this may be checked by default). Click **create**.
 
     ![df](../media/03-adf_selections.jpg)
 
@@ -66,7 +66,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
     ![](../media/03-adf_author&monitor.jpg)
     ![](../media/03-adf_copydata.jpg)
 
-1. Edit basic properties for this data copy. You should name the task **ImportNutrition** and select to **Run once now**. Do not select **nable git**.
+1. Edit basic properties for this data copy. You should name the task **ImportNutrition** and select to **Run once now**. Do not select **enable git**.
 
    ![adf-properties](../media/03-adf_properties.jpg)
 
@@ -80,7 +80,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_connecttoblob.jpg)
 
-1. Click **Next** and then **Browse** to select the **nutrition** folder
+1. Click **Next** and then **Browse** to select the **nutritiondata** folder. Then select **NutritionData.json**.
 
     ![](../media/03-adf_choosestudents.jpg)
 
@@ -88,7 +88,7 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_source_next.jpg)
 
-1. Select the file format as **JSON format**. You should also make sure you select **Array of Objects**  as the File pattern.
+1. Select the file format as **JSON format**. Then select **Next**.
 
     ![](../media/03-adf_source_dataset_format.jpg)
 
@@ -106,11 +106,11 @@ You will use **Azure Data Factory (ADF)** to import the JSON array stored in the
 
     ![](../media/03-adf_destconnectionnext.jpg)
 
-1. Select your **FoodCollection** container from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB container. Select **Skip column mapping for all tables** before continuing.
+1. Select your **FoodCollection** container from the drop-down menu. You will map your Blob storage file to the correct Cosmos DB container. Click **Next** to continue.
 
     ![](../media/03-adf_correcttable.jpg)
 
-1. You should have selected to skip column mappings in a previous step. Click through this screen.
+1. Click through this screen.
 
     ![](../media/03-adf_destinationconnectionfinal.jpg)
 

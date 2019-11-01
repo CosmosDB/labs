@@ -301,7 +301,7 @@ Replace the **Indexing Policy** with the following text:
 
 5. **Save** this new indexing policy. The update should take approximately 10-15 seconds to apply to your container.
 
-This indexing policy defines a composite index that allows for the following ORDER BY queries. Test each of these by running them in your existing open query tab in the **Data Explorer**.
+This indexing policy defines a composite index that allows for the following ORDER BY queries. Test each of these by running them in your existing open query tab in the **Data Explorer**. When you define the order for properties in a composite index, they must either exactly match the order in the ORDER BY clause or be, in all cases, the opposite value.
 
 ```sql
     SELECT * FROM c ORDER BY c.foodGroup ASC, c.manufacturerName ASC

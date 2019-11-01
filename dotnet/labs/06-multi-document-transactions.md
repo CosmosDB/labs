@@ -12,7 +12,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
-1. In the **Data Explorer** section, expand the **NutritionDatabase** database node and then expand the **FoodCollection** container node. 
+1. In the **Data Explorer** section, expand the **NutritionDatabase** database node and then expand the **FoodCollection** container node.
 
 1. Within the **FoodCollection** node, click the **Items** link.
 
