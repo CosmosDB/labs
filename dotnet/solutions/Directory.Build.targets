@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <PackageReference Update="Bogus" Version="28.4.4" />
+    <PackageReference Update="Microsoft.Azure.Cosmos" Version="3.5.1" />
+  </ItemGroup>
+</Project>

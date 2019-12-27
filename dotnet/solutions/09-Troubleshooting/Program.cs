@@ -129,7 +129,7 @@ public class Program
 
     private static async Task ThroughputSettings(Container peopleContainer)
     {
-        ThroughputResponse response = await peopleContainer.ReadThroughputAsync();
+        ThroughputResponse response = await peopleContainer.ReadThroughputAsync(new RequestOptions());
         int? current = response.Resource.Throughput;
         await Console.Out.WriteLineAsync($"{current} RU per sec");
         await Console.Out.WriteLineAsync($"Minimum allowed: {response.MinThroughput} RU per sec");
