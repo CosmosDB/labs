@@ -32,7 +32,8 @@ namespace MultiDocTransactions
                 int pointer = 0;
                 while (pointer < foods.Count)
                 {
-                    StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<IEnumerable<Food>, int>(new PartitionKey("Energy Bars"), "bulkUpload", foods.Skip(pointer));
+                    var parameters = new dynamic[] { foods.Skip(pointer) };
+                    StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), parameters);
                     pointer += result.Resource;
                     await Console.Out.WriteLineAsync($"{pointer} Total Items\t{result.Resource} Items Uploaded in this Iteration");
                 }
@@ -40,11 +41,12 @@ namespace MultiDocTransactions
                 Console.WriteLine("Execution paused for verification. Press any key to continue to delete.");
                 Console.ReadKey();
 
-                bool resume = true;
+                bool resume;
                 do
                 {
                     string query = "SELECT * FROM foods f WHERE f.foodGroup = 'Energy Bars'";
-                    StoredProcedureExecuteResponse<DeleteStatus> result = await container.Scripts.ExecuteStoredProcedureAsync<string, DeleteStatus>(new PartitionKey("Energy Bars"), "bulkDelete", query);
+                    var parameters = new dynamic[] { query };
+                    StoredProcedureExecuteResponse<DeleteStatus> result = await container.Scripts.ExecuteStoredProcedureAsync<DeleteStatus>("bulkDelete", new PartitionKey("Energy Bars"), parameters);
                     await Console.Out.WriteLineAsync($"Batch Delete Completed.\tDeleted: {result.Resource.Deleted}\tContinue: {result.Resource.Continuation}");
                     resume = result.Resource.Continuation;
                 }
