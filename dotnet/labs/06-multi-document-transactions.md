@@ -40,7 +40,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``example``.
+    1. In the **Partition key value** section, use Type **String** and enter the value: ``example``.
     
     1. If there are no param fields listed, click the **Add New Param** button.
 
@@ -86,7 +86,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``My Recipes``.
+    1. In the **Partition key value** section, use Type **String** and enter the value: ``My Recipes``.
     
     1. If there are no param fields listed, click the **Add New Param** button.
 
@@ -151,7 +151,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``My Recipes``.
+    1. In the **Partition key value** section, use Type **String** and enter the value: ``My Recipes``.
     
     1. Click the **Add New Param** button.
 
@@ -196,7 +196,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``Packaged Foods``.
+    1. In the **Partition key value** section, use Type **String** and enter the value: ``Packaged Foods``.
     
     1. Click the **Add New Param** button.
 
@@ -212,7 +212,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``Packaged Foods``.
+    1. In the **Partition key value** section, use Type **String** and enter the value: ``Packaged Foods``.
     
     1. Click the **Add New Param** button.
 
@@ -289,7 +289,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``Vitamins``.
+    1. In the **Partition key value** section, use Type **String** and enter the value: ``Vitamins``.
     
     1. Click the **Add New Param** button three times.
 
@@ -350,7 +350,7 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 1. In the **Input parameters** popup that appears, perform the following actions:
 
-    1. In the **Partition key value** field, enter the value: ``Junk Food``.
+    1.  In the **Partition key value** section, use Type **String** and enter the value: ``Junk Food``.
     
     1. Click the **Add New Param** button until three param fields are listed.
 
