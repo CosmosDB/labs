@@ -16,7 +16,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-Visual Studio Code will automatically detect the Maven Project (**pom.xml** file). If you have installed the Maven plugin, Visual Studio Code should automatically generate **.classpath** and **target\\** in the directory.
+    Visual Studio Code will automatically detect the Maven Project (**pom.xml** file). If you have installed the Maven plugin, Visual Studio Code should automatically generate **.classpath** and **target\\** in the directory. 
 
     ![Visual Studio Code after opening project](../media/01-vscode_opened_project.jpg)
 
@@ -162,7 +162,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
     private static AtomicBoolean resourcesCreated = new AtomicBoolean(false);
     ```
 
-All code added in subsequent steps should be placed between the build-client call and the close-client call in the **main** method:
+    All code added in subsequent steps should be placed between the build-client call and the close-client call in the **main** method:
 
     ```java
     CosmosAsyncClient client = new CosmosClientBuilder()
