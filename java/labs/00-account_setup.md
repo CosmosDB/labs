@@ -8,7 +8,7 @@
 
    > To automatically set up the resources needed for each lab, you will need to run Powershell scripts for Azure resource setup and to create local code files. Azure setup uses the Azure Powershell module. If you do not already have it installed, go to <https://docs.microsoft.com/en-us/powershell/azure/install-az-ps> for setup instructions before continuing.
 
-1. Open a Powershell session and navigate to the folder containing your downloaded copy of the repo. Inside the repo, navigate to the **dotnet\setup** folder:
+1. Open a Powershell session and navigate to the folder containing your downloaded copy of the repo. Inside the repo, navigate to the **java\setup** folder:
 
    ```powershell
    cd .\java\setup\
