@@ -1,4 +1,4 @@
-param($session = $null, $location = "West US", $resourceGroupName = "cosmoslabs", [switch]$teardown, [switch]$overwriteGroup)
+param($session = $null, $location = "West US", $resourceGroupName = "cosmoslabs_anfeldma", [switch]$teardown, [switch]$overwriteGroup)
 
 # Settings to apply to new deployment
 $randomNum = if ($null -eq $session) { Get-Random -Maximum 100000 } else { $session } # some resources need unique names - this could be user entered instead
