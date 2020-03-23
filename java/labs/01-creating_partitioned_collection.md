@@ -20,7 +20,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ![Visual Studio Code after opening project](../media/01-vscode_opened_project.jpg)
 
-1. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs**. Each Lab which involves Java coding will have its own template subdirectory here, **lab*****XX***. The **common\\** subdirectory holds Java classes for use by any of the labs.
+1. The **Explorer** pane button is emphasized in red in the image above. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs**. Each Lab which involves Java coding will have its own template subdirectory here, **lab*****XX***. The **common\\** subdirectory holds Java classes for use by any of the labs.
 
 1. Expand down to **common\\datatypes\\**. You should see a number of Java classes; these are a handful of predefined datatypes for use in the Labs.
 
