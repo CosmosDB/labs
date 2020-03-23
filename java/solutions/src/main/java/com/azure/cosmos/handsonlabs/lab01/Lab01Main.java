@@ -13,6 +13,7 @@ import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
+import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
 import com.azure.cosmos.models.CosmosContainerProperties;
@@ -51,22 +52,21 @@ public class Lab01Main {
         targetDatabase = client.getDatabase("EntertainmentDatabase");
         customContainer = targetDatabase.getContainer("CustomCollection");
 
-        ArrayList<WatchLiveTelevisionChannel> tvInteractions = new ArrayList<WatchLiveTelevisionChannel>();
+        ArrayList<ViewMap> mapInteractions = new ArrayList<ViewMap>();
         Faker faker = new Faker();
 
         for (int i= 0; i < 500;i++){  
-            WatchLiveTelevisionChannel doc = new WatchLiveTelevisionChannel(); 
+            ViewMap doc = new ViewMap(); 
 
-            doc.setChannelName(faker.funnyName().toString());
             doc.setMinutesViewed(faker.random().nextInt(1, 60));
             doc.setType("WatchLiveTelevisionChannel");
             doc.setId(UUID.randomUUID().toString());
-            tvInteractions.add(doc);
+            mapInteractions.add(doc);
         }
 
-        Flux<WatchLiveTelevisionChannel> tvInteractionsFlux = Flux.fromIterable(tvInteractions);
-        List<CosmosAsyncItemResponse<WatchLiveTelevisionChannel>> results = 
-            tvInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
+        Flux<ViewMap> mapInteractionsFlux = Flux.fromIterable(mapInteractions);
+        List<CosmosAsyncItemResponse<ViewMap>> results = 
+            mapInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
 
         results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
 

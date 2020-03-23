@@ -552,54 +552,73 @@ In general, you will customize the container's dedicated throughput for your app
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the **Main** method and delete any existing code:
+1. Once again, locate the **Main** method and delete the faker code block and the item-insert code, so that what you have left in **Main** looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {                            
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        targetDatabase = client.getDatabase("EntertainmentDatabase");
+        customContainer = targetDatabase.getContainer("CustomCollection");
+
+        client.close();        
     }
     ```
 
-1. Replace the **Main** method with the following implementation:
+1. Paste in the following new code so that **Main** appears as shown below:
 
     ```java
-    public static async Task Main(string[] args)
-    {  
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var targetDatabase = client.GetDatabase("EntertainmentDatabase");
-            var customContainer = targetDatabase.GetContainer("CustomCollection");
-            var mapInteractions = new Bogus.Faker<ViewMap>()
-                .RuleFor(i => i.id, (fake) => Guid.NewGuid().ToString())
-                .RuleFor(i => i.type, (fake) => nameof(ViewMap))
-                .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-                .GenerateLazy(500);
-            foreach(var interaction in mapInteractions)
-            {
-                ItemResponse<ViewMap> result = await customContainer.CreateItemAsync(interaction);
-                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.id}");
-            }
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        targetDatabase = client.getDatabase("EntertainmentDatabase");
+        customContainer = targetDatabase.getContainer("CustomCollection");
+
+        ArrayList<ViewMap> mapInteractions = new ArrayList<ViewMap>();
+        Faker faker = new Faker();
+
+        for (int i= 0; i < 500;i++){  
+            ViewMap doc = new ViewMap(); 
+
+            doc.setMinutesViewed(faker.random().nextInt(1, 60));
+            doc.setType("WatchLiveTelevisionChannel");
+            doc.setId(UUID.randomUUID().toString());
+            mapInteractions.add(doc);
         }
+
+        Flux<ViewMap> mapInteractionsFlux = Flux.fromIterable(mapInteractions);
+        List<CosmosAsyncItemResponse<ViewMap>> results = 
+            mapInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
+
+        results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
+
+        client.close();        
     }
     ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 500 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates items in Azure Cosmos DB.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. In the Visual Studio Code window **Explorer** pane right-click **Lab01Main.java** and choose **Run**.
 
-1. In the open terminal pane, enter and execute the following command:
+1. Observe the output of the running command.
 
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > You should see a list of item ids associated with new items that are being created.
+    > You should see a list of item ids associated with new items that are being created by this tool.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
