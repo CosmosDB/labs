@@ -13,6 +13,7 @@ import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
+import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemResponse;
@@ -50,26 +51,22 @@ public class Lab01Main {
         targetDatabase = client.getDatabase("EntertainmentDatabase");
         customContainer = targetDatabase.getContainer("CustomCollection");
 
-        ArrayList<PurchaseFoodOrBeverage> foodInteractions = new ArrayList<PurchaseFoodOrBeverage>();
+        ArrayList<WatchLiveTelevisionChannel> tvInteractions = new ArrayList<WatchLiveTelevisionChannel>();
         Faker faker = new Faker();
 
         for (int i= 0; i < 500;i++){  
-            PurchaseFoodOrBeverage doc = new PurchaseFoodOrBeverage(); 
-            DecimalFormat df = new DecimalFormat("###.###");      
-            doc.setType("PurchaseFoodOrBeverage");            
-            doc.setQuantity(faker.random().nextInt(1, 5));            
-            String unitPrice = df.format(Double.valueOf((Double)faker.random().nextDouble()));
-            doc.setUnitPrice(new BigDecimal(unitPrice));
-            int quantity = Integer.valueOf((Integer)doc.getQuantity());        
-            String totalPrice = df.format(Double.valueOf(unitPrice) * quantity);
-            doc.setTotalPrice(new BigDecimal(totalPrice));
+            WatchLiveTelevisionChannel doc = new WatchLiveTelevisionChannel(); 
+
+            doc.setChannelName(faker.funnyName().toString());
+            doc.setMinutesViewed(faker.random().nextInt(1, 60));
+            doc.setType("WatchLiveTelevisionChannel");
             doc.setId(UUID.randomUUID().toString());
-            foodInteractions.add(doc);
+            tvInteractions.add(doc);
         }
 
-        Flux<PurchaseFoodOrBeverage> foodInteractionsFlux = Flux.fromIterable(foodInteractions);
-        List<CosmosAsyncItemResponse<PurchaseFoodOrBeverage>> results = 
-            foodInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
+        Flux<WatchLiveTelevisionChannel> tvInteractionsFlux = Flux.fromIterable(tvInteractions);
+        List<CosmosAsyncItemResponse<WatchLiveTelevisionChannel>> results = 
+            tvInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
 
         results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
 

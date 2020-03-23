@@ -411,7 +411,7 @@ In general, you will customize the container's dedicated throughput for your app
         foodInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
     ```
 
-    > The ``createItem`` method of the ``CosmosAsyncContainer`` class takes in an object that you would like to serialize into JSON and store as a document within the specified container. The ``id`` property, which here we've assigned to a unique Guid on each object, is a special required value in Cosmos DB that is used for indexing and must be unique for every item in a container.
+    > The ``createItem`` method of the ``CosmosAsyncContainer`` class takes in an object that you would like to serialize into JSON and store as a document within the specified container. The ``id`` property, which here we've assigned to a unique UUID on each object, is a special required value in Cosmos DB that is used for indexing and must be unique for every item in a container.
 
 1. Add a second foreach block that writes the value of the newly created resource ``id`` properties to the console:
 
@@ -419,7 +419,7 @@ In general, you will customize the container's dedicated throughput for your app
     results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
     ```
 
-    > Notice that these prints are accomplished using a **log4j** logger instance. For best performance it is recommended to use an asynchronous logger such as **Log4j** during high-throughput request operations, so that Cosmos DB requests are not blocked waiting for the print statements to complete. 
+    > Notice that these prints are accomplished using a **log4j** logger instance. For best performance it is recommended to use an asynchronous logger such as **log4j** during high-throughput request operations, so that Cosmos DB requests are not blocked waiting for the print statements to complete. 
 
     > The ``CosmosAsyncItemResponse`` type has a ``getItem`` method that returns an object representing the item as well as other properties to give you access to interesting data about an item such as its ETag.
 
@@ -479,55 +479,76 @@ In general, you will customize the container's dedicated throughput for your app
 
 ### Populate Container with Data of Different Types
 
-1. Locate the **Main** method and delete any existing code:
+1. Locate the **Main** method and delete the faker code block and the item-insert code, so that what you have left in **Main** looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {                           
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        targetDatabase = client.getDatabase("EntertainmentDatabase");
+        customContainer = targetDatabase.getContainer("CustomCollection");
+
+        client.close();        
     }
     ```
 
-1. Replace the **Main** method with the following implementation:
+1. Paste in the following new code so that **Main** appears as shown below:
 
     ```java
-    public static async Task Main(string[] args)
-    {  
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var targetDatabase = client.GetDatabase("EntertainmentDatabase");
-            var customContainer = targetDatabase.GetContainer("CustomCollection");
-            var tvInteractions = new Bogus.Faker<WatchLiveTelevisionChannel>()
-                .RuleFor(i => i.id, (fake) => Guid.NewGuid().ToString())
-                .RuleFor(i => i.type, (fake) => nameof(WatchLiveTelevisionChannel))
-                .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
-                .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
-                .GenerateLazy(500);
-            foreach(var interaction in tvInteractions)
-            {
-                ItemResponse<WatchLiveTelevisionChannel> result = await customContainer.CreateItemAsync(interaction);
-                await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
-            }
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        targetDatabase = client.getDatabase("EntertainmentDatabase");
+        customContainer = targetDatabase.getContainer("CustomCollection");
+
+        ArrayList<WatchLiveTelevisionChannel> tvInteractions = new ArrayList<WatchLiveTelevisionChannel>();
+        Faker faker = new Faker();
+
+        for (int i= 0; i < 500;i++){  
+            WatchLiveTelevisionChannel doc = new WatchLiveTelevisionChannel(); 
+
+            doc.setChannelName(faker.funnyName().toString());
+            doc.setMinutesViewed(faker.random().nextInt(1, 60));
+            doc.setType("WatchLiveTelevisionChannel");
+            doc.setId(UUID.randomUUID().toString());
+            tvInteractions.add(doc);
         }
+
+        Flux<WatchLiveTelevisionChannel> tvInteractionsFlux = Flux.fromIterable(tvInteractions);
+        List<CosmosAsyncItemResponse<WatchLiveTelevisionChannel>> results = 
+            tvInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
+
+        results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
+
+        client.close();        
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 500 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates items in Azure Cosmos DB.
+    > As a reminder, the **faker** library generates a set of test data. In this example, you are creating 500 items using the **faker** library and the rules listed above. 
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. In the Visual Studio Code window **Explorer** pane right-click **Lab01Main.java** and choose **Run**.
 
-1. In the open terminal pane, enter and execute the following command:
+1. Observe the output of the running command.
 
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > You should see a list of item ids associated with new items that are being created.
+    > You should see a list of item ids associated with new items that are being created by this tool.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
