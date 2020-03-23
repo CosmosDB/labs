@@ -37,35 +37,7 @@ public class Lab01Main {
                 .setKey(primaryKey)
                 .setConnectionPolicy(defaultPolicy)
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
-                .buildAsyncClient();
-
-        client.createDatabaseIfNotExists("EntertainmentDatabase").flatMap(databaseResponse -> {
-            targetDatabase = databaseResponse.getDatabase();
-
-            IndexingPolicy indexingPolicy = new IndexingPolicy();
-            indexingPolicy.setIndexingMode(IndexingMode.CONSISTENT);
-            indexingPolicy.setAutomatic(true);
-            List<IncludedPath> includedPaths = new ArrayList<>();
-            IncludedPath includedPath = new IncludedPath();
-            includedPath.setPath("/*");
-            includedPaths.add(includedPath);
-            indexingPolicy.setIncludedPaths(includedPaths);            
-
-            CosmosContainerProperties containerProperties = 
-                new CosmosContainerProperties("CustomCollection", "/type");
-            containerProperties.setIndexingPolicy(indexingPolicy);
-            return targetDatabase.createContainerIfNotExists(containerProperties, 10000);
-        }).flatMap(containerResponse -> {
-            customContainer = containerResponse.getContainer();
-            return Mono.empty();
-        }).subscribe(voidItem -> {}, err -> {}, () -> {
-            resourcesCreated.set(true);
-        });
-
-        while (!resourcesCreated.get());
-
-        logger.info("Database Id:\t{}",targetDatabase.getId());
-        logger.info("Container Id:\t{}",customContainer.getId());        
+                .buildAsyncClient();      
 
         client.close();        
     }
