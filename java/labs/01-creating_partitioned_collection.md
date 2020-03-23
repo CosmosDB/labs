@@ -12,7 +12,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 1. Open Visual Studio Code.
 
-1. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **<Windows home directory>\Documents\CosmosLabs**. In Visual Studio Code, go to **File > Open Folder >** to get an Open Folder dialog and and use the dialog to open the CosmosLabs folder. 
+1. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **your\home\directory\Documents\CosmosLabs**. In Visual Studio Code, go to **File > Open Folder >** to get an Open Folder dialog and and use the dialog to open the CosmosLabs folder. 
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
