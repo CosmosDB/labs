@@ -104,6 +104,9 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 
 - [Pre-lab: Creating an Azure Cosmos DB account](java/labs/00-account_setup.md)
 - [Lab 1: Creating a container in Azure Cosmos DB](java/labs/01-creating_partitioned_collection.md)
+- [Lab 2: Importing Data into Azure Cosmos DB with Azure Data Factory](java/labs/02-load_data_with_adf.md)
+- [Lab 3: Querying in Azure Cosmos DB](java/labs/03-querying_in_azure_cosmosdb.md)
+- [Lab 4: Indexing in Azure Cosmos DB](java/labs/04-indexing_in_cosmosdb.md)
 
 ---
 
