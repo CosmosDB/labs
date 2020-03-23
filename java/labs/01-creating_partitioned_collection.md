@@ -260,15 +260,6 @@ In general, you will customize the container's dedicated throughput for your app
     return targetDatabase.createContainerIfNotExists(containerProperties, 10000);    
     ```
 
-
-1. Now take a look at the following lines of code in the Database and Container creation block:
-
-    ```java
-    CosmosContainerProperties containerProperties = 
-        new CosmosContainerProperties("CustomCollection", "/type");
-    return targetDatabase.createContainerIfNotExists(containerProperties, 10000);
-    ```
-
 1. Save all of your open editor tabs.
 
 1. Confirm that you can build and run with these changes. In the Visual Studio Code window **Explorer** pane right-click **Lab01Main.java** and choose **Run**.
@@ -279,15 +270,11 @@ In general, you will customize the container's dedicated throughput for your app
 
 ## Populate a Container with Items using the SDK
 
-> You will now use the .NET SDK to populate your container with various items of varying schemas. These items will be serialized instances of multiple C# classes in your project.
+> You will now use the Java SDK to populate your container with various items of varying schemas. These items will be serialized instances of multiple Java classes in your project.
 
 ### Populate Container with Data
 
-1. In the Visual Studio Code window, look in the **Explorer** pane and verify that you have a **DataTypes.cs** file in your project folder.
-
-    > This file contains the data classes you will be working with in the following steps.
-
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **Lab01Main.java** link in the **Explorer** pane to open the file in the editor, if it is not opened already.
 
 1. Locate the using block within the **Main** method and delete any existing code:
 

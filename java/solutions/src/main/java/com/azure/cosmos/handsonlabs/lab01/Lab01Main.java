@@ -2,6 +2,7 @@ package com.azure.cosmos.handsonlabs.lab01;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.github.javafaker.Faker;
 import com.azure.cosmos.ConnectionPolicy;
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosAsyncClient;
