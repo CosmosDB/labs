@@ -12,15 +12,25 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 1. Open Visual Studio Code.
 
-1. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**. In Visual Studio Code, go to **File > Open Folder >** to get an Open Folder dialog and and use the dialog to open the CosmosLabs folder. Visual Studio Code will automatically detect the Maven Project (**pom.xml** file). If you have installed the Maven plugin, Visual Studio Code should automatically generate **.classpath** and **target\\** in the directory.
+1. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**. In Visual Studio Code, go to **File > Open Folder >** to get an Open Folder dialog and and use the dialog to open the CosmosLabs folder. 
+
+![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
+
+Visual Studio Code will automatically detect the Maven Project (**pom.xml** file). If you have installed the Maven plugin, Visual Studio Code should automatically generate **.classpath** and **target\\** in the directory.
+
+![Open with Visual Studio Code](../media/01-vscode_opened_project.jpg)
 
 1. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs**. Each Lab which involves Java coding will have its own template subdirectory here, **lab*****XX***. The **common\\** subdirectory holds Java classes for use by any of the labs.
 
 1. Expand down to **common\\datatypes\\**. You should see a number of Java classes; these are a handful of predefined datatypes for use in the Labs.
 
+![Open with Visual Studio Code](../media/01-vscode_expanded_datatypes.jpg)
+
 1. Looking now two directories above, expand the **handsonlabs\\lab01\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab01Main.java** file - this is the main class for the project.
 
 1. Open **Lab01Main.java** in the editor by clicking on it in the **Explorer** pane.
+
+![Open with Visual Studio Code](../media/01-vscode-first-time-editor.jpg)
 
 ### Create CosmosAsyncClient Instance
 
@@ -31,14 +41,26 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
     ```java
     import com.azure.cosmos.ConnectionPolicy;
     import com.azure.cosmos.ConsistencyLevel;
-    import com.azure.cosmos.ConnectionPolicy;
-    import com.azure.cosmos.ConsistencyLevel;
     import com.azure.cosmos.CosmosAsyncClient;
     import com.azure.cosmos.CosmosAsyncDatabase;
     import com.azure.cosmos.CosmosAsyncContainer;
     import com.azure.cosmos.CosmosClientBuilder;
+    import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
+    import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
+    import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
+    import com.azure.cosmos.models.CosmosAsyncItemResponse;
     import com.azure.cosmos.models.CosmosContainerProperties;
+    import com.azure.cosmos.models.CosmosItemResponse;
+    import com.azure.cosmos.models.IndexingMode;
+    import com.azure.cosmos.models.IndexingPolicy;
+    import com.azure.cosmos.models.IncludedPath;
+
+    import reactor.core.publisher.Flux;
     import reactor.core.publisher.Mono;
+
+    import java.util.ArrayList;
+    import java.util.List;
+    import java.util.UUID;
     import java.util.concurrent.atomic.AtomicBoolean;
     import com.google.common.collect.Lists;
     ```
@@ -183,6 +205,8 @@ All code added in subsequent steps should be placed between the build-client cal
 1. Save all of your open editor tabs.
 
 1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
+
+    ![Open with Visual Studio Code](../media/01-vscode_run.jpg)
 
     > This command will build and execute the console project.
 
