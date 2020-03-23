@@ -241,7 +241,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
 
     > Note that the partition key is case-sensitive. This is especially important when you consider JSON property casing in the context of .NET CLR object to JSON object serialization.
 
-In general, you will customize the container's dedicated throughput for your application. Here let's modify the last line above to provision 10000 RU/s for this container as shown below:
+    In general, you will customize the container's dedicated throughput for your application. Here let's modify the last line above to provision 10000 RU/s for this container as shown below:
 
     ```java
     CosmosContainerProperties containerProperties = 
