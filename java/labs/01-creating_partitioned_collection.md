@@ -276,6 +276,9 @@ In general, you will customize the container's dedicated throughput for your app
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
     import com.github.javafaker.Faker;
+    import java.math.BigDecimal;
+    import java.text.DecimalFormat;
+
     import com.azure.cosmos.ConnectionPolicy;
     import com.azure.cosmos.ConsistencyLevel;
     import com.azure.cosmos.CosmosAsyncClient;
@@ -369,13 +372,13 @@ In general, you will customize the container's dedicated throughput for your app
 1. Add the following code to the method to create a reference to an existing container:
 
     ```java
-    var targetDatabase = client.GetDatabase("EntertainmentDatabase");
-    var customContainer = targetDatabase.GetContainer("CustomCollection");
+    targetDatabase = client.getDatabase("EntertainmentDatabase");
+    customContainer = targetDatabase.getContainer("CustomCollection");
     ```
 
 1. Observe the code in the **Main** method.
 
-    > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
+    > For the next few instructions, we will use the [Java Faker](http://github.com/DiUS/java-faker) library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
 
 1. Add the following code to create a collection of ``PurchaseFoodOrBeverage`` instances:
 

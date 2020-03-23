@@ -21,7 +21,7 @@ public class PurchaseFoodOrBeverage implements IInteraction
     public BigDecimal getTotalPrice(){
         return new BigDecimal(this.totalPrice.toString());
     }
-    public void setTotalPrice(){
+    public void setTotalPrice(BigDecimal totalPrice){
         this.totalPrice=new BigDecimal(totalPrice.toString());
     }
     public int getQuantity(){return this.quantity;}
