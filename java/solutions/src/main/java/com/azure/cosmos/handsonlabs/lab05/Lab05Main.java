@@ -1,4 +1,4 @@
-package com.azure.cosmos.handsonlabs.lab01;
+package com.azure.cosmos.handsonlabs.lab05;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +31,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.google.common.collect.Lists;
 
-public class Lab01Main {
-    protected static Logger logger = LoggerFactory.getLogger(Lab01Main.class.getSimpleName());
+public class Lab05Main {
+    protected static Logger logger = LoggerFactory.getLogger(Lab05Main.class.getSimpleName());
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase targetDatabase;
@@ -51,24 +51,6 @@ public class Lab01Main {
 
         targetDatabase = client.getDatabase("EntertainmentDatabase");
         customContainer = targetDatabase.getContainer("CustomCollection");
-
-        ArrayList<ViewMap> mapInteractions = new ArrayList<ViewMap>();
-        Faker faker = new Faker();
-
-        for (int i= 0; i < 500;i++){  
-            ViewMap doc = new ViewMap(); 
-
-            doc.setMinutesViewed(faker.random().nextInt(1, 60));
-            doc.setType("WatchLiveTelevisionChannel");
-            doc.setId(UUID.randomUUID().toString());
-            mapInteractions.add(doc);
-        }
-
-        Flux<ViewMap> mapInteractionsFlux = Flux.fromIterable(mapInteractions);
-        List<CosmosAsyncItemResponse<ViewMap>> results = 
-            mapInteractionsFlux.flatMap(interaction -> customContainer.createItem(interaction)).collectList().block();
-
-        results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
 
         client.close();        
     }
