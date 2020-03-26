@@ -67,9 +67,12 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 1. Add the following lines of code to use the **readItem** function to retrieve a single item from your Cosmos DB by its `id` and write its description to the console.
 
     ```java
-    ItemResponse<Food> candyResponse = await container.ReadItemAsync<Food>("19130", new PartitionKey("Sweets"));
-    Food candy = candyResponse.Resource;
-    Console.Out.WriteLine($"Read {candy.Description}");
+    container.readItem("19130", new PartitionKey("Sweets"), Food.class)
+        .flatMap(candyResponse -> {
+        Food candy = candyResponse.getItem();
+        logger.info("Read {}",candy.getDescription());
+        return Mono.empty();
+    }).block();
     ```
 
 1. Save all of your open editor tabs.
@@ -80,7 +83,7 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
     > This command will build and execute the console project.
 
-1. You should see the following line output in the console, indicating that **ReadItemAsync** completed successfully:
+1. Within the logger output to the terminal, you should see the following line output in the console, indicating that **readItem** completed successfully:
 
    ```sh
    Read Candies, HERSHEY''S POT OF GOLD Almond Bar
@@ -90,40 +93,111 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 ## Execute a Query Against a Single Azure Cosmos DB Partition 
 
-1.  Find the last line of code you wrote:
+1.  Find the last line of code you wrote
 
     ```java
-    Console.Out.WriteLine($"Read {candy.Description}");
+    }).block();
     ```
 
-1.  Create a SQL Query against your data, as follows:
+    and replace it with the following:
 
     ```java
-    string sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+    }).flux().flatMap(voidItem -> {
+
+    }).blockLast();
     ```
 
-    > This query will select all food where the foodGroup is set to the value `Sweets`. It will also only select documents that have description, manufacturerName, and servings properties defined. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
+    ```flux()``` converts the ```Mono<Void>``` output of the previous stream operation to a ```Flux<Void>```. This is necessary because the query we perform in this section will return output as a ```Flux<FeedResponse<Food>>``` i.e. as a ```Flux``` of query response pages. This may be highlighted as an error by your IDE because the final reactive stream operation contains no return statement; we will fix this soon.
 
-1. Add the following code to execute and read the results of this query
+1.  Within the empty brackets you created
 
-   ```java
-   FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1});
-   foreach (Food food in await queryA.ReadNextAsync())
-   {
-       await Console.Out.WriteLineAsync($"{food.Description} by {food.ManufacturerName}");
-       foreach (Serving serving in food.Servings)
-       {
-           await Console.Out.WriteLineAsync($"\t{serving.Amount} {serving.Description}");
-       }
-       await Console.Out.WriteLineAsync();
-   }
-   ```
+    ```java
+    }).flux().flatMap(voidItem -> {
+        //<== Add new code here
+    }).blockLast();
+    ```
+
+    define the following SQL Query string:
+
+    ```java
+    String sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+    ```
+
+    > In the following section we will run this query against the nutrition dataset. This query will select all food where the foodGroup is set to the value `Sweets`. It will also only select documents that have description, manufacturerName, and servings properties defined. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
+
+1. Add the following code to execute the query and get back a ```Flux<FeedResponse<Food>>``` containing the query response pages:
+
+    ```java
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    return container.queryItems(sqlA, optionsA, Food.class).byPage();
+    ```
+    
+    Your code should now look like this:
+
+    ```java
+    }).flux().flatMap(voidItem -> {
+
+        String sqlA = "SELECT f.description, f.manufacturerName, " + 
+        "f.servings FROM foods f WHERE f.foodGroup = " + 
+        "'Sweets' and IS_DEFINED(f.description) and " + 
+        "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+
+        FeedOptions optionsA = new FeedOptions();
+        optionsA.setMaxDegreeOfParallelism(1);
+        return container.queryItems(sqlA, optionsA, Food.class).byPage();
+    }).blockLast();
+    ```    
+1. We still need to process the query response pages. Add another empty reactive stream operation before ```.blockLast()``` as shown:
+
+    ```java
+            }).flux().flatMap(voidItem -> {
+
+                String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                "f.servings FROM foods f WHERE f.foodGroup = " + 
+                "'Sweets' and IS_DEFINED(f.description) and " + 
+                "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+
+                FeedOptions optionsA = new FeedOptions();
+                optionsA.setMaxDegreeOfParallelism(1);
+                return container.queryItems(sqlA, optionsA, Food.class).byPage();
+            }).flatMap(page -> {
+
+                return Mono.empty();
+    }).blockLast();
+    ```
+
+    Since we already added ```return Mono.empty()```, your IDE should not flag this code as errant.
+
+1. Within the empty reactive stream operation that you just created
+
+    ```java
+            }).flatMap(page -> {
+
+                return Mono.empty();
+    }).blockLast();
+    ```
+
+    and before the ```return``` statement, add the following code which prints out the query responses in each page:
+
+    ```java
+    for (Food fd : page.getResults()) {
+        String msg="";
+        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+        for (Serving sv : fd.getServings()) {
+            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+        }
+        msg += "\n";
+        logger.info(msg);
+    } 
+    ```
 
 1. Save all of your open editor tabs.
 
 1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
 
-1.  The code will loop through each result of the SQL query and output a message to the console similar to the following:
+1.  The code will loop through each result of the SQL query. Within the logger output in the terminal, you should see a message similar to the following:
 
     ```sh
     ...

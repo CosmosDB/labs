@@ -36,14 +36,13 @@ import com.google.common.collect.Lists;
 
 public class Lab05Main {
     protected static Logger logger = LoggerFactory.getLogger(Lab05Main.class.getSimpleName());
-    private static String endpointUri = "https://testdb3152.documents.azure.com:443/";
-    private static String primaryKey = "BzrbjviV0weDwekxKbvFyKqaEZHbSAxOg8qS56xeKkAyquIP8tS6o0XIjpee7v3Sf7BtmKEufKN175RIX1a2NQ==";   
-    private static CosmosAsyncDatabase targetDatabase;
-    private static CosmosAsyncContainer customContainer;
-    private static AtomicBoolean resourcesCreated = new AtomicBoolean(false);     
+    private static String endpointUri = "<your uri>";
+    private static String primaryKey = "<your key>";   
+    private static CosmosAsyncDatabase database;
+    private static CosmosAsyncContainer container;  
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
-        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US"));
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
     
         CosmosAsyncClient client = new CosmosClientBuilder()
                 .setEndpoint(endpointUri)
@@ -52,8 +51,8 @@ public class Lab05Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        targetDatabase = client.getDatabase("EntertainmentDatabase");
-        customContainer = targetDatabase.getContainer("CustomCollection");
+        database = client.getDatabase("EntertainmentDatabase");
+        container = database.getContainer("CustomCollection");
 
         client.close();        
     }

@@ -35,9 +35,8 @@ public class Lab05Main {
     protected static Logger logger = LoggerFactory.getLogger(Lab05Main.class.getSimpleName());
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
-    private static CosmosAsyncDatabase targetDatabase;
-    private static CosmosAsyncContainer customContainer;
-    private static AtomicBoolean resourcesCreated = new AtomicBoolean(false);     
+    private static CosmosAsyncDatabase database;
+    private static CosmosAsyncContainer container;  
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
         defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
@@ -49,8 +48,10 @@ public class Lab05Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        targetDatabase = client.getDatabase("EntertainmentDatabase");
-        customContainer = targetDatabase.getContainer("CustomCollection");
+        database = client.getDatabase("NutritionDatabase");
+        container = database.getContainer("FoodCollection");
+
+        //container.readItem("19130", new PartitionKey("Sweets"), Family.class);
 
         client.close();        
     }
