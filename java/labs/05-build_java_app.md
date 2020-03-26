@@ -4,7 +4,7 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-## Create a Java Core Project
+## Open the CosmosLabs Maven Project Template
 
 1. Open Visual Studio Code.
 
@@ -16,7 +16,7 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
     ![Expand datatypes in Visual Studio Code](../media/01-vscode_expanded_datatypes.jpg)
 
-1. Looking now two directories above, expand the **handsonlabs\\lab05\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab05Main.java** file - this is the main class for the project.
+1. Looking now two directories above, expand the **handsonlabs\\lab05\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab05Main.java** file - this is the **main** class for the project.
 
 1. Open **Lab05Main.java** in the editor by clicking on it in the **Explorer** pane.
 
@@ -44,40 +44,41 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
    > We are now going to implement a sample query to make sure our client connection code works.
 
-## Read a single Document in Azure Cosmos DB Using ReadItemAsync
+## Read a single Document in Azure Cosmos DB Using readItem()
 
-_ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ In Azure Cosmos DB, this is the most efficient method of reading a single document.
+_```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID._ In Azure Cosmos DB, this is the most efficient method of reading a single document.
 
-1. Locate the using block within the **Main** method:
+1. Locate the client-create/client-close block within the **main** method:
 
-   ```csharp
-   using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-   {
-       var database = client.GetDatabase(_databaseId);
-       var container = database.GetContainer(_containerId);
+    ```java
+    CosmosAsyncClient client = new CosmosClientBuilder()
+            .setEndpoint(endpointUri)
+            .setKey(primaryKey)
+            .setConnectionPolicy(defaultPolicy)
+            .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+            .buildAsyncClient();
 
-   }
-   ```
+    targetDatabase = client.getDatabase("EntertainmentDatabase");
+    customContainer = targetDatabase.getContainer("CustomCollection");            
 
-1. Add the following lines of code to use the **ReadItemAsync** function to retrieve a single item from your Cosmos DB by its `id` and write its description to the console.
+    client.close();
+    ```
 
-   ```csharp
+1. Add the following lines of code to use the **readItem** function to retrieve a single item from your Cosmos DB by its `id` and write its description to the console.
+
+    ```java
     ItemResponse<Food> candyResponse = await container.ReadItemAsync<Food>("19130", new PartitionKey("Sweets"));
     Food candy = candyResponse.Resource;
     Console.Out.WriteLine($"Read {candy.Description}");
-   ```
+    ```
 
-1. Save all of your open tabs in Visual Studio Code
+1. Save all of your open editor tabs.
 
-1. Return to your terminal pane
+1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
 
-   > If you've closed the terminal right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+    ![Run Lab01Main.java](../media/01-vscode_run.jpg)
 
-1. In the open terminal pane, enter and execute the following command:
-
-   ```sh
-   dotnet run
-   ```
+    > This command will build and execute the console project.
 
 1. You should see the following line output in the console, indicating that **ReadItemAsync** completed successfully:
 
@@ -85,25 +86,19 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
    Read Candies, HERSHEY''S POT OF GOLD Almond Bar
    ```
 
+1. Click the **🗙** symbol to close the terminal pane.
+
 ## Execute a Query Against a Single Azure Cosmos DB Partition 
-
-1.  Return to Visual Studio Code
-
-    > If you've closed Visual Studio code, re-open it from the command line with the following command:
-
-    ```sh
-    code .
-    ```
 
 1.  Find the last line of code you wrote:
 
-    ```csharp
+    ```java
     Console.Out.WriteLine($"Read {candy.Description}");
     ```
 
 1.  Create a SQL Query against your data, as follows:
 
-    ```csharp
+    ```java
     string sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
     ```
 
@@ -111,7 +106,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
 
 1. Add the following code to execute and read the results of this query
 
-   ```csharp
+   ```java
    FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1});
    foreach (Food food in await queryA.ReadNextAsync())
    {
@@ -124,17 +119,9 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
    }
    ```
 
-1.  Save all of your open tabs in Visual Studio Code
+1. Save all of your open editor tabs.
 
-1.  Return to your terminal pane
-
-    > If you've closed the terminal right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1.  In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
+1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
 
 1.  The code will loop through each result of the SQL query and output a message to the console similar to the following:
 
@@ -148,25 +135,19 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
     ...
     ```
 
+1. Click the **🗙** symbol to close the terminal pane.
+
 ### Execute a Query Against Multiple Azure Cosmos DB Partitions
-
-1.  Return to Visual Studio Code
-
-    > If you've closed Visual Studio code, re-open it from the command line with the following command:
-
-    ```sh
-    code .
-    ```
 
 1.  Following your `foreach` loop, create a SQL Query against your data, as follows:
 
-    ```csharp
+    ```java
     string sqlB = @"SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
     ```
 
 1.  Add the following line of code after the definition of `sqlB` to create your next item query:
 
-    ```csharp
+    ```java
     FeedIterator<Food> queryB = container.GetItemQueryIterator<Food>(sqlB, requestOptions: new QueryRequestOptions{MaxConcurrency = 5, MaxItemCount = 100});
     ```
 
@@ -174,7 +155,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
 
 1.  Add the following lines of code to page through the results of this query using a while loop.
 
-    ```csharp
+    ```java
     int pageCount = 0;
     while (queryB.HasMoreResults)
     {
@@ -186,17 +167,9 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
     }
     ```
 
-1.  Save all of your open tabs in Visual Studio Code
+1. Save all of your open editor tabs.
 
-1.  Return to your terminal pane
-
-    > If you've closed the terminal right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1.  In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
+1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
 
 1.  You should see a number of new results, each separated by the a line indicating the page, as follows:
 
@@ -207,5 +180,7 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
     ```
 
 > Note that the results are coming from multiple partitions.
+
+1. Click the **🗙** symbol to close the terminal pane.
 
 > If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 
