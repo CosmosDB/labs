@@ -1,48 +1,32 @@
 ## Build A Simple Java Console App
 
-_After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB container. You are now going to use the .NET SDK to issue similar queries._
+_After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB container. You are now going to use the Java SDK to issue similar queries._
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-## Create a .NET Core Project
+## Create a Java Core Project
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab05 folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+1. Open Visual Studio Code.
 
-1. In the Lab05 folder, right-click the folder and select the **Open with Code** menu option.
+1. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **your\home\directory\Documents\CosmosLabs**. In Visual Studio Code, go to **File > Open Folder >** to get an Open Folder dialog and and use the dialog to open the CosmosLabs folder. 
 
-   ![Open with Visual Studio Code](../media/03-open_with_code.jpg)
+    ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-   > Alternatively, you can run a terminal in your current directory and execute the `code .` command.
+    Visual Studio Code will automatically detect the Maven Project (**pom.xml** file). If you have installed the Maven plugin, Visual Studio Code should automatically generate **.classpath** and **target\\** in the directory. 
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+    ![Visual Studio Code after opening project](../media/01-vscode_opened_project.jpg)
 
-   ![Open in Terminal](../media/open_in_terminal.jpg)
+1. The **Explorer** pane button is emphasized in red in the image above. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs**. Each Lab which involves Java coding will have its own template subdirectory here, **lab*****XX***. The **common\\** subdirectory holds Java classes for use by any of the labs.
 
-1. In the terminal pane, enter and execute the following command:
+1. Expand down to **common\\datatypes\\**. You should see a number of Java classes; these are a handful of predefined datatypes for use in the Labs.
 
-   ```sh
-   dotnet restore
-   ```
+    ![Expand datatypes in Visual Studio Code](../media/01-vscode_expanded_datatypes.jpg)
 
-   > This command will restore all packages specified as dependencies in the project.
+1. Looking now two directories above, expand the **handsonlabs\\lab01\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab01Main.java** file - this is the main class for the project.
 
-1. In the terminal pane, enter and execute the following command:
+1. Open **Lab01Main.java** in the editor by clicking on it in the **Explorer** pane.
 
-   ```sh
-   dotnet build
-   ```
-
-   > This command will build the project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. In the **Explorer** pane verify that you have a **DataTypes.cs** file in your project folder.
-
-   > This file contains the data classes you will be working with in the following steps.
-
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
-
-   ![Open editor](../media/03-program_editor.jpg)
+    ![Open Lab01Main.java in editor](../media/01-vscode-first-time-editor.jpg)
 
 1. For the `_endpointUri` variable, replace the placeholder value with the **URI** value and for the `_primaryKey` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
 
