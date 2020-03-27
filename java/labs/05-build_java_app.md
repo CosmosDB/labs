@@ -93,35 +93,22 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 ## Execute a Query Against a Single Azure Cosmos DB Partition 
 
-1.  Find the last line of code you wrote
+1.  Find the last block of code you wrote
 
     ```java
+    container.readItem("19130", new PartitionKey("Sweets"), Food.class)
+            .flatMap(candyResponse -> {
+            Food candy = candyResponse.getItem();
+            logger.info("Read {}",candy.getDescription());
+            return Mono.empty();
     }).block();
+    
+    // <== New code goes here
     ```
 
-    and replace it with the following:
+    and add this section's code after the block above.
 
-    ```java
-    })
-    .flux()
-    .flatMap(voidItem -> {
-
-    }).blockLast();
-    ```
-
-    ```flux()``` converts the ```Mono<Void>``` output of the previous stream operation to a ```Flux<Void>```. This is necessary because the query we perform in this section will return output as a ```Flux<FeedResponse<Food>>``` i.e. as a ```Flux``` of query response pages. This may be highlighted as an error by your IDE because the final reactive stream operation contains no return statement; we will fix this soon.
-
-1.  Within the empty brackets you created
-
-    ```java
-    })
-    .flux()
-    .flatMap(voidItem -> {
-        //<== Add new code here
-    }).blockLast();
-    ```
-
-    define the following SQL Query string:
+1.  Define the following SQL Query string:
 
     ```java
     String sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
@@ -129,64 +116,19 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
     > In the following section we will run this query against the nutrition dataset. This query will select all food where the foodGroup is set to the value `Sweets`. It will also only select documents that have description, manufacturerName, and servings properties defined. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
 
-1. Add the following code to execute the query and get back a ```Flux<FeedResponse<Food>>``` containing the query response pages:
+1. Add the following code to execute the query and page through the ```Flux<FeedResponse<Food>>``` which is returned:
 
     ```java
     FeedOptions optionsA = new FeedOptions();
     optionsA.setMaxDegreeOfParallelism(1);
-    return container.queryItems(sqlA, optionsA, Food.class).byPage();
+    container.queryItems(sqlA, optionsA, Food.class).byPage();
+            .flatMap(page -> {
+
+            return Mono.empty();
+    }).blockLast();    
     ```
     
-    Your code should now look like this:
-
-    ```java
-    })
-    .flux()
-    .flatMap(voidItem -> {
-
-        String sqlA = "SELECT f.description, f.manufacturerName, " + 
-        "f.servings FROM foods f WHERE f.foodGroup = " + 
-        "'Sweets' and IS_DEFINED(f.description) and " + 
-        "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
-
-        FeedOptions optionsA = new FeedOptions();
-        optionsA.setMaxDegreeOfParallelism(1);
-        return container.queryItems(sqlA, optionsA, Food.class).byPage();
-    }).blockLast();
-    ```    
-1. We still need to process the query response pages. Add another empty reactive stream operation before ```.blockLast()``` as shown:
-
-    ```java
-            })
-            .flux()
-            .flatMap(voidItem -> {
-
-                String sqlA = "SELECT f.description, f.manufacturerName, " + 
-                "f.servings FROM foods f WHERE f.foodGroup = " + 
-                "'Sweets' and IS_DEFINED(f.description) and " + 
-                "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
-
-                FeedOptions optionsA = new FeedOptions();
-                optionsA.setMaxDegreeOfParallelism(1);
-                return container.queryItems(sqlA, optionsA, Food.class).byPage();
-            }).flatMap(page -> {
-
-                return Mono.empty();
-    }).blockLast();
-    ```
-
-    Since we already added ```return Mono.empty()```, your IDE should not flag this code as errant.
-
-1. Within the empty reactive stream operation that you just created
-
-    ```java
-            }).flatMap(page -> {
-
-                return Mono.empty();
-    }).blockLast();
-    ```
-
-    and before the ```return``` statement, add the following code which prints out the query responses in each page:
+    Notice that the Reactive Stream operation starting with ```.flatMap(page -> {``` is empty, so really nothing is being done with the query response pages. Above ```return Mono.empty();```, add the following lines to process the query response pages:
 
     ```java
     for (Food fd : page.getResults()) {
@@ -198,8 +140,35 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
         }
         msg += "\n";
         logger.info(msg);
-    } 
+    }
     ```
+
+    Your code for the query should now look like this:
+
+    ```java
+    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                    "f.servings FROM foods f WHERE f.foodGroup = " + 
+                    "'Sweets' and IS_DEFINED(f.description) and " + 
+                    "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+            for (Food fd : page.getResults()) {
+                String msg="";
+                msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+                for (Serving sv : fd.getServings()) {
+                    msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                }
+                msg += "\n";
+                logger.info(msg);
+            }
+
+            return Mono.empty();
+    }).blockLast();
+    ```    
 
 1. Save all of your open editor tabs.
 
