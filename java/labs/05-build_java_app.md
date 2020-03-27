@@ -77,9 +77,9 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 1. Save all of your open editor tabs.
 
-1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
+1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
-    ![Run Lab01Main.java](../media/01-vscode_run.jpg)
+    ![Run Lab05Main.java](../media/01-vscode_run.jpg)
 
     > This command will build and execute the console project.
 
@@ -102,7 +102,9 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     and replace it with the following:
 
     ```java
-    }).flux().flatMap(voidItem -> {
+    })
+    .flux()
+    .flatMap(voidItem -> {
 
     }).blockLast();
     ```
@@ -112,7 +114,9 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 1.  Within the empty brackets you created
 
     ```java
-    }).flux().flatMap(voidItem -> {
+    })
+    .flux()
+    .flatMap(voidItem -> {
         //<== Add new code here
     }).blockLast();
     ```
@@ -136,7 +140,9 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     Your code should now look like this:
 
     ```java
-    }).flux().flatMap(voidItem -> {
+    })
+    .flux()
+    .flatMap(voidItem -> {
 
         String sqlA = "SELECT f.description, f.manufacturerName, " + 
         "f.servings FROM foods f WHERE f.foodGroup = " + 
@@ -151,7 +157,9 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 1. We still need to process the query response pages. Add another empty reactive stream operation before ```.blockLast()``` as shown:
 
     ```java
-            }).flux().flatMap(voidItem -> {
+            })
+            .flux()
+            .flatMap(voidItem -> {
 
                 String sqlA = "SELECT f.description, f.manufacturerName, " + 
                 "f.servings FROM foods f WHERE f.foodGroup = " + 
@@ -195,7 +203,7 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 1. Save all of your open editor tabs.
 
-1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
+1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
 1.  The code will loop through each result of the SQL query. Within the logger output in the terminal, you should see a message similar to the following:
 
@@ -213,44 +221,129 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 ### Execute a Query Against Multiple Azure Cosmos DB Partitions
 
-1.  Following your `foreach` loop, create a SQL Query against your data, as follows:
+1. In this section we will run another query. Extend the reactive stream by duplicating your query code as shown below:
 
     ```java
-    string sqlB = @"SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
+                 .flatMap(voidItem -> {
+
+                    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                                  "f.servings FROM foods f WHERE f.foodGroup = " + 
+                                  "'Sweets' and IS_DEFINED(f.description) and " + 
+                                  "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+
+                    FeedOptions optionsA = new FeedOptions();
+                    optionsA.setMaxDegreeOfParallelism(1);
+                    return container.queryItems(sqlA, optionsA, Food.class).byPage();
+                 }).flatMap(page -> {
+                    for (Food fd : page.getResults()) {
+                        String msg="";
+                        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+                        for (Serving sv : fd.getServings()) {
+                            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                        }
+                        msg += "\n";
+                        logger.info(msg);
+                    }
+
+                    return Mono.empty();
+                 }).flatMap(voidItem -> { //<== Duplicate starts here
+
+                    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                                  "f.servings FROM foods f WHERE f.foodGroup = " + 
+                                  "'Sweets' and IS_DEFINED(f.description) and " + 
+                                  "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+
+                    FeedOptions optionsA = new FeedOptions();
+                    optionsA.setMaxDegreeOfParallelism(1);
+                    return container.queryItems(sqlA, optionsA, Food.class).byPage();
+                 }).flatMap(page -> {
+                    for (Food fd : page.getResults()) {
+                        String msg="";
+                        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+                        for (Serving sv : fd.getServings()) {
+                            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                        }
+                        msg += "\n";
+                        logger.info(msg);
+                    }
+
+                    return Mono.empty();
+        }).blockLast();
     ```
 
-1.  Add the following line of code after the definition of `sqlB` to create your next item query:
+1. **Within the duplicate query code** find where you define ```String sqlA``` and replace it with a new query ```String sqlB``` as shown below:
 
     ```java
-    FeedIterator<Food> queryB = container.GetItemQueryIterator<Food>(sqlB, requestOptions: new QueryRequestOptions{MaxConcurrency = 5, MaxItemCount = 100});
+    string sqlB = "SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
     ```
 
-    > Take note of the differences in this call to **GetItemQueryIterator** as compared to the previous section. **maxConcurrency** is set to `5` and we are limiting the **MaxItemCount** to `100` items. This will result in paging if there are more than 100 items that match the query.
+    because ```sqlA``` is no longer defined, your IDE may flag an error until you make the following changes.
 
-1.  Add the following lines of code to page through the results of this query using a while loop.
+1. For this query, we will run with greater concurrency and allow a max item count of 100. Find this section of the duplicate query code
 
     ```java
-    int pageCount = 0;
-    while (queryB.HasMoreResults)
-    {
-        Console.Out.WriteLine($"---Page #{++pageCount:0000}---");
-        foreach (var food in await queryB.ReadNextAsync())
-        {
-            Console.Out.WriteLine($"\t[{food.Id}]\t{food.Description,-20}\t{food.ManufacturerName,-40}");
-        }
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    return container.queryItems(sqlA, optionsA, Food.class).byPage();
+    ```
+
+    and replace it with
+
+    ```java
+    FeedOptions optionsB = new FeedOptions();
+    optionsB.setMaxDegreeOfParallelism(5);
+    optionsB.setMaxItemCount(100);
+    return container.queryItems(sqlB, optionsB, Food.class).byPage();
+    ```
+
+    > Take note of the differences in this call to **queryItems** as compared to the previous section. **maxDegreeOfParallelism** is set to `5` and we are limiting the **maxItemCount** to `100` items. This will result in paging if there are more than 100 items that match the query.
+
+1. Now we will look at handling the paged response to this query. First, find the variable declarations at the top of the **Lab05Main** class definition and add another one:
+
+    ```java
+    private static AtomicInteger pageCount = new AtomicInteger(0);
+    ```
+
+    which creates a thread-safe page count variable initialized to zero.
+
+1. In the duplicate query code find the portion which pages through the query response
+
+    ```java
+    String msg="";
+
+    msg = String.format("---Page %d---\n",pageCount.getAndIncrement());
+
+    for (Food fd : page.getResults()) {
+        msg += String.format("\t%s\t%s\t%s\n",fd.getId(),fd.getDescription(),fd.getManufacturerName());
     }
+    logger.info(msg); 
+    ```
+
+    and modify it to read as follows:
+
+    ```java
+    String msg="";
+
+    msg = String.format("---Page %d---\n",pageCount.getAndIncrement());
+
+    for (Food fd : page.getResults()) {
+        msg += String.format("\t[%s]\t%s\t%s\n",fd.getId(),fd.getDescription(),fd.getManufacturerName());
+    }
+    logger.info(msg);    
     ```
 
 1. Save all of your open editor tabs.
 
-1. In the **Explorer** pane, right-click **Lab01Main.java** and choose the **Run** menu option.
+1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
-1.  You should see a number of new results, each separated by the a line indicating the page, as follows:
+1.  Within the logger output, you should see a number of new results, each separated by the a line indicating the page, as follows:
 
     ```
-        [19067] Candies, TWIZZLERS CHERRY BITES Hershey Food Corp.
-    ---Page #0016---
-        [19065] Candies, ALMOND JOY Candy Bar   Hershey Food Corp.
+        ---Page #0016---
+        [19065] Candies,ALMOND JOY Candy Bar   Hershey Food Corp.
+        [19067] Candies, TWIZZLERS CHERRY BITES Hershey Food Corp.        
     ```
 
 > Note that the results are coming from multiple partitions.
