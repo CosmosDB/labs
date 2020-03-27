@@ -190,56 +190,54 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 ### Execute a Query Against Multiple Azure Cosmos DB Partitions
 
-1. In this section we will run another query. Extend the reactive stream by duplicating your query code as shown below:
+1. In this section we will run another query. Duplicate your query code from the last section as shown below:
 
     ```java
-                 .flatMap(voidItem -> {
+    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                    "f.servings FROM foods f WHERE f.foodGroup = " + 
+                    "'Sweets' and IS_DEFINED(f.description) and " + 
+                    "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
 
-                    String sqlA = "SELECT f.description, f.manufacturerName, " + 
-                                  "f.servings FROM foods f WHERE f.foodGroup = " + 
-                                  "'Sweets' and IS_DEFINED(f.description) and " + 
-                                  "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+            for (Food fd : page.getResults()) {
+                String msg="";
+                msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
 
-                    FeedOptions optionsA = new FeedOptions();
-                    optionsA.setMaxDegreeOfParallelism(1);
-                    return container.queryItems(sqlA, optionsA, Food.class).byPage();
-                 }).flatMap(page -> {
-                    for (Food fd : page.getResults()) {
-                        String msg="";
-                        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+                for (Serving sv : fd.getServings()) {
+                    msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                }
+                msg += "\n";
+                logger.info(msg);
+            }
 
-                        for (Serving sv : fd.getServings()) {
-                            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
-                        }
-                        msg += "\n";
-                        logger.info(msg);
-                    }
+            return Mono.empty();
+    }).blockLast();
 
-                    return Mono.empty();
-                 }).flatMap(voidItem -> { //<== Duplicate starts here
+    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                    "f.servings FROM foods f WHERE f.foodGroup = " + 
+                    "'Sweets' and IS_DEFINED(f.description) and " + 
+                    "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
 
-                    String sqlA = "SELECT f.description, f.manufacturerName, " + 
-                                  "f.servings FROM foods f WHERE f.foodGroup = " + 
-                                  "'Sweets' and IS_DEFINED(f.description) and " + 
-                                  "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+            for (Food fd : page.getResults()) {
+                String msg="";
+                msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
 
-                    FeedOptions optionsA = new FeedOptions();
-                    optionsA.setMaxDegreeOfParallelism(1);
-                    return container.queryItems(sqlA, optionsA, Food.class).byPage();
-                 }).flatMap(page -> {
-                    for (Food fd : page.getResults()) {
-                        String msg="";
-                        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+                for (Serving sv : fd.getServings()) {
+                    msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                }
+                msg += "\n";
+                logger.info(msg);
+            }
 
-                        for (Serving sv : fd.getServings()) {
-                            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
-                        }
-                        msg += "\n";
-                        logger.info(msg);
-                    }
-
-                    return Mono.empty();
-        }).blockLast();
+            return Mono.empty();
+    }).blockLast();    
     ```
 
 1. **Within the duplicate query code** find where you define ```String sqlA``` and replace it with a new query ```String sqlB``` as shown below:
