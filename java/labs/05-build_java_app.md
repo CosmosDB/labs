@@ -20,7 +20,7 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
 1. Open **Lab05Main.java** in the editor by clicking on it in the **Explorer** pane.
 
-    ![Open Lab05Main.java in editor](../media/01-vscode-first-time-editor.jpg)
+    ![Open Lab05Main.java in editor](../media/05-vscode-first-time-editor.jpg)
 
 1. In the Visual Studio Code window, in the **Explorer** pane, right-click the empty space in pane and choose the **Open in Terminal** menu option.
 
@@ -79,7 +79,7 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 
 1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
-    ![Run Lab05Main.java](../media/01-vscode_run.jpg)
+    ![Run Lab05Main.java](../media/05-vscode_run.jpg)
 
     > This command will build and execute the console project.
 
