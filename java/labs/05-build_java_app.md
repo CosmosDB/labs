@@ -12,7 +12,7 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-1. The **Explorer** pane button is emphasized in red in the image below. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs\\common\\datatypes\\** and double-check that you still have datatype Java files for use in the Labs.
+1. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs\\common\\datatypes\\** and double-check that you still have datatype Java files for use in the Labs.
 
     ![Expand datatypes in Visual Studio Code](../media/01-vscode_expanded_datatypes.jpg)
 
