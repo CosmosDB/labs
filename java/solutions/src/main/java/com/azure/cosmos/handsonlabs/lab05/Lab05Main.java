@@ -59,8 +59,8 @@ public class Lab05Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("EntertainmentDatabase");
-        container = database.getContainer("CustomCollection");
+        database = client.getDatabase("NutritionDatabase");
+        container = database.getContainer("FoodCollection");
 
         container.readItem("19130", new PartitionKey("Sweets"), Food.class)
                  .flatMap(candyResponse -> {
