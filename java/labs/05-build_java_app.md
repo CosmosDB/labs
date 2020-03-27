@@ -311,14 +311,16 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
 1. In the duplicate query code find the portion which pages through the query response
 
     ```java
-    String msg="";
-
-    msg = String.format("---Page %d---\n",pageCount.getAndIncrement());
-
     for (Food fd : page.getResults()) {
-        msg += String.format("\t%s\t%s\t%s\n",fd.getId(),fd.getDescription(),fd.getManufacturerName());
-    }
-    logger.info(msg); 
+        String msg="";
+        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+        for (Serving sv : fd.getServings()) {
+            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+        }
+        msg += "\n";
+        logger.info(msg);
+    } 
     ```
 
     and modify it to read as follows:
