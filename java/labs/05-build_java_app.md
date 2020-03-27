@@ -58,8 +58,8 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
             .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
             .buildAsyncClient();
 
-    targetDatabase = client.getDatabase("EntertainmentDatabase");
-    customContainer = targetDatabase.getContainer("CustomCollection");            
+    database = client.getDatabase("NutritionDatabase");
+    container = database.getContainer("FoodCollection");            
 
     client.close();
     ```
