@@ -59,60 +59,60 @@ public class Lab05Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("NutritionDatabase");
-        container = database.getContainer("FoodCollection");
-
-        container.readItem("19130", new PartitionKey("Sweets"), Food.class)
-                 .flatMap(candyResponse -> {
-                    Food candy = candyResponse.getItem();
-                    logger.info("Read {}",candy.getDescription());
-                    return Mono.empty();
-                 })
-                 .flux()
-                 .flatMap(voidItem -> {
-
-                    String sqlA = "SELECT f.description, f.manufacturerName, " + 
-                                  "f.servings FROM foods f WHERE f.foodGroup = " + 
-                                  "'Sweets' and IS_DEFINED(f.description) and " + 
-                                  "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
-
-                    FeedOptions optionsA = new FeedOptions();
-                    optionsA.setMaxDegreeOfParallelism(1);
-                    return container.queryItems(sqlA, optionsA, Food.class).byPage();
-                 }).flatMap(page -> {
-                    for (Food fd : page.getResults()) {
-                        String msg="";
-                        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
-
-                        for (Serving sv : fd.getServings()) {
-                            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                database = client.getDatabase("NutritionDatabase");
+                container = database.getContainer("FoodCollection");
+        
+                container.readItem("19130", new PartitionKey("Sweets"), Food.class)
+                         .flatMap(candyResponse -> {
+                            Food candy = candyResponse.getItem();
+                            logger.info("Read {}",candy.getDescription());
+                            return Mono.empty();
+                }).block();
+                         
+        
+        
+                String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                                "f.servings FROM foods f WHERE f.foodGroup = " + 
+                                "'Sweets' and IS_DEFINED(f.description) and " + 
+                                "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+        
+                FeedOptions optionsA = new FeedOptions();
+                optionsA.setMaxDegreeOfParallelism(1);
+                container.queryItems(sqlA, optionsA, Food.class).byPage()
+                        .flatMap(page -> {
+                        for (Food fd : page.getResults()) {
+                            String msg="";
+                            msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+        
+                            for (Serving sv : fd.getServings()) {
+                                msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                            }
+                            msg += "\n";
+                            logger.info(msg);
                         }
-                        msg += "\n";
-                        logger.info(msg);
-                    }
-
-                    return Mono.empty();
-                 }).flatMap(voidItem -> {
-
-                    String sqlB = "SELECT f.id, f.description, f.manufacturerName, f.servings " + 
-                                  "FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
-
-                    FeedOptions optionsB = new FeedOptions();
-                    optionsB.setMaxDegreeOfParallelism(5);
-                    optionsB.setMaxItemCount(100);
-                    return container.queryItems(sqlB, optionsB, Food.class).byPage();
-                 }).flatMap(page -> {
-                    String msg="";
-
-                    msg = String.format("---Page %d---\n",pageCount.getAndIncrement());
-
-                    for (Food fd : page.getResults()) {
-                        msg += String.format("\t[%s]\t%s\t%s\n",fd.getId(),fd.getDescription(),fd.getManufacturerName());
-                    }
-                    logger.info(msg);
-                    return Mono.empty();
-        }).blockLast();
-
-        client.close();        
-    }
-}
+        
+                        return Mono.empty();
+                }).blockLast();
+                         
+                String sqlB = "SELECT f.id, f.description, f.manufacturerName, f.servings " + 
+                                "FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
+        
+                FeedOptions optionsB = new FeedOptions();
+                optionsB.setMaxDegreeOfParallelism(5);
+                optionsB.setMaxItemCount(100);
+                container.queryItems(sqlB, optionsB, Food.class).byPage()
+                         .flatMap(page -> {
+                            String msg="";
+        
+                            msg = String.format("---Page %d---\n",pageCount.getAndIncrement());
+        
+                            for (Food fd : page.getResults()) {
+                                msg += String.format("\t[%s]\t%s\t%s\n",fd.getId(),fd.getDescription(),fd.getManufacturerName());
+                            }
+                            logger.info(msg);
+                            return Mono.empty();
+                }).blockLast();
+        
+                client.close();        
+            }
+        }
