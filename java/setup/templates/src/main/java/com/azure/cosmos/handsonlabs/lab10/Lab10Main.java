@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.azure.cosmos.handsonlabs.lab05;
+package com.azure.cosmos.handsonlabs.lab10;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.google.common.collect.Lists;
 
-public class Lab05Main {
-    protected static Logger logger = LoggerFactory.getLogger(Lab05Main.class.getSimpleName());
+public class Lab10Main {
+    protected static Logger logger = LoggerFactory.getLogger(Lab10Main.class.getSimpleName());
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase database;
@@ -51,8 +51,8 @@ public class Lab05Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("NutritionDatabase");
-        container = database.getContainer("FoodCollection");
+        database = client.getDatabase("EntertainmentDatabase");
+        container = database.getContainer("CustomCollection");
 
         client.close();        
     }

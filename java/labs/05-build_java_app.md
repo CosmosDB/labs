@@ -1,10 +1,10 @@
 ## Build A Simple Java Console App
 
-_After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB container. You are now going to use the Java SDK to issue similar queries._
+_Previously we used the Azure Portal's **Data Explorer** to query an Azure Cosmos DB container. You are now going to use the Java SDK to issue similar queries._
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-## Create a Java Core Project
+## Open the CosmosLabs Maven Project Template
 
 1. Open Visual Studio Code.
 
@@ -12,123 +12,169 @@ _After using the Azure Portal's **Data Explorer** to query an Azure Cosmos DB co
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-    Visual Studio Code will automatically detect the Maven Project (**pom.xml** file). If you have installed the Maven plugin, Visual Studio Code should automatically generate **.classpath** and **target\\** in the directory. 
-
-    ![Visual Studio Code after opening project](../media/01-vscode_opened_project.jpg)
-
-1. The **Explorer** pane button is emphasized in red in the image above. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs**. Each Lab which involves Java coding will have its own template subdirectory here, **lab*****XX***. The **common\\** subdirectory holds Java classes for use by any of the labs.
-
-1. Expand down to **common\\datatypes\\**. You should see a number of Java classes; these are a handful of predefined datatypes for use in the Labs.
+1. To see where Java source for the Labs is located, go to Visual Studio Code and click the **Explorer** pane. Expand the contents of the CosmosLabs folder in Visual Studio Code; expand down to **src\main\java\com\azure\cosmos\handsonlabs\\common\\datatypes\\** and double-check that you still have datatype Java files for use in the Labs.
 
     ![Expand datatypes in Visual Studio Code](../media/01-vscode_expanded_datatypes.jpg)
 
-1. Looking now two directories above, expand the **handsonlabs\\lab01\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab01Main.java** file - this is the main class for the project.
+1. Looking now two directories above, expand the **handsonlabs\\lab05\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab05Main.java** file - this is the **main** class for the project.
 
-1. Open **Lab01Main.java** in the editor by clicking on it in the **Explorer** pane.
+1. Open **Lab05Main.java** in the editor by clicking on it in the **Explorer** pane.
 
-    ![Open Lab01Main.java in editor](../media/01-vscode-first-time-editor.jpg)
+    ![Open Lab05Main.java in editor](../media/05-vscode-first-time-editor.jpg)
 
-1. For the `_endpointUri` variable, replace the placeholder value with the **URI** value and for the `_primaryKey` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
+1. In the Visual Studio Code window, in the **Explorer** pane, right-click the empty space in pane and choose the **Open in Terminal** menu option.
 
-   > For example, if your **uri** is `https://cosmosacct.documents.azure.com:443/`, your new variable assignment will look like this: `private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";`.
+    ![Open in terminal](../media/01-vscode_terminal.jpg)
 
-   > For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`.
+1. Let's start by building the template code. In the open terminal pane, enter and execute the following command:
+
+    ```sh
+    mvn clean package
+    ```
+
+    > This command will build the console project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. For the `endpointUri` variable, replace the placeholder value with the **URI** value and for the `primaryKey` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
+
+   > For example, if your **uri** is `https://cosmosacct.documents.azure.com:443/`, your new variable assignment will look like this: `private static String endpointUri = "https://cosmosacct.documents.azure.com:443/";`.
+
+   > For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static String primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`.
 
    > We are now going to implement a sample query to make sure our client connection code works.
 
-## Read a single Document in Azure Cosmos DB Using ReadItemAsync
+## Read a single Document in Azure Cosmos DB Using readItem()
 
-_ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ In Azure Cosmos DB, this is the most efficient method of reading a single document.
+_```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID._ In Azure Cosmos DB, this is the most efficient method of reading a single document.
 
-1. Locate the using block within the **Main** method:
+1. Locate the client-create/client-close block within the **main** method:
 
-   ```csharp
-   using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-   {
-       var database = client.GetDatabase(_databaseId);
-       var container = database.GetContainer(_containerId);
+    ```java
+    CosmosAsyncClient client = new CosmosClientBuilder()
+            .setEndpoint(endpointUri)
+            .setKey(primaryKey)
+            .setConnectionPolicy(defaultPolicy)
+            .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+            .buildAsyncClient();
 
-   }
-   ```
+    database = client.getDatabase("NutritionDatabase");
+    container = database.getContainer("FoodCollection");            
 
-1. Add the following lines of code to use the **ReadItemAsync** function to retrieve a single item from your Cosmos DB by its `id` and write its description to the console.
+    client.close();
+    ```
 
-   ```csharp
-    ItemResponse<Food> candyResponse = await container.ReadItemAsync<Food>("19130", new PartitionKey("Sweets"));
-    Food candy = candyResponse.Resource;
-    Console.Out.WriteLine($"Read {candy.Description}");
-   ```
+1. Add the following lines of code to use the **readItem** function to retrieve a single item from your Cosmos DB by its `id` and write its description to the console.
 
-1. Save all of your open tabs in Visual Studio Code
+    ```java
+    container.readItem("19130", new PartitionKey("Sweets"), Food.class)
+        .flatMap(candyResponse -> {
+        Food candy = candyResponse.getItem();
+        logger.info("Read {}",candy.getDescription());
+        return Mono.empty();
+    }).block();
+    ```
 
-1. Return to your terminal pane
+1. Save all of your open editor tabs.
 
-   > If you've closed the terminal right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
+    ![Run Lab05Main.java](../media/05-vscode_run.jpg)
 
-   ```sh
-   dotnet run
-   ```
+    > This command will build and execute the console project.
 
-1. You should see the following line output in the console, indicating that **ReadItemAsync** completed successfully:
+1. Within the logger output to the terminal, you should see the following line output in the console, indicating that **readItem** completed successfully:
 
    ```sh
    Read Candies, HERSHEY''S POT OF GOLD Almond Bar
    ```
 
+1. Click the **🗙** symbol to close the terminal pane.
+
 ## Execute a Query Against a Single Azure Cosmos DB Partition 
 
-1.  Return to Visual Studio Code
+1.  Find the last block of code you wrote
 
-    > If you've closed Visual Studio code, re-open it from the command line with the following command:
-
-    ```sh
-    code .
+    ```java
+    container.readItem("19130", new PartitionKey("Sweets"), Food.class)
+            .flatMap(candyResponse -> {
+            Food candy = candyResponse.getItem();
+            logger.info("Read {}",candy.getDescription());
+            return Mono.empty();
+    }).block();
+    
+    // <== New code goes here
     ```
 
-1.  Find the last line of code you wrote:
+    and add this section's code after the block above.
 
-    ```csharp
-    Console.Out.WriteLine($"Read {candy.Description}");
+1.  Define the following SQL Query string:
+
+    ```java
+    String sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
     ```
 
-1.  Create a SQL Query against your data, as follows:
+    > In the following section we will run this query against the nutrition dataset. This query will select all food where the foodGroup is set to the value `Sweets`. It will also only select documents that have description, manufacturerName, and servings properties defined. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
 
-    ```csharp
-    string sqlA = "SELECT f.description, f.manufacturerName, f.servings FROM foods f WHERE f.foodGroup = 'Sweets' and IS_DEFINED(f.description) and IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+1. Add the following code to execute the query and page through the ```Flux<FeedResponse<Food>>``` which is returned:
+
+    ```java
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+
+            return Mono.empty();
+    }).blockLast();    
+    ```
+    
+    Notice that the Reactive Stream operation starting with ```.flatMap(page -> {``` is empty, so really nothing is being done with the query response pages. Above ```return Mono.empty();```, add the following lines to process the query response pages:
+
+    ```java
+    for (Food fd : page.getResults()) {
+        String msg="";
+        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+        for (Serving sv : fd.getServings()) {
+            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+        }
+        msg += "\n";
+        logger.info(msg);
+    }
     ```
 
-    > This query will select all food where the foodGroup is set to the value `Sweets`. It will also only select documents that have description, manufacturerName, and servings properties defined. You'll note that the syntax is very familiar if you've done work with SQL before. Also note that because this query has the partition key in the WHERE clause, this query can execute within a single partition.
+    Your code for the query should now look like this:
 
-1. Add the following code to execute and read the results of this query
+    ```java
+    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                    "f.servings FROM foods f WHERE f.foodGroup = " + 
+                    "'Sweets' and IS_DEFINED(f.description) and " + 
+                    "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
 
-   ```csharp
-   FeedIterator<Food> queryA = container.GetItemQueryIterator<Food>(new QueryDefinition(sqlA), requestOptions: new QueryRequestOptions{MaxConcurrency = 1});
-   foreach (Food food in await queryA.ReadNextAsync())
-   {
-       await Console.Out.WriteLineAsync($"{food.Description} by {food.ManufacturerName}");
-       foreach (Serving serving in food.Servings)
-       {
-           await Console.Out.WriteLineAsync($"\t{serving.Amount} {serving.Description}");
-       }
-       await Console.Out.WriteLineAsync();
-   }
-   ```
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+            for (Food fd : page.getResults()) {
+                String msg="";
+                msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
 
-1.  Save all of your open tabs in Visual Studio Code
+                for (Serving sv : fd.getServings()) {
+                    msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                }
+                msg += "\n";
+                logger.info(msg);
+            }
 
-1.  Return to your terminal pane
+            return Mono.empty();
+    }).blockLast();
+    ```    
 
-    > If you've closed the terminal right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. Save all of your open editor tabs.
 
-1.  In the open terminal pane, enter and execute the following command:
+1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
-    ```sh
-    dotnet run
-    ```
-
-1.  The code will loop through each result of the SQL query and output a message to the console similar to the following:
+1.  The code will loop through each result of the SQL query. Within the logger output in the terminal, you should see a message similar to the following:
 
     ```sh
     ...
@@ -140,64 +186,137 @@ _ReadItemAsync allows a single item to be retrieved from Cosmos DB by its ID._ I
     ...
     ```
 
+1. Click the **🗙** symbol to close the terminal pane.
+
 ### Execute a Query Against Multiple Azure Cosmos DB Partitions
 
-1.  Return to Visual Studio Code
+1. In this section we will run another query. Duplicate your query code from the last section as shown below:
 
-    > If you've closed Visual Studio code, re-open it from the command line with the following command:
+    ```java
+    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                    "f.servings FROM foods f WHERE f.foodGroup = " + 
+                    "'Sweets' and IS_DEFINED(f.description) and " + 
+                    "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
 
-    ```sh
-    code .
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+            for (Food fd : page.getResults()) {
+                String msg="";
+                msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+                for (Serving sv : fd.getServings()) {
+                    msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                }
+                msg += "\n";
+                logger.info(msg);
+            }
+
+            return Mono.empty();
+    }).blockLast();
+
+    String sqlA = "SELECT f.description, f.manufacturerName, " + 
+                    "f.servings FROM foods f WHERE f.foodGroup = " + 
+                    "'Sweets' and IS_DEFINED(f.description) and " + 
+                    "IS_DEFINED(f.manufacturerName) and IS_DEFINED(f.servings)";
+
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
+            .flatMap(page -> {
+            for (Food fd : page.getResults()) {
+                String msg="";
+                msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+                for (Serving sv : fd.getServings()) {
+                    msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
+                }
+                msg += "\n";
+                logger.info(msg);
+            }
+
+            return Mono.empty();
+    }).blockLast();    
     ```
 
-1.  Following your `foreach` loop, create a SQL Query against your data, as follows:
+    In the next section we will change this code so that it does not cause errors; for the moment you may see some errors in your IDE.
 
-    ```csharp
-    string sqlB = @"SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
+1. **Within the duplicate query code** find where you define ```String sqlA``` and replace it with a new query ```String sqlB``` as shown below:
+
+    ```java
+    string sqlB = "SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
     ```
 
-1.  Add the following line of code after the definition of `sqlB` to create your next item query:
+1. For this query, we will run with greater concurrency and allow a max item count of 100. Find this section of the duplicate query code
 
-    ```csharp
-    FeedIterator<Food> queryB = container.GetItemQueryIterator<Food>(sqlB, requestOptions: new QueryRequestOptions{MaxConcurrency = 5, MaxItemCount = 100});
+    ```java
+    FeedOptions optionsA = new FeedOptions();
+    optionsA.setMaxDegreeOfParallelism(1);
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
     ```
 
-    > Take note of the differences in this call to **GetItemQueryIterator** as compared to the previous section. **maxConcurrency** is set to `5` and we are limiting the **MaxItemCount** to `100` items. This will result in paging if there are more than 100 items that match the query.
+    and replace it with
 
-1.  Add the following lines of code to page through the results of this query using a while loop.
+    ```java
+    FeedOptions optionsB = new FeedOptions();
+    optionsB.setMaxDegreeOfParallelism(5);
+    optionsB.setMaxItemCount(100);
+    container.queryItems(sqlB, optionsB, Food.class).byPage()
+    ```
 
-    ```csharp
-    int pageCount = 0;
-    while (queryB.HasMoreResults)
-    {
-        Console.Out.WriteLine($"---Page #{++pageCount:0000}---");
-        foreach (var food in await queryB.ReadNextAsync())
-        {
-            Console.Out.WriteLine($"\t[{food.Id}]\t{food.Description,-20}\t{food.ManufacturerName,-40}");
+    > Take note of the differences in this call to **queryItems** as compared to the previous section. **maxDegreeOfParallelism** is set to `5` and we are limiting the **maxItemCount** to `100` items. This will result in paging if there are more than 100 items that match the query.
+
+1. Now we will look at handling the paged response to this query. First, find the variable declarations at the top of the **Lab05Main** class definition and add another one:
+
+    ```java
+    private static AtomicInteger pageCount = new AtomicInteger(0);
+    ```
+
+    which creates a thread-safe page count variable initialized to zero.
+
+1. In the duplicate query code find the portion which pages through the query response
+
+    ```java
+    for (Food fd : page.getResults()) {
+        String msg="";
+        msg = String.format("%s by %s\n",fd.getDescription(),fd.getManufacturerName());
+
+        for (Serving sv : fd.getServings()) {
+            msg += String.format("\t%f %s\n",sv.getAmount(),sv.getDescription());
         }
+        msg += "\n";
+        logger.info(msg);
+    } 
+    ```
+
+    and modify it to read as follows:
+
+    ```java
+    String msg="";
+
+    msg = String.format("---Page %d---\n",pageCount.getAndIncrement());
+
+    for (Food fd : page.getResults()) {
+        msg += String.format("\t[%s]\t%s\t%s\n",fd.getId(),fd.getDescription(),fd.getManufacturerName());
     }
+    logger.info(msg);    
     ```
 
-1.  Save all of your open tabs in Visual Studio Code
+1. Save all of your open editor tabs.
 
-1.  Return to your terminal pane
+1. In the **Explorer** pane, right-click **Lab05Main.java** and choose the **Run** menu option.
 
-    > If you've closed the terminal right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1.  In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-1.  You should see a number of new results, each separated by the a line indicating the page, as follows:
+1.  Within the logger output, you should see a number of new results, each separated by the a line indicating the page, as follows:
 
     ```
-        [19067] Candies, TWIZZLERS CHERRY BITES Hershey Food Corp.
-    ---Page #0016---
-        [19065] Candies, ALMOND JOY Candy Bar   Hershey Food Corp.
+        ---Page #0016---
+        [19065] Candies,ALMOND JOY Candy Bar   Hershey Food Corp.
+        [19067] Candies, TWIZZLERS CHERRY BITES Hershey Food Corp.        
     ```
 
 > Note that the results are coming from multiple partitions.
+
+1. Click the **🗙** symbol to close the terminal pane.
 
 > If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 

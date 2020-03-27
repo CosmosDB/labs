@@ -101,7 +101,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
             .buildAsyncClient();
     ```
 
-1. Now add a line at the end of the main method which closes the client:
+1. Now add a line at the end of the **main** method which closes the client:
 
     ```java
     client.close();
@@ -382,7 +382,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
 
 1. Double-click the **Lab01Main.java** link in the **Explorer** pane to open the file in the editor, if it is not opened already.
 
-1. Locate the block of code starting with client creation and ending with client closure within the **Main** method. Delete any existing code except for client creation and closure:
+1. Locate the block of code starting with client creation and ending with client closure within the **main** method. Delete any existing code except for client creation and closure:
 
     ```java
     CosmosAsyncClient client = new CosmosClientBuilder()
@@ -402,7 +402,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
     customContainer = targetDatabase.getContainer("CustomCollection");
     ```
 
-1. Observe the code in the **Main** method.
+1. Observe the code in the **main** method.
 
     > For the next few instructions, we will use the [Java Faker](http://github.com/DiUS/java-faker) library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
 
@@ -449,7 +449,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
 
     > The ``CosmosAsyncItemResponse`` type has a ``getItem`` method that returns an object representing the item as well as other properties to give you access to interesting data about an item such as its ETag.
 
-1. Your **Main** method should look like this:
+1. Your **main** method should look like this:
 
     ```java
     public static void main(String[] args) {
@@ -505,7 +505,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
 
 ### Populate Container with Data of Different Types
 
-1. Locate the **Main** method and delete the faker code block and the item-insert code, so that what you have left in **Main** looks like this:
+1. Locate the **main** method and delete the faker code block and the item-insert code, so that what you have left in **main** looks like this:
 
     ```java
     public static void main(String[] args) {
@@ -578,7 +578,7 @@ The **CosmosAsyncClient** class is the main "entry point" to using the SQL API i
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Once again, locate the **Main** method and delete the faker code block and the item-insert code, so that what you have left in **Main** looks like this:
+1. Once again, locate the **main** method and delete the faker code block and the item-insert code, so that what you have left in **main** looks like this:
 
     ```java
     public static void main(String[] args) {
