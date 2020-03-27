@@ -121,7 +121,7 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     ```java
     FeedOptions optionsA = new FeedOptions();
     optionsA.setMaxDegreeOfParallelism(1);
-    container.queryItems(sqlA, optionsA, Food.class).byPage();
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
             .flatMap(page -> {
 
             return Mono.empty();
@@ -240,6 +240,8 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     }).blockLast();    
     ```
 
+    In the next section we will change this code so that it does not cause errors; for the moment you may see some errors in your IDE.
+
 1. **Within the duplicate query code** find where you define ```String sqlA``` and replace it with a new query ```String sqlB``` as shown below:
 
     ```java
@@ -253,7 +255,7 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     ```java
     FeedOptions optionsA = new FeedOptions();
     optionsA.setMaxDegreeOfParallelism(1);
-    return container.queryItems(sqlA, optionsA, Food.class).byPage();
+    container.queryItems(sqlA, optionsA, Food.class).byPage()
     ```
 
     and replace it with
@@ -262,7 +264,7 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     FeedOptions optionsB = new FeedOptions();
     optionsB.setMaxDegreeOfParallelism(5);
     optionsB.setMaxItemCount(100);
-    return container.queryItems(sqlB, optionsB, Food.class).byPage();
+    container.queryItems(sqlB, optionsB, Food.class).byPage()
     ```
 
     > Take note of the differences in this call to **queryItems** as compared to the previous section. **maxDegreeOfParallelism** is set to `5` and we are limiting the **maxItemCount** to `100` items. This will result in paging if there are more than 100 items that match the query.
