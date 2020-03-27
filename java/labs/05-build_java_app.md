@@ -248,8 +248,6 @@ _```readItem()``` allows a single item to be retrieved from Cosmos DB by its ID.
     string sqlB = "SELECT f.id, f.description, f.manufacturerName, f.servings FROM foods f WHERE IS_DEFINED(f.manufacturerName)";
     ```
 
-    because ```sqlA``` is no longer defined, your IDE may flag an error until you make the following changes.
-
 1. For this query, we will run with greater concurrency and allow a max item count of 100. Find this section of the duplicate query code
 
     ```java
