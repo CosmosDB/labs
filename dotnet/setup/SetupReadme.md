@@ -47,6 +47,6 @@ Run **labSetup.ps1** with **teardown** switch and required parameter
 .\labSetup.ps1 -teardown
 ```
 
-> If you don't know the name of your resource group, open the [Azure portal](http://portal.azure.com). On the left side of the portal, click the **Resource groups** link. The resource group created for lab content should contain a Cosmos account beginning with *cosmoslab*, an Azure Data Factory with a name beginning with *importNutritionData*, an Event Hub named *CartEventHub*, and a Stream Processor named *CartStreamProcessor*.
+> If you don't know the name of your resource group, open the [Azure portal](http://portal.azure.com). On the left side of the portal, select the **Resource groups** link. The resource group created for lab content should contain a Cosmos account beginning with *cosmoslab*, an Azure Data Factory with a name beginning with *importNutritionData*, an Event Hub named *CartEventHub*, and a Stream Processor named *CartStreamProcessor*.
 
 ![Resource groups](../media/03-resource_groups.jpg)

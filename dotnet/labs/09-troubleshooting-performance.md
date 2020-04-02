@@ -6,9 +6,9 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ## Create a .NET Core Project
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab09 folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the `Lab09` folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
 
-1. In the Lab09 folder, right-click the folder and select the **Open with Code** menu option.
+1. In the `Lab09` folder, right-click the folder and select the **Open with Code** menu option.
 
     > Alternatively, you can run a terminal in your current directory and execute the ``code .`` command.
 
@@ -30,41 +30,32 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This command will build the project.
 
-1. Click the **🗙** symbol to close the terminal pane.
+1. In the **Explorer** pane, select the **DataTypes.cs**
+1. Review the file, notice it contains the data classes you will be working with in the following steps.
 
-1. In the **Explorer** pane verify that you have a **DataTypes.cs** file in your project folder.
-
-    > This file contains the data classes you will be working with in the following steps.
-
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Select the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
 1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value and for the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
 
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";``.
+    - For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";``.
 
-    > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
-    
-    > We will now execute build the application to make sure our code compiles successfully.
+    - For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet build
     ```
 
-    > This command will build the console project.
-
 ## Examining Response Headers
 
-*Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occurred on the server-side. The .NET SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.*
+Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occurred on the server-side. The .NET SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.
 
 ### Observe RU Charge for Large Item
 
-1. Locate the using block within the **Main** method:
+1. Locate the using block within the `Main` method:
 
     ```csharp
     using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -75,15 +66,15 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     }
     ```
-    
-1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named **member**:
+
+1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named `member`:
 
     ```csharp
     object member = new Member { accountHolder = new Bogus.Person() };
     ```
 
-    > The **Bogus** library has a special helper class (``Bogus.Person``) that will generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
-    
+    > The **Bogus** library has a special helper class (`Bogus.Person`) that will generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
+
     ```js
     {
         "Gender": 1,
@@ -126,7 +117,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
     ```
 
-1. Your **Main** method should now look like this:
+1. Your `Main` method should now look like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -145,63 +136,53 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+1. Observe the results of the console project. You should see the document creation operation use approximately `15 RUs`.
 
-1. Observe the results of the console project.
+2. Return to the **Azure Portal** (<http://portal.azure.com>).
 
-    > You should see the document creation operation use approximately 10 RUs.
+3. On the left side of the portal, select the **Resource groups** link.
 
-1. Click the **🗙** symbol to close the terminal pane.
+4. In the **Resource groups** blade, locate and select the **cosmoslab** resource group.
 
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
+5. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
 
-1. On the left side of the portal, click the **Resource groups** link.
+6. In the **Azure Cosmos DB** blade, locate and select the **Data Explorer** link on the left side of the blade.
 
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
+7. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then select the **PeopleCollection** node.
 
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
+8. Select the **New SQL Query** button at the top of the **Data Explorer** section.
 
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
-
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then select the **PeopleCollection** node.
-
-1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
-
-1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+9.  In the query tab, replace the contents of the query editor with the following SQL query. This query will return the latest two items added to your container:
 
     ```sql
     SELECT TOP 2 * FROM coll ORDER BY coll._ts DESC
     ```
 
-    > This query will return the latest two items added to your container.
+1.  Select the **Execute Query** button in the query tab to run the query.
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+2.  In the **Results** pane, observe the results of your query, you should see one document created from the code above and an execution cost of ~3RUs.
 
-1. In the **Results** pane, observe the results of your query.
+3.  Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+4.  In the Visual Studio Code window, select the **Program.cs** file to open an editor tab for the file.
 
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
-
-1. To view the RU charge for inserting a very large document, we will use the **Bogus** library to create a fictional family on our Member object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
+5.  To view the RU charge for inserting a very large document, we will use the **Bogus** library to create a fictional family on our Member object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
 
     ```js
     {
-        "accountHolder":  { ... }, 
+        "accountHolder":  { ... },
         "relatives": {
-            "spouse": { ... }, 
+            "spouse": { ... },
             "children": [
-                { ... }, 
-                { ... }, 
-                { ... }, 
+                { ... },
+                { ... },
+                { ... },
                 { ... }
             ]
         }
@@ -210,9 +191,9 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     Each property will have a **Bogus**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
 
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+6.  Within the **Program.cs** editor tab, locate the `Main` method.
 
-1. Within the **Main** method, locate the following line of code: 
+7.  Within the `Main` method, locate the following line of code:
 
     ```csharp
     object member = new Member { accountHolder = new Bogus.Person() };
@@ -234,53 +215,31 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This new block of code will create the large JSON object discussed above.
 
-1. Save all of your open editor tabs.
+8.  Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+9.  In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the results of the console project.
-
-    > You should see this new operation require far more RUs than the simple JSON document.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
-
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+1. Observe the results of the console project. You should see this new operation require far more RUs than the simple JSON document at ~48RUs (last one was ~15RUs).
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node and then select the **PeopleCollection** node.
 
-1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+1. Select the **New SQL Query** button at the top of the **Data Explorer** section.
 
-1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+1. In the query tab, replace the contents of the *query editor* with the following SQL query. This query will return the only item in your container with a property named **Children**:
 
     ```sql
     SELECT * FROM coll WHERE IS_DEFINED(coll.relatives)
     ```
 
-    > This query will return the only item in your container with a property named **Children**.
+1. Select the **Execute Query** button in the query tab to run the query.
 
-1. Click the **Execute Query** button in the query tab to run the query. 
-
-1. In the **Results** pane, observe the results of your query.
+1. In the **Results** pane, observe the results of your query, you should see more data returned and a slightly higher RU cost.
 
 ### Tune Index Policy
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Scale & Settings** option.
 
@@ -321,7 +280,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This policy will index all paths in your JSON document. This policy implements maximum precision (-1) for both numbers (max 8) and strings (max 100) paths. This policy will also index spatial data.
 
-1. Replace the indexing policy with a new policy that removes the ``/relatives/*`` path from the index:
+1. Replace the indexing policy with a new policy. This new policy will exclude the `/relatives/*` path from indexing effectively removing the **Children** property of your large JSON document from the index:
 
     ```js
     {
@@ -355,65 +314,45 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > This new policy will exclude the ``/relatives/*`` path from indexing effectively removing the **Children** property of your large JSON document from the index.
+2. Select the **Save** button at the top of the section to persist your new indexing policy.
 
-1. Click the **Save** button at the top of the section to persist your new indexing policy and "kick off" a transformation of the container's index.
+3. Select the **New SQL Query** button at the top of the **Data Explorer** section.
 
-1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
-
-1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+4. In the query tab, replace the contents of the query editor with the following SQL query:
 
     ```sql
     SELECT * FROM coll WHERE IS_DEFINED(coll.relatives)
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+5. Select the **Execute Query** button in the query tab to run the query.
 
     > You will see immediately that you can still determine if the **/relatives** path is defined.
 
-1. In the query tab, replace the contents of the *query editor* with the following SQL query:
+6. In the query tab, replace the contents of the query editor with the following SQL query:
 
     ```sql
     SELECT * FROM coll WHERE IS_DEFINED(coll.relatives) ORDER BY coll.relatives.Spouse.FirstName
     ```
 
-1. Click the **Execute Query** button in the query tab to run the query. 
+7. Select the **Execute Query** button in the query tab to run the query.
 
-    > This query will fail immediately since this property is not indexed. Keep in mind when defining indexes that only indexed properties can be used in query conditions. 
+    > This query will fail immediately since this property is not indexed. Keep in mind when defining indexes that only indexed properties can be used in query conditions.
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+8. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+9.  In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the results of the console project.
-
-    > You should see a difference in the number of RUs required to create this item. This is due to the indexer skipping the paths you excluded.
-
-1. Click the **🗙** symbol to close the terminal pane.
+10. Observe the results of the console project. You should see a difference in the number of RUs (~16RUs vs ~48RUs previously) required to create this item. This is due to the indexer skipping the paths you excluded.
 
 ## Troubleshooting Requests
 
-*First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
+First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.
 
 ### Reducing R/U Throughput for a Container
-
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
-
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
 
@@ -421,15 +360,15 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This is the minimum throughput that you can allocate to a container.
 
-1. Click the **Save** button at the top of the section to persist your new throughput allocation.
+1. Select the **Save** button at the top of the section to persist your new throughput allocation.
 
 ### Observing Throttling (HTTP 429)
 
 1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Select the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the `using` block within the `Main` method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -444,8 +383,6 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
-
 1. Add the following code to create a collection of ``Transaction`` instances:
 
     ```csharp
@@ -458,9 +395,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
         .GenerateLazy(100);
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
-    
-1. Add the following foreach block to iterate over the ``Transaction`` instances:
+1. Add the following foreach block to iterate over the `Transaction` instances:
 
     ```csharp
     foreach(var transaction in transactions)
@@ -468,23 +403,23 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-1. Within the ``foreach`` block, add the following line of code to asynchronously create an item and save the result of the creation task to a variable:
+1. Within the `foreach` block, add the following line of code to asynchronously create an item and save the result of the creation task to a variable:
 
     ```csharp
     ItemResponse<Transaction> result = await transactionContainer.CreateItemAsync(transaction);
     ```
 
-    > The ``CreateItemAsync`` method of the ``Container`` class takes in an object that you would like to serialize into JSON and store as an item within the specified collection.
+    > The `CreateItemAsync` method of the `Container` class takes in an object that you would like to serialize into JSON and store as an item within the specified collection.
 
-1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
+4. Still within the `foreach` block, add the following line of code to write the value of the newly created resource's `id` property to the console:
 
     ```csharp
     await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
     ```
 
-    > The ``ItemResponse`` type has a property named ``Resource`` that can give you access to the item instance resulting from the operation.
+    > The `ItemResponse` type has a property named `Resource` that can give you access to the item instance resulting from the operation.
 
-1. Your **Main** method should look like this:
+5. Your `Main` method should look like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -510,27 +445,19 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates items in Azure Cosmos DB.
+    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type `IEnumerable<Transaction>`. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates items in Azure Cosmos DB.
 
-1. Save all of your open editor tabs.
+6. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+7. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+8. Observe the output of the console application. You should see a list of item ids associated with new items that are being created by this tool.
 
-1. Observe the output of the console application.
-
-    > You should see a list of item ids associated with new items that are being created by this tool.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Back in the code editor tab, locate the following lines of code:
+9. Back in the code editor tab, locate the following lines of code:
 
     ```csharp
     foreach (var transaction in transactions)
@@ -556,9 +483,9 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > We are going to attempt to run as many of these creation tasks in parallel as possible. Remember, our container is configured at 400 RU/s.
+    > We are going to attempt to run as many of these creation tasks in parallel as possible. Remember, our container is configured at the minimum of 400 RU/s.
 
-1. Your **Main** method should look like this:
+10. Your `Main` method should look like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -568,6 +495,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
             var database = client.GetDatabase(_databaseId);
             var peopleContainer = database.GetContainer(_peopleCollectionId);
             var transactionContainer = database.GetContainer(_transactionCollectionId);
+
             var transactions = new Bogus.Faker<Transaction>()
                 .RuleFor(t => t.id, (fake) => Guid.NewGuid().ToString())
                 .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
@@ -575,13 +503,17 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
                 .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
                 .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
                 .GenerateLazy(100);
+
             List<Task<ItemResponse<Transaction>>> tasks = new List<Task<ItemResponse<Transaction>>>();
+
             foreach (var transaction in transactions)
             {
                 Task<ItemResponse<Transaction>> resultTask = transactionContainer.CreateItemAsync(transaction);
                 tasks.Add(resultTask);
             }
+
             Task.WaitAll(tasks.ToArray());
+
             foreach (var task in tasks)
             {
                 await Console.Out.WriteLineAsync($"Item Created\t{task.Result.Resource.id}");
@@ -590,27 +522,23 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your  does not have enough assigned throughput to handle the volume of requests.
+    - As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type `IEnumerable<Transaction>`. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
+  
+    - The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your  does not have enough assigned throughput to handle the volume of requests.
 
-1. Save all of your open editor tabs.
+11. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+12. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+13. Observe the output of the console application.
 
     > This query should execute successfully. We are only creating 100 items and we most likely will not run into any throughput issues here.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Back in the code editor tab, locate the following line of code:
+14. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     .GenerateLazy(100);
@@ -624,83 +552,47 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > We are going to try and create 5000 items in parallel to see if we can hit out throughput limit.
 
-1. Save all of your open editor tabs.
+15. **Save** all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+16. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe that the application will crash after some time.
+17. Observe that the application will crash after some time.
 
     > This query will most likely hit our throughput limit. You will see multiple error messages indicating that specific requests have failed.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
 ### Increasing R/U Throughput to Reduce Throttling
 
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
-
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
-
-1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
+1. Switch back to the Azure Portal, in the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **TransactionCollection** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Throughput** field and update it's value to **10000**.
 
-1. Click the **Save** button at the top of the section to persist your new throughput allocation.
-
-1. Back in the code editor tab, locate the following line of code:
-
-    ```csharp
-    .GenerateLazy(5000);
-    ```
-
-    Replace that line of code with the following code:
-
-    ```csharp
-    .GenerateLazy(10000);
-    ```
-
-    > We are going to try creating 10000 items in parallel against the new higher throughput limit.
+1. Select the **Save** button at the top of the section to persist your new throughput allocation.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+2. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+3. Observe that the application will complete after some time.
 
-1. Observe that the application will complete after some time.
+4. Return to the **Settings** section in the **Azure Portal** and change the **Throughput** value back to **400**.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Return to the **Settings** section in the **Azure Portal** and change the **Throughput** value back to **400**.
-
-1. Click the **Save** button at the top of the section to persist your new throughput allocation.
+5. Select the **Save** button at the top of the section to persist your new throughput allocation.
 
 ## Tuning Queries and Reads
 
-*You will now tune your requests to Azure Cosmos DB by manipulating the SQL query and properties of the **RequestOptions** class in the .NET SDK.*
+You will now tune your requests to Azure Cosmos DB by manipulating the SQL query and properties of the **RequestOptions** class in the .NET SDK.
 
 ### Measuring RU Charge
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the `using` block within the `Main` method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -745,23 +637,15 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+2. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+3. Observe the output of the console application. You should see the **Request Charge** metric printed out in your console window. It should be ~16RUs.
 
-1. Observe the output of the console application.
-
-    > You should see the **Request Charge** metric printed out in your console window.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Back in the code editor tab, locate the following line of code:
+5. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
@@ -775,23 +659,17 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This new query does not perform a cross-partition ORDER BY.
 
-1. Save all of your open editor tabs.
+6. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+7. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+8. Observe the output of the console application. You should see a slight reduction in both the **Request Charge** value to ~13RUs
 
-1. Observe the output of the console application.
-
-    > You should see a reduction in both the **Request Charge** value.
-
-1. Back in the code editor tab, locate the following line of code:
+9.  Back in the code editor tab, locate the following line of code:
 
     ```csharp
     string sql = "SELECT * FROM c WHERE c.processed = true";
@@ -805,23 +683,17 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This new query does not filter the result set.
 
-1. Save all of your open editor tabs.
+10. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+11. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+12. Observe the output of the console application. This query should be ~10RUs. Observe the slight differences in the various metric values from last few queries.
 
-1. Observe the output of the console application.
-
-    > Observe the slight differences in the various metric values.
-
-1. Back in the code editor tab, locate the following line of code:
+13. Back in the code editor tab, locate the following line of code:
 
      ```csharp
      string sql = "SELECT * FROM c";
@@ -833,27 +705,21 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
      string sql = "SELECT c.id FROM c";
      ```
 
-     > This new query does not filter the result set.
+     > This new query does not filter the result set, and only returns part of the documents.
 
-1. Save all of your open editor tabs.
+14. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+15. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > Observe the slight differences in the metric value.
+16. Observe the output of the console application. This should be lower at ~9RUs.
 
 ### Managing SDK Query Options
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the `using` block within the `Main` method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -924,7 +790,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > Since the results are paged, we will need to call the ``ReadNextAsync`` method multiple times in a while loop.
+    > Since the results are paged, we will need to call the `ReadNextAsync` method multiple times in a while loop.
 
 1. Add the following line of code stop the timer:
 
@@ -940,21 +806,17 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+2. Observe the output of the console application.
 
     > This initial query should take an unexpectedly long amount of time. This will require us to optimize our SDK options.
 
-1. Back in the code editor tab, locate the following line of code:
+3. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     int maxDegreeOfParallelism = 1;
@@ -966,25 +828,21 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     int maxDegreeOfParallelism = 5;
     ```
 
-    > Setting the ``maxConcurrency`` query parameter to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
+    > Setting the `maxDegreeOfParallelism` query parameter to a value of `1` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of `5`.
 
-1. Save all of your open editor tabs.
+4. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+5. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+6. Observe the output of the console application.
 
-1. Observe the output of the console application.
+    > You should see a very slight positive impact considering you now have some form of parallelism.
 
-    > You should see a slight difference considering you now have some form of parallelism.
-
-1. Back in the code editor tab, locate the following line of code:
+7. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     int maxBufferedItemCount = 0;
@@ -996,24 +854,21 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     int maxBufferedItemCount = -1;
     ```
 
-    > Setting the ``MaxBufferedItemCount`` property to a value of ``-1`` effectively tells the SDK to manage this setting.
+    > Setting the `MaxBufferedItemCount` property to a value of `-1` effectively tells the SDK to manage this setting.
 
-1. Save all of your open editor tabs.
+8. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+10. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+11. Observe the output of the console application.
 
-1. Observe the output of the console application.
+    > Again, this should have a slight positive impact on your performance time.
 
-    > Again, this should have a slight impact on your performance time.
-1. Back in the code editor tab, locate the following line of code:
+12. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     int maxDegreeOfParallelism = 5;
@@ -1025,25 +880,21 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     int maxDegreeOfParallelism = -1;
     ```
 
-    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned container is fetched serially with respect to the query setting the ``maxConcurrency`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
+    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned container is fetched serially with respect to the query setting the `maxBufferedItemCount` property to a value of `-1` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
 
-1. Save all of your open editor tabs.
+13. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+15. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+16. Observe the output of the console application.
 
     > Again, this should have a slight impact on your performance time.
 
-1. Back in the code editor tab, locate the following line of code:
+17. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     int maxItemCount = 100;
@@ -1057,23 +908,19 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > We are increasing the amount of items returned per "page" in an attempt to improve the performance of the query.
 
-1. Save all of your open editor tabs.
+18. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+19. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+20. Observe the output of the console application.
 
     > You will notice that the query performance improved dramatically. This may be an indicator that our query was bottlenecked by the client computer.
 
-1. Back in the code editor tab, locate the following line of code:
+21. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     int maxItemCount = 500;
@@ -1087,23 +934,19 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > For large queries, it is recommended that you increase the page size up to a value of 1000.
 
-1. Save all of your open editor tabs.
+22. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+24. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+25. Observe the output of the console application.
 
     > By increasing the page size, you have sped up the query even more.
 
-1. Back in the code editor tab, locate the following line of code:
+26. Back in the code editor tab, locate the following line of code:
 
     ```csharp
     int maxBufferedItemCount = -1;
@@ -1117,41 +960,29 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > Parallel query is designed to pre-fetch results while the current batch of results is being processed by the client. The pre-fetching helps in overall latency improvement of a query. **MaxBufferedItemCount** is the parameter to limit the number of pre-fetched results. Setting MaxBufferedItemCount to the expected number of results returned (or a higher number) allows the query to receive maximum benefit from pre-fetching.
 
-1. Save all of your open editor tabs.
+27. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+29. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+30. Observe the output of the console application.
 
-1. Observe the output of the console application.
-
-    > This change should have decreased your query time by a small amount.
-
-1. Click the **🗙** symbol to close the terminal pane.
+    > In most cases, this change will decrease your query time by a small amount.
 
 ### Reading and Querying Items
 
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
-
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+1. In the **Azure Cosmos DB** blade, locate and select the **Data Explorer** link on the left side of the blade.
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Items** option.
 
 1. Take note of the **id** property value of any document as well as that document's **partition key**.
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+    ![The PeopleCollection is displayed with an item selected.  The id and Lastname is highlighted.](../media/09-find-id-key.jpg "Find an item and record its id property")
+
+2. Locate the `using` block within the `Main` method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -1161,12 +992,12 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
             var database = client.GetDatabase(_databaseId);
             var peopleContainer = database.GetContainer(_peopleCollectionId);
             var transactionContainer = database.GetContainer(_transactionCollectionId);
-    
+
         }
     }
     ```
 
-1. Add the following line of code that will store a SQL query in a string variable (replacing **example.document** with the **id ** value that you noted earlier):
+3. Add the following line of code that will store a SQL query in a string variable (replacing **example.document** with the **id** value that you noted earlier):
 
     ```csharp
     string sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
@@ -1174,13 +1005,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This query will find a single item matching the specified unique id.
 
-1. Add the following line of code to create a item query instance:
+4. Add the following line of code to create a item query instance:
 
     ```csharp
     FeedIterator<object> query = peopleContainer.GetItemQueryIterator<object>(sql);
     ```
 
-1. Add the following line of code to get the first page of results and then store them in a variable of type **FeedResponse<>**:
+5. Add the following line of code to get the first page of results and then store them in a variable of type **FeedResponse<>**:
 
     ```csharp
     FeedResponse<object> response = await query.ReadNextAsync();
@@ -1188,32 +1019,26 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > We only need to retrieve a single page since we are getting the ``TOP 1`` items from the .
 
-1. Add the following lines of code to print out the value of the **RequestCharge** property of the **FeedResponse<>** instance and then the content of the retrieved item:
+6. Add the following lines of code to print out the value of the **RequestCharge** property of the **FeedResponse<>** instance and then the content of the retrieved item:
 
     ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs for ");    
     await Console.Out.WriteLineAsync($"{response.Resource.First()}");
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs for ");
     ```
 
-1. Save all of your open editor tabs.
+7. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+8. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+9.  Observe the output of the console application.
 
-1. Observe the output of the console application.
+    > You should see the amount of ~ 3RUs used to query for the item. Make note of the **LastName** object property value as you will use it in the next step.
 
-    > You should see the amount of RUs used to query for the item. Make note of the **LastName** object property value as you will use it in the next step.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+10. Locate the `using` block within the `Main` method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -1228,63 +1053,50 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-1. Add the following code to use the **ReadItemAsync** method of the **Container** class to retrieve an item using the unique id and the partition key set to the last name from the previous step:
+11. Add the following code to use the `ReadItemAsync` method of the `Container` class to retrieve an item using the unique id and the partition key set to the last name from the previous step. Replace the `example.document` and `<Last Name>` tokens:
 
     ```csharp
     ItemResponse<object> response = await peopleContainer.ReadItemAsync<object>("example.document", new PartitionKey("<Last Name>"));
     ```
 
-1. Add the following line of code to print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
+12. Add the following line of code to print out the value of the **RequestCharge** property of the `ItemResponse<T>` instance:
 
     ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
     ```
-   
-1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+13. Save all of your open editor tabs.
 
-1. In the open terminal pane, enter and execute the following command:
+14. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+15. Observe the output of the console application.
 
-1. Observe the output of the console application.
-
-    > You should see that it took fewer RUs to obtain the item directly if you have it's unique id.
-
-1. Click the **🗙** symbol to close the terminal pane.
+    > You should see that it took fewer RUs (1RU vs ~3RUs) to obtain the item directly if you have it's unique id.
 
 ## Setting Throughput for Expected Workloads
 
-*Using appropriate RU settings for container or database throughput can allow you to meet desired performance at minimal cost. Deciding on a good baseline and varying settings based on expected usage patterns are both strategies that can help.*
+Using appropriate RU settings for container or database throughput can allow you to meet desired performance at minimal cost. Deciding on a good baseline and varying settings based on expected usage patterns are both strategies that can help.
 
 ### Estimating Throughput Needs
 
-1. We'll start out by looking at actual usage of your Cosmos account for these labs. Return to the **Azure Portal** (<http://portal.azure.com>).
+1. In the **Azure Cosmos DB** blade, locate and select the **Metrics** link on the left side of the blade under the **Monitoring** section.
+2. Observe the values in the **Number of requests** graph to see the volume of requests your lab work has been making to your Cosmos containers.
 
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
-
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Metrics** link on the left side of the blade under the **Monitoring** section. Observe the values in the *Number of requests* graph to see the volume of requests your lab work has been making to your Cosmos containers.
-
-    ![Metrics](../media/09-metrics.jpg)
+    ![The Metrics dashboard is displayed](../media/09-metrics.jpg "Review your Cosmos DB metrics dashboard")
 
     > Various parameters can be changed to adjust the data shown in the graphs and there is also an option to export data to csv for further analysis. For an existing application this can be helpful in determining your query volume.
 
-1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the **Main** method in **Program.cs**:
+3. Return to the Visual Studio Code window and locate the `WriteLineAsync` line within the `Main` method in **Program.cs**:
 
     ```csharp
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
     ```
 
-1. Following that line, add the following code to use the **CreateItemAsync** method of the **Container** class to add a new item and print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
+4. Following that line, add the following code to use the **CreateItemAsync** method of the **Container** class to add a new item and print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
 
     ```csharp
     object member = new Member { accountHolder = new Bogus.Person() };
@@ -1292,7 +1104,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     await Console.Out.WriteLineAsync($"{createResponse.RequestCharge} RUs");
     ```
 
-1. Add the following lines of code to create variables to represent the estimated workload for our application:
+5. Add the following lines of code to create variables to represent the estimated workload for our application:
 
     ```csharp
     int expectedWritesPerSec = 200;
@@ -1301,37 +1113,29 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > These types of numbers could come from planning a new application or tracking actual usage of an existing one. Details of determining workload are outside the scope of this lab.
 
-1. Add the following line of code to print out the estimated throughput needs of our application based on our test queries:
+6. Add the following line of code to print out the estimated throughput needs of our application based on our test queries:
 
     ```csharp
     await Console.Out.WriteLineAsync($"Estimated load: {response.RequestCharge * expectedReadsPerSec + createResponse.RequestCharge * expectedWritesPerSec} RU per sec");
     ```
 
-1. Save all of your open editor tabs.
+7. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+9. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+10. Observe the output of the console application.
 
     > You should see the total throughput needed for our application based on our estimates, which can then be used to guide our provisioned throughput setting.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
 ### Adjusting for Usage Patterns
 
-*Many applications have workloads that vary over time in a predictable way. For example, business applications that have a heavy workload during a 9-5 business day but minimal usage outside of those hours. Cosmos throughput settings can also be varied to match this type of usage pattern.*
+Many applications have workloads that vary over time in a predictable way. For example, business applications that have a heavy workload during a 9-5 business day but minimal usage outside of those hours. Cosmos throughput settings can also be varied to match this type of usage pattern.
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section:
-
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the `using` block within the `Main` method and delete the code added for the previous section so it again looks like this:
 
     ```csharp
     public static async Task Main(string[] args)
@@ -1370,32 +1174,22 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. In the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
 1. Observe the output of the console application.
 
     > You should see the initial provisioned value before changing to **1000**.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Return to the **Azure Portal** (<http://portal.azure.com>).
-
-1. On the left side of the portal, click the **Resource groups** link.
-
-1. In the **Resource groups** blade, locate and select the **cosmoslab** *Resource Group*.
-
-1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
-
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+1. In the **Azure Cosmos DB** blade, locate and select the **Data Explorer** link on the left side of the blade.
 
 1. In the **Data Explorer** section, expand the **FinancialDatabase** database node, expand the **PeopleCollection** node, and then select the **Scale & Settings** option.
 
 1. In the **Settings** section, locate the **Throughput** field and note that is is now set to **1000**.
+
+> Note that you may need to refresh the Data Explorer to see the new value.
+
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources.

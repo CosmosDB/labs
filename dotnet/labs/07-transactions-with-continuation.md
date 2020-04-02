@@ -6,19 +6,19 @@ In this lab, you will author and execute multiple stored procedures within your 
 
 ## Author Stored Procedures using the Continuation Model
 
-_You will now implement stored procedures that may execute longer than the bounded execution limits on the server. You will implement the continuation model so that the stored procedures can "pick up where they left off" after they ran out of time in a previous execution._
+You will now implement stored procedures that may execute longer than the bounded execution limits on the server. You will implement the continuation model so that the stored procedures can "pick up where they left off" after they ran out of time in a previous execution.
 
 ### Create Bulk Upload and Bulk Delete Stored Procedures
 
-1. From within the **Cosmos DB** resource blade, click on the **Data Explorer** link on the left
+1. From within the **Cosmos DB** resource blade, select on the **Data Explorer** link on the left
 
-1. Expand the **NutritionDatabase** and then click to select the **FoodCollection**.
+1. Expand the **NutritionDatabase** and then select to select the **FoodCollection**.
 
-1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
+1. Select the **New Stored Procedure** button at the top of the **Data Explorer** section.
 
 1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: **bulkUpload**.
 
-1. Replace the contents of the _stored procedure editor_ with the following JavaScript code:
+1. Replace the contents of the stored procedure editor with the following JavaScript code:
 
    ```js
    function bulkUpload(docs) {
@@ -59,13 +59,13 @@ _You will now implement stored procedures that may execute longer than the bound
 
    If you are having trouble copying the stored procedure above, the full source code for this stored procedure is located here: [bulk_upload.js](../solutions/05-authoring_stored_procedures/bulk_upload.js)
 
-1. Click the **Save** button at the top of the tab.
+1. Select the **Save** button at the top of the tab.
 
-1. Click the **New Stored Procedure** button at the top of the **Data Explorer** section.
+1. Select the **New Stored Procedure** button at the top of the **Data Explorer** section.
 
 1. In the stored procedure tab, locate the **Stored Procedure Id** field and enter the value: **bulkDelete**.
 
-1. Replace the contents of the _stored procedure editor_ with the following JavaScript code:
+1. Replace the contents of the stored procedure editor with the following JavaScript code:
 
    ```js
    function bulkDelete(query) {
@@ -126,13 +126,13 @@ _You will now implement stored procedures that may execute longer than the bound
 
    If you are having trouble copying the stored procedure above, the full source code for this stored procedure is located here: [bulk_delete.js](../solutions/05-authoring_stored_procedures/bulk_delete.js)
 
-1. Click the **Save** button at the top of the tab.
+1. Select the **Save** button at the top of the tab.
 
 ### Create a .NET Core Project
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab07 folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the `Lab07` folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
 
-1. In the Lab07 folder, right-click the folder and select the **Open with Code** menu option.
+1. In the `Lab07` folder, right-click the folder and select the **Open with Code** menu option.
 
    > Alternatively, you can run a terminal in your current directory and execute the `code .` command.
 
@@ -156,25 +156,23 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This command will build the project.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. In the **Explorer** pane verify that you have a **DataTypes.cs** file in your project folder.
+2. In the **Explorer** pane verify that you have a **DataTypes.cs** file in your project folder.
 
    > This file contains the data classes you will be working with in the following steps.
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+3. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
 
-1. For the `_endpointUri` variable, replace the placeholder value with the **URI** value and for the `_primaryKey` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
+4. For the `_endpointUri` variable, replace the placeholder value with the **URI** value and for the `_primaryKey` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
 
-   > For example, if your **uri** is `https://cosmosacct.documents.azure.com:443/`, your new variable assignment will look like this: `private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";`.
+   - For example, if your **uri** is `https://cosmosacct.documents.azure.com:443/`, your new variable assignment will look like this: `private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";`.
 
-   > For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`.
+   - For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`.
 
-1. Save all of your open editor tabs.
+5. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+6. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
+7. In the open terminal pane, enter and execute the following command:
 
    ```sh
    dotnet build
@@ -182,11 +180,9 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This command will build the console project.You'll likely see warnings related to the lack of the `await` operator. You can ignore these for now.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
 ### Execute Bulk Upload Stored Procedure from .NET Core SDK
 
-1. In the Visual Studio Code window, double click to open the **Program.cs** file
+1. In the Visual Studio Code window, double select to open the **Program.cs** file
 
 1. Locate the **Main** method within the **Program** class:
 
@@ -263,13 +259,18 @@ _You will now implement stored procedures that may execute longer than the bound
     }
    ```
 
-   > You will notice that our C# code using the **Skip** method of the LINQ library to submit only the subset of our documents that are not yet uploaded. On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents. When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **5000** documents were uploaded. The pointer will now be incremented to a value of **5000**. On the next check of the while loop's condition, **5000** will be evaluated to be less than **25000** causing another execution of the code in the while loop. The LINQ method will now skip **5000** documents and send the remaining **20000** documents to the stored procedure to upload. This loop will continue until all documents are uploaded. Also keep in mind that as of this writing, Cosmos DB has a 2 MB request limit on all calls. If your data is bigger than this test data, consider chaining `.Take()` to `foods.Skip(point)` to send a smaller payload with each request.
+      - You will notice that our C# code using the **Skip** method of the LINQ library to submit only the subset of our documents that are not yet uploaded.
+      - On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents.
+      - When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **5000** documents were uploaded.
+      - The pointer will now be incremented to a value of **5000**. On the next check of the while loop's condition, **5000** will be evaluated to be less than **25000** causing another execution of the code in the while loop.
+      - The LINQ method will now skip **5000** documents and send the remaining **20000** documents to the stored procedure to upload.
+      - This loop will continue until all documents are uploaded.
 
-1. Save all of your open editor tabs.
+      > Also keep in mind that as of this writing, Cosmos DB has a 2 MB request limit on all calls. If your data is bigger than this test data, consider chaining `.Take()` to `foods.Skip(point)` to send a smaller payload with each request.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+2. Press **Ctrl-S** to save the `program.cs` file
 
-1. In the open terminal pane, enter and execute the following command:
+3. In the open terminal pane, enter and execute the following command:
 
    ```sh
    dotnet run
@@ -277,41 +278,37 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This command will build and execute the console project.
 
-1. Observe the results of the console project.
+4. Observe the results of the console project.
 
    > This stored procedure will batch upload 10,000 documents to your collection within the specified partition key.
-
-1. Click the **🗙** symbol to close the terminal pane.
 
 ### Observe the Uploaded Documents in the Azure Portal
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
-1. On the left side of the portal, click the **Resource groups** link.
+1. On the left side of the portal, select the **Resource groups** link.
 
 1. In the **Resource groups** blade, locate and select the **cosmoslab** _Resource Group_.
 
 1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
 
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+1. In the **Azure Cosmos DB** blade, locate and select the **Data Explorer** link on the left side of the blade.
 
 1. In the **Data Explorer** section, expand the **NutritionDatabase** database node and then observe select the **FoodCollection** node.
 
-1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+1. Select the **New SQL Query** button at the top of the **Data Explorer** section.
 
-1. In the query tab, replace the contents of the _query editor_ with the following SQL query:
+1. To validate that our documents were uploaded, we will issue a query to select all documents with the partition key we used earlier for the stored procedure's execution. In the query tab, replace the contents of the query editor with the following SQL query:
 
    ```sql
    SELECT * FROM foods f WHERE f.foodGroup = "Energy Bars"
    ```
 
-   > To validate that our documents were uploaded, we will issue a query to select all documents with the partition key we used earlier for the stored procedure's execution.
+2. Select the **Execute Query** button in the query tab to run the query.
 
-1. Click the **Execute Query** button in the query tab to run the query.
+3. In the **Results** pane, observe the results of your query.
 
-1. In the **Results** pane, observe the results of your query.
-
-1. In the query tab, replace the contents of the _query editor_ with the following SQL query:
+4. In the query tab, replace the contents of the query editor with the following SQL query:
 
    ```sql
    SELECT COUNT(1) FROM foods f WHERE f.foodGroup = "Energy Bars"
@@ -319,13 +316,13 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This query will return a count of the documents that are in the **Energy Bars** partition key.
 
-1. Click the **Execute Query** button in the query tab to run the query.
+5. Select the **Execute Query** button in the query tab to run the query.
 
-1. In the **Results** pane, observe the results of your query.
+6. In the **Results** pane, observe the results of your query.
 
 ### Execute Bulk Delete Stored Procedure from .NET Core SDK
 
-1. In the Visual Studio Code pane, double click the **Program.cs** file to open it in the editor.
+1. In the Visual Studio Code pane, double select the **Program.cs** file to open it in the editor.
 
 1. Locate the **Main** method and delete any existing code:
 
@@ -347,13 +344,13 @@ _You will now implement stored procedures that may execute longer than the bound
         {
             Database database = client.GetDatabase(_databaseId);
             Container container = database.GetContainer(_containerId);
-   
+
             bool resume = true;
             do
             {
                 string query = "SELECT * FROM foods f WHERE f.foodGroup = 'Energy Bars'";
                  StoredProcedureExecuteResponse<DeleteStatus> result = await container.Scripts.ExecuteStoredProcedureAsync<DeleteStatus>("bulkDelete", new PartitionKey("Energy Bars"),  new dynamic[] {query});
-                
+
                 await Console.Out.WriteLineAsync($"Batch Delete Completed.\tDeleted: {result.Resource.Deleted}\tContinue: {result.Resource.Continuation}");
                 resume = result.Resource.Continuation;
             }
@@ -364,11 +361,11 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This code will execute the stored procedure that deletes documents as long as the **resume** variable is set to true. The stored procedure itself always returns an object, serialized as **DeleteStatus**, that has a boolean indicating whether we should continue deleting documents and a number indicating how many documents were deleted as part of this execution. Within the do-while loop, we simply store the value of the boolean returned from the stored procedure in our **resume** variable and continue executing the stored procedure until it returns a false value indicating that all documents were deleted.
 
-1. Save all of your open editor tabs.
+2. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+3. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
+4. In the open terminal pane, enter and execute the following command:
 
    ```sh
    dotnet run
@@ -376,33 +373,29 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This command will build and execute the console project.
 
-1. Observe the results of the console project.
+5. Observe the results of the console project.
 
    > This stored procedure will delete all of the documents associated with the specified partition key. In this demo, this means we will delete the documents we batch uploaded earlier.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
-1. Close the Visual Studio Code application.
+6. Close all open editor tabs.
 
 ### Query for Documents Within a Partition Key in the Azure Portal
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
-1. On the left side of the portal, click the **Resource groups** link.
+1. On the left side of the portal, select the **Resource groups** link.
 
 1. In the **Resource groups** blade, locate and select the **cosmoslab** _Resource Group_.
 
 1. In the **cosmoslab** blade, select the **Azure Cosmos DB** account you recently created.
 
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+1. In the **Azure Cosmos DB** blade, locate and select the **Data Explorer** link on the left side of the blade.
 
 1. In the **Data Explorer** section, expand the **NutritionDatabase** database node and then observe select the **FoodCollection** node.
 
-1. Click the **New SQL Query** button at the top of the **Data Explorer** section.
+1. Select the **New SQL Query** button at the top of the **Data Explorer** section.
 
-1. In the query tab, replace the contents of the _query editor_ with the following SQL query:
+1. In the query tab, replace the contents of the query editor with the following SQL query:
 
    ```sql
    SELECT COUNT(1) FROM foods f WHERE f.foodGroup = "Energy Bars"
@@ -410,8 +403,10 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This query will return a count of the documents that are in the **Energy Bars** partition key. This count should verify that all documents were deleted.
 
-1. Click the **Execute Query** button in the query tab to run the query.
+1. Select the **Execute Query** button in the query tab to run the query.
 
 1. In the **Results** pane, observe the results of your query.
 
 1. Close your browser application.
+
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources.
