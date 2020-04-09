@@ -27,12 +27,26 @@ public class Food {
         this.servings = servings;
     }
 
+    public void addServing(Serving serving) {
+        if (this.servings == null)
+            this.servings = new ArrayList<Serving>();
+
+        this.servings.add(serving);
+    }
+
     public List<Nutrient> getNutrients() {
         return nutrients;
     }
 
     public void setNutrients(List<Nutrient> nutrients) {
         this.nutrients = nutrients;
+    }
+
+    public void addNutrient(Nutrient nutrient) {
+        if (this.nutrients == null)
+            this.nutrients = new ArrayList<Nutrient>();
+
+        this.nutrients.add(nutrient);
     }
 
     public String getFoodGroup() {

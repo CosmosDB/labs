@@ -109,7 +109,7 @@ Java 8 JRE (or greater) | [/jre8-downloads](https://www.oracle.com/technetwork/j
 - [Lab 4: Indexing in Azure Cosmos DB](java/labs/04-indexing_in_cosmosdb.md)
 - [Lab 5: Building a Java Console App on Azure Cosmos DB](java/labs/05-build_java_app.md)
 - [Lab 6: Multi-Document Transactions in Azure Cosmos DB](java/labs/06-multi-document-transactions.md)
-- [Lab 7: Transactional Continuation in Azure Cosmos DB](java/labs/placeholder_WIP.md)
+- [Lab 7: Transactional Continuation in Azure Cosmos DB](java/labs/07-transactions-with-continuation.md)
 - [Lab 8: Intro to Azure Cosmos DB Change Feed](java/labs/placeholder_WIP.md)
 - [Lab 9: Troubleshooting Performance in Azure Cosmos DB](java/labs/placeholder_WIP.md)
 - [Lab 10: Optimistic Concurrency Control in Azure Cosmos DB](java/labs/10-concurrency-control.md)
