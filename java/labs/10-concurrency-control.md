@@ -141,68 +141,62 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
    > These lines of code will modify a property of the item. Here we are modifying the **tags** collection property by adding a new **Tag** object.
 
-1. Find the return statement toward the end of the reactive stream:
+1. Now add a line which invokes the async ```upsertItem``` method passing in both the item and the options:
 
    ```java
-      return Mono.empty(); // <==
-   }).block();
+   CosmosItemResponse upsertResponse =
+      container.upsertItem(fastFood,requestOptions).block();
    ```
 
-   And modify it to invoke the async ```upsertItem``` method passing in both the item and the options:
+1. Finally, add a line of code to print out the **ETag** of the newly updated item, as shown below:
 
    ```java
-      return container.upsertItem(fastFood,requestOptions);
-   }).block();
-   ```
-
-1. Add an additional stage to the end of the reactive stream, and in that stage add a line of code to print out the **ETag** of the newly updated item, as shown below:
-
-   ```java
-         return container.upsertItem(fastFood,requestOptions);
-      }) // Add a new reactive stream stage below
-      .flatMap(upsertResponse -> {
-         logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
-
-         return Mono.empty();
-   }).block();
+   logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
    ```
 
 1. Your **main** method should now look like this:
 
    ```java
-   public static void main(String[] args) {
-      ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
-      defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
-   
-      CosmosAsyncClient client = new CosmosClientBuilder()
-               .setEndpoint(endpointUri)
-               .setKey(primaryKey)
-               .setConnectionPolicy(defaultPolicy)
-               .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
-               .buildAsyncClient();
+   public class Lab10Main {
+      protected static Logger logger = LoggerFactory.getLogger(Lab10Main.class.getSimpleName());
+      private static String endpointUri = "<your uri>";
+      private static String primaryKey = "<your key>";   
+      private static CosmosAsyncDatabase database;
+      private static CosmosAsyncContainer container;  
+      public static void main(String[] args) {
+         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+         defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+      
+         CosmosAsyncClient client = new CosmosClientBuilder()
+                  .setEndpoint(endpointUri)
+                  .setKey(primaryKey)
+                  .setConnectionPolicy(defaultPolicy)
+                  .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                  .buildAsyncClient();
 
-      database = client.getDatabase("NutritionDatabase");
-      container = database.getContainer("FoodCollection");
+         database = client.getDatabase("NutritionDatabase");
+         container = database.getContainer("FoodCollection");
 
-      container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
-         .flatMap(fastFoodResponse -> {
-            logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
+         container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
+               .flatMap(fastFoodResponse -> {
+                  logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
 
-            CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-            requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
+                  CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
+                  requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
 
-            Food fastFood = fastFoodResponse.getItem();
-            fastFood.addTag(new Tag("Demo"));
+                  Food fastFood = fastFoodResponse.getItem();
+                  fastFood.addTag(new Tag("Demo"));
 
-            return container.upsertItem(fastFood,requestOptions);
-         })
-         .flatMap(upsertResponse -> {
-            logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
+                  CosmosAsyncItemResponse<Food> upsertResponse =
+                  container.upsertItem(fastFood,requestOptions).block();
 
-            return Mono.empty();
-      }).block();
+                  logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
 
-      client.close();        
+                  return Mono.empty();
+         }).block();
+
+         client.close();        
+      }
    }
    ```
 
@@ -216,61 +210,46 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the _using_ block within the **main** method:
+1. Add two new lines of code to again update a property of the item:
 
    ```java
-   using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-   {
-   }
+   fastFood = upsertResponse.getItem();
+   fastFood.addTag(new Tag("Failure"));
    ```
 
-1. Within the **using** block, add a new line of code to again update a property of the item:
+1. Add a new line of code to again invoke the ```upsertItem``` method passing in both the updated item and the same options as before:
 
    ```java
-   response.Resource.tags.Add(new Tag { name = "Failure" });
+   upsertResponse =
+    container.upsertItem(fastFood,requestOptions).block();
    ```
 
-1. Add a new line of code to again invoke the **UpsertItemAsync** method passing in both the updated item and the same options as before:
+   > The ```CosmosItemRequestOptions``` instance has not been updated, so is still using the ETag value from the original object, which is now out of date so we should expect to get an error.
 
-   ```java
-   response = await container.UpsertItemAsync(response.Resource, requestOptions: requestOptions);
-   ```
-
-   > The **ItemRequestOptions** instance has not been updated, so is still using the ETag value from the original object, which is now out of date so we should expect to now get an error.
-
-1. Add error handling to the **UpsertItemAsync** call you just added by wrapping it with a try-catch and then output the resulting error message. The code should now look like this:
+1. Add error handling to the **upsertItem** call you just added by wrapping it with a try-catch and then output the resulting error message. The code should now look like this:
 
    ```java
    try
    {
-       response = await container.UpsertItemAsync(response.Resource, requestOptions: requestOptions);
+      upsertResponse =
+      container.upsertItem(fastFood,requestOptions).block();
    }
    catch (Exception ex)
    {
-       await Console.Out.WriteLineAsync($"Update error:\t{ex.Message}");
+      logger.error("Update error",ex);
    }
    ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-   ```sh
-   dotnet run
-   ```
-
-   > This command will build and execute the console project.
+1. Build and execute the project as you have in previous steps.
 
 1. Observe the output of the console application.
 
-   > You should see that the second update call fails because value of the ETag property has changed. The **ItemRequestOptions** class specifying the original ETag value as an If-Match header caused the server to decide to reject the update operation with an "HTTP 412 Precondition failure" response code.
+   > You should see that the second update call fails because value of the ETag property has changed. The ```CosmosItemRequestOptions``` class specifying the original ETag value as an If-Match header caused the server to decide to reject the update operation with an "HTTP 412 Precondition failure" response code.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
 1. Close all open editor tabs.
 
 1. Close the Visual Studio Code application.
-
-1. Close your browser application.
