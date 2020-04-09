@@ -49,8 +49,34 @@ public class Lab01Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        targetDatabase = client.getDatabase("EntertainmentDatabase");
-        customContainer = targetDatabase.getContainer("CustomCollection");
+        // Async resource creation
+        client.createDatabaseIfNotExists("EntertainmentDatabase").flatMap(databaseResponse -> {
+            targetDatabase = databaseResponse.getDatabase();
+
+            IndexingPolicy indexingPolicy = new IndexingPolicy();
+            indexingPolicy.setIndexingMode(IndexingMode.CONSISTENT);
+            indexingPolicy.setAutomatic(true);
+            List<IncludedPath> includedPaths = new ArrayList<>();
+            IncludedPath includedPath = new IncludedPath();
+            includedPath.setPath("/*");
+            includedPaths.add(includedPath);
+            indexingPolicy.setIncludedPaths(includedPaths); 
+
+            CosmosContainerProperties containerProperties = 
+                new CosmosContainerProperties("CustomCollection", "/type");
+            containerProperties.setIndexingPolicy(indexingPolicy);
+            return targetDatabase.createContainerIfNotExists(containerProperties, 400);
+        }).flatMap(containerResponse -> {
+            customContainer = containerResponse.getContainer();
+            return Mono.empty();
+        }).subscribe(voidItem -> {}, err -> {}, () -> {
+            resourcesCreated.set(true);
+        });
+    
+        while (!resourcesCreated.get());
+
+        logger.info("Database Id:\t{}",targetDatabase.getId());
+        logger.info("Container Id:\t{}",customContainer.getId()); 
 
         ArrayList<ViewMap> mapInteractions = new ArrayList<ViewMap>();
         Faker faker = new Faker();
