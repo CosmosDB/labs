@@ -27,6 +27,13 @@ public class Food {
         this.servings = servings;
     }
 
+    public void addServing(Serving serving) {
+        if (this.servings == null)
+            this.servings = new ArrayList<Serving>();
+
+        this.servings.add(serving);
+    }
+
     public List<Nutrient> getNutrients() {
         return nutrients;
     }

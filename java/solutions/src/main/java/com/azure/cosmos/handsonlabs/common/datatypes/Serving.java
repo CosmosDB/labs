@@ -10,6 +10,12 @@ public class Serving {
     private String description;
     private BigDecimal weightInGrams;
 
+    public Serving() {
+        this.amount = new BigDecimal("0.0");
+        this.description = "";
+        this.weightInGrams = new BigDecimal("0.0");
+    }
+
     public BigDecimal getAmount() {
         return amount;
     }

@@ -189,23 +189,26 @@ _You will now implement stored procedures that may execute longer than the bound
    List<Food> foods = new ArrayList<Food>();
    Faker faker = new Faker();
 
-   for (int i= 0; i < 10000;i++){  
+   for (int i= 0; i < 1000;i++){  
       Food food = new Food(); 
 
       food.setId(UUID.randomUUID().toString());
       food.setDescription(faker.food().dish());
       food.setManufacturerName(faker.company().name());
       food.setFoodGroup("Energy Bars");
+      food.addTag(new Tag("Food"));
+      food.addNutrient(new Nutrient());
+      food.addServing(new Serving());
       foods.add(food);
-   }   
+   }
    ```   
 
-   > As a reminder, the Faker library generates a set of test data. In this example, you are creating 10,000 items using the Faker library and the rules listed. Then these items are collected in a ```List<Food>```.
+   > As a reminder, the Faker library generates a set of test data. In this example, you are creating 1,000 items using the Faker library and the rules listed. Then these items are collected in a ```List<Food>```.
 
-1. Next, add the following line of code to create a variable named ```pointer``` with a default value of **zero**.
+1. Next, find the very beginning of the ```Lab07Main``` class definition. Add the following line of code to create a variable named ```pointer``` with a default value of **zero**.
 
    ```java
-   int pointer = 0;
+   private static int pointer = 0;
    ```
 
    > We are going to use this variable to determine how many documents were uploaded by our stored procedure.
@@ -213,7 +216,9 @@ _You will now implement stored procedures that may execute longer than the bound
 1. Next, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is _less than_ the amount of items in the **foods** collection:
 
    ```js
-   while (pointer < foods.size()) {}
+   while (pointer < foods.size()) {
+      // <== Add code here
+   }
    ```
 
    > We are going to create a while loop that will keep uploading documents until the pointer's value greater than or equal to the amount of food objects in our object set.
@@ -224,12 +229,13 @@ _You will now implement stored procedures that may execute longer than the bound
    CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
    options.setPartitionKey(new PartitionKey("Energy Bars"));
 
-   Object sprocArgs[] = {foods};
+   Object sprocArgs[] = new Object[] {foods.subList(pointer,foods.size())};
 
    container.getScripts()
             .getStoredProcedure("bulkUpload")
             .execute(sprocArgs,options)
             .flatMap(executeResponse -> {
+               logger.info("Response: {}",executeResponse.getStatusCode());
                int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
                pointer += delta_items;
 
@@ -239,83 +245,89 @@ _You will now implement stored procedures that may execute longer than the bound
    }).block();
    ```
 
-   > This line of code will execute the stored procedure using three parameters; the partition key for the data set you are executing against, the name of the stored procedure, and a list of **food** objects to send to the stored procedure.
+   > This section of code will execute the stored procedure using three parameters; the partition key for the data set you are executing against, the name of the stored procedure, and a list of **food** objects to send to the stored procedure.
 
    > Note that the last stage of this reactive stream retrieves the number of items processed by the stored procedure (```delta_items```), increments ```pointer``` by this amount to obtain the total progress, and then logs the progress of the stored procedure in operating on these items.
 
-1. Your **main** method should now look like this:
+1. Your ```Lab07Main``` class should now look like this:
 
    ```java
-   public static void main(String[] args) {
-      ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
-      defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
-   
-      CosmosAsyncClient client = new CosmosClientBuilder()
-               .setEndpoint(endpointUri)
-               .setKey(primaryKey)
-               .setConnectionPolicy(defaultPolicy)
-               .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
-               .buildAsyncClient();
-
-      database = client.getDatabase("NutritionDatabase");
-      container = database.getContainer("FoodCollection");
-
-      List<Food> foods = new ArrayList<Food>();
-      Faker faker = new Faker();
-
-      for (int i= 0; i < 10000;i++){  
-         Food food = new Food(); 
-
-         food.setId(UUID.randomUUID().toString());
-         food.setDescription(faker.food().dish());
-         food.setManufacturerName(faker.company().name());
-         food.setFoodGroup("Energy Bars");
-         foods.add(food);
-      }
-
-      while (pointer < foods.size()) {
-         //CosmosAsyncStoredProcedureResponse result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), new dynamic[] {foods.Skip(pointer)});
+   public class Lab07Main {
+      protected static Logger logger = LoggerFactory.getLogger(Lab07Main.class.getSimpleName());
+      private static String endpointUri = "<your uri>";
+      private static String primaryKey = "<your key>";    
+      private static CosmosAsyncDatabase database;
+      private static CosmosAsyncContainer container;  
+      private static int pointer = 0;
+      public static void main(String[] args) {
+         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+         defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
       
-         CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
-         options.setPartitionKey(new PartitionKey("Energy Bars"));
-   
-         Object sprocArgs[] = {foods};
+         CosmosAsyncClient client = new CosmosClientBuilder()
+                  .setEndpoint(endpointUri)
+                  .setKey(primaryKey)
+                  .setConnectionPolicy(defaultPolicy)
+                  .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                  .buildAsyncClient();
 
-         container.getScripts()
-                  .getStoredProcedure("bulkUpload")
-                  .execute(sprocArgs,options)
-                  .flatMap(executeResponse -> {
-                     int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
-                     pointer += delta_items;
+         database = client.getDatabase("NutritionDatabase");
+         container = database.getContainer("FoodCollection");
 
-                     logger.info("{} Total Items {} Items Uploaded in this Iteration",pointer,delta_items);
+         List<Food> foods = new ArrayList<Food>();
+         Faker faker = new Faker();
 
-                     return Mono.empty();
-                  }).block();
+         for (int i= 0; i < 1000;i++){  
+               Food food = new Food(); 
+
+               food.setId(UUID.randomUUID().toString());
+               food.setDescription(faker.food().dish());
+               food.setManufacturerName(faker.company().name());
+               food.setFoodGroup("Energy Bars");
+               food.addTag(new Tag("Food"));
+               food.addNutrient(new Nutrient());
+               food.addServing(new Serving());
+               foods.add(food);
+         }
+
+         while (pointer < foods.size()) {
+         
+               CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
+               options.setPartitionKey(new PartitionKey("Energy Bars"));
       
-      }
+               Object sprocArgs[] = new Object[] {foods.subList(pointer,foods.size())};
 
-      client.close();        
+               container.getScripts()
+                     .getStoredProcedure("bulkUpload")
+                     .execute(sprocArgs,options)
+                     .flatMap(executeResponse -> {
+                           logger.info("Response: {}",executeResponse.getStatusCode());
+                           int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
+                           pointer += delta_items;
+
+                           logger.info("{} Total Items {} Items Uploaded in this Iteration",pointer,delta_items);
+
+                           return Mono.empty();
+               }).block();
+         }
+
+         client.close();        
+      }
    }
    ```
 
-   > You will notice that our java code using the **Skip** method of the LINQ library to submit only the subset of our documents that are not yet uploaded. On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents. When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **5000** documents were uploaded. The pointer will now be incremented to a value of **5000**. On the next check of the while loop's condition, **5000** will be evaluated to be less than **25000** causing another execution of the code in the while loop. The LINQ method will now skip **5000** documents and send the remaining **20000** documents to the stored procedure to upload. This loop will continue until all documents are uploaded. Also keep in mind that as of this writing, Cosmos DB has a 2 MB request limit on all calls. If your data is bigger than this test data, consider chaining `.Take()` to `foods.Skip(point)` to send a smaller payload with each request.
+   > On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents. When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **500** documents were uploaded. The pointer will now be incremented to a value of **500**. On the next check of the while loop's condition, **500** will be evaluated to be less than **1000** causing another execution of the code in the while loop. The program will now skip **500** documents and send the remaining **500** documents to the stored procedure to upload. This loop will continue until all documents are uploaded. Also keep in mind that as of this writing, Cosmos DB has a 2 MB request limit on all calls. If your data is bigger than this test data, consider sending smaller chunks of the payload with each request.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. In the **Explorer** pane, right-click **Lab10Main.java** and choose the **Run** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
+    ![Run Lab10Main.java](../media/10-vscode_run.jpg)
 
-   ```sh
-   dotnet run
-   ```
-
-   > This command will build and execute the console project.
+    > This command will build and execute the console project.
 
 1. Observe the results of the console project.
 
-   > This stored procedure will batch upload 10,000 documents to your collection within the specified partition key.
+   > This stored procedure will batch upload 1,000 documents to your collection within the specified partition key.
 
 1. Click the **🗙** symbol to close the terminal pane.
 

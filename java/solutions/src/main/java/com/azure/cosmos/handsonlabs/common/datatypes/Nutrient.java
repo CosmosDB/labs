@@ -11,6 +11,8 @@ public class Nutrient {
     private BigDecimal nutritionValue;
     private String units;
 
+    public Nutrient(){this.id=""; this.description=""; this.nutritionValue = new BigDecimal("0.0"); this.units="";}
+
     public String getId() {
         return id;
     }
