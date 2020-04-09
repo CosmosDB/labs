@@ -136,9 +136,9 @@ _You will now implement stored procedures that may execute longer than the bound
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab10\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab10Main.java** file - this is the **main** class for the project.
+1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab07\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab07Main.java** file - this is the **main** class for the project.
 
-1. Open **Lab10Main.java** in the editor by clicking on it in the **Explorer** pane.
+1. Open **Lab07Main.java** in the editor by clicking on it in the **Explorer** pane.
 
     ![Open Lab07Main.java in editor](../media/07-vscode-first-time-editor.jpg)
 
@@ -318,7 +318,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. Save all of your open editor tabs.
 
-1. In the **Explorer** pane, right-click **Lab10Main.java** and choose the **Run** menu option.
+1. In the **Explorer** pane, right-click **Lab07Main.java** and choose the **Run** menu option.
 
     ![Run Lab07Main.java](../media/07-vscode_run.jpg)
 
