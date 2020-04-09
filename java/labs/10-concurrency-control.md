@@ -6,7 +6,7 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-## Open the CosmosLabs Maven Project Template
+### Open the CosmosLabs Maven Project Template
 
 1. Open Visual Studio Code.
 
