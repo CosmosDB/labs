@@ -125,11 +125,14 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
    logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
    ```
 
-1. After the line above (and before the ```return``` statement), two lines of code to create a ```CosmosItemRequestOptions``` instance that will use the **ETag** from the item and specify an **If-Match** header:
+1. After the line above (and before the ```return``` statement), add the code below to create a ```CosmosItemRequestOptions``` instance that will use the **ETag** from the item and specify an **If-Match** header:
 
    ```java
    CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-   requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("etag");
+   AccessCondition accessCondition = new AccessCondition();
+   accessCondition.setType(AccessConditionType.IF_MATCH);
+   accessCondition.setCondition(fastFoodResponse.getResponseHeaders().get("etag"));
+   requestOptions.setAccessCondition(accessCondition);
    ```
 
 1. Add two new lines of code to retrieve the point-read item and update a property of the retrieved item:
@@ -182,7 +185,10 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
                   logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
 
                   CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-                  requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("etag");
+                  AccessCondition accessCondition = new AccessCondition();
+                  accessCondition.setType(AccessConditionType.IF_MATCH);
+                  accessCondition.setCondition(fastFoodResponse.getResponseHeaders().get("etag"));
+                  requestOptions.setAccessCondition(accessCondition);
 
                   Food fastFood = fastFoodResponse.getItem();
                   fastFood.addTag(new Tag("Demo"));

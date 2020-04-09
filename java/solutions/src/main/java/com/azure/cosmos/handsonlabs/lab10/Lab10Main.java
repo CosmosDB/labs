@@ -20,6 +20,8 @@ import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
 import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
 import com.azure.cosmos.handsonlabs.common.datatypes.Tag;
+import com.azure.cosmos.models.AccessCondition;
+import com.azure.cosmos.models.AccessConditionType;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
@@ -63,7 +65,10 @@ public class Lab10Main {
                 logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
 
                 CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-                requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("etag");
+                AccessCondition accessCondition = new AccessCondition();
+                accessCondition.setType(AccessConditionType.IF_MATCH);
+                accessCondition.setCondition(fastFoodResponse.getResponseHeaders().get("etag"));
+                requestOptions.setAccessCondition(accessCondition);
 
                 Food fastFood = fastFoodResponse.getItem();
                 fastFood.addTag(new Tag("Demo"));

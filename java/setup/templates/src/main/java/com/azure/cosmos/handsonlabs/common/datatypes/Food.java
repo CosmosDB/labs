@@ -4,6 +4,7 @@
 package com.azure.cosmos.handsonlabs.common.datatypes;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Food {
     private String id;
@@ -48,6 +49,13 @@ public class Food {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public void addTag(Tag tag) {
+        if (this.tags == null)
+            this.tags = new ArrayList<Tag>();
+
+        this.tags.add(tag);
     }
 
     public String getManufacturerName() {
