@@ -64,136 +64,159 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
     client.close();
     ```
 
-1. Add the following code to asynchronously read a single item from the container, identified by its partition key and id:
+1. Add the following lines of async code which use the **readItem** function to retrieve a single item from your Cosmos DB, identified by its partition key and id:
 
-   ```java
-   ItemResponse<Food> response = await container.ReadItemAsync<Food>("21083", new PartitionKey("Fast Foods"));
-   ```
-
-1. Add the following line of code to show the current ETag value of the item:
-
-   ```java
-   await Console.Out.WriteLineAsync($"ETag: {response.ETag}");
-   ```
+    ```java
+    container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
+        .flatMap(fastFoodResponse -> {
+        logger.info("Read {}",fastFoodResponse.getETag());
+        return Mono.empty();
+    }).block();
+    ```
+    This block of code includes a line which shows the current ETag value of the item.
 
    > The ETag header and the current value are included in all response messages.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. In the **Explorer** pane, right-click **Lab10Main.java** and choose the **Run** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
+    ![Run Lab10Main.java](../media/10-vscode_run.jpg)
 
-   ```sh
-   dotnet run
-   ```
-
-   > This command will build and execute the console project.
+    > This command will build and execute the console project.
 
 1. Observe the output of the console application.
 
    > You should see an ETag for the item.
 
-1. Enter and execute the following command:
-
-   ```sh
-   dotnet run
-   ```
-
-   > This command will build and execute the console project.
-
-1. Observe the output of the console application.
+1. Following the same procedure, run **Lab10Main.java** again and observe the output of the console application.
 
    > The ETag should remain unchanged since the item has not been changed.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the _using_ block within the **Main** method:
+1. Once again, locate the client-create/client-close block within the **main** method:
+
+    ```java
+    CosmosAsyncClient client = new CosmosClientBuilder()
+            .setEndpoint(endpointUri)
+            .setKey(primaryKey)
+            .setConnectionPolicy(defaultPolicy)
+            .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+            .buildAsyncClient();
+
+    database = client.getDatabase("NutritionDatabase");
+    container = database.getContainer("FoodCollection");            
+
+    //...
+
+    client.close();
+    ```
+
+1. Within the **main** method, locate the following line of code:
 
    ```java
-   using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-   {
-   }
-   ```
-
-1. Within the **Main** method, locate the following line of code:
-
-   ```java
-   await Console.Out.WriteLineAsync($"ETag:\t{response.ETag}");
+   logger.info("ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
    ```
 
    Replace that line of code with the following code:
 
    ```java
-   await Console.Out.WriteLineAsync($"Existing ETag:\t{response.ETag}");
+   logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
    ```
 
-1. Within the **using** block, add a new line of code to create an **ItemRequestOptions** instance that will use the **ETag** from the item and specify an **If-Match** header:
+1. After the line above (and before the ```return``` statement), two lines of code to create a ```CosmosItemRequestOptions``` instance that will use the **ETag** from the item and specify an **If-Match** header:
 
    ```java
-   ItemRequestOptions requestOptions = new ItemRequestOptions { IfMatchEtag = response.ETag };
+   CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
+   requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
    ```
 
-1. Add a new line of code to update a property of the retrieved item:
+1. Add two new lines of code to retrieve the point-read item and update a property of the retrieved item:
 
    ```java
-   response.Resource.tags.Add(new Tag { name = "Demo" });
+   Food fastFood = fastFoodResponse.getItem();
+   fastFood.addTag(new Tag("Demo"));
    ```
 
-   > This line of code will modify a property of the item. Here we are modifying the **tags** collection property by adding a new **Tag** object.
+   > These lines of code will modify a property of the item. Here we are modifying the **tags** collection property by adding a new **Tag** object.
 
-1. Add a new line of code to invoke the **UpsertItemAsync** method passing in both the item and the options:
+1. Find the return statement toward the end of the reactive stream:
 
    ```java
-   response = await container.UpsertItemAsync(response.Resource, requestOptions: requestOptions);
+      return Mono.empty(); // <==
+   }).block();
    ```
 
-1. Add a new line of code to print out the **ETag** of the newly updated item:
+   And modify it to invoke the async ```upsertItem``` method passing in both the item and the options:
 
    ```java
-   await Console.Out.WriteLineAsync($"New ETag:\t{response.ETag}");
+      return container.upsertItem(fastFood,requestOptions);
+   }).block();
    ```
 
-1. Your **Main** method should now look like this:
+1. Add an additional stage to the end of the reactive stream, and in that stage add a line of code to print out the **ETag** of the newly updated item, as shown below:
 
    ```java
-   public static async Task Main(string[] args)
-   {
-       using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-       {
-           var database = client.GetDatabase(_databaseId);
-           var container = database.GetContainer(_containerId);
+         return container.upsertItem(fastFood,requestOptions);
+      }) // Add a new reactive stream stage below
+      .flatMap(upsertResponse -> {
+         logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
 
-           ItemResponse<Food> response = await container.ReadItemAsync<Food>("21083", new PartitionKey("Fast Foods"));
-           await Console.Out.WriteLineAsync($"Existing ETag:\t{response.ETag}");
+         return Mono.empty();
+   }).block();
+   ```
 
-           ItemRequestOptions requestOptions = new ItemRequestOptions { IfMatchEtag = response.ETag };
-           response.Resource.tags.Add(new Tag { name = "Demo" });
-           response = await container.UpsertItemAsync(response.Resource, requestOptions: requestOptions);
-           await Console.Out.WriteLineAsync($"New ETag:\t{response.ETag}");
-       }
+1. Your **main** method should now look like this:
+
+   ```java
+   public static void main(String[] args) {
+      ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+      defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+   
+      CosmosAsyncClient client = new CosmosClientBuilder()
+               .setEndpoint(endpointUri)
+               .setKey(primaryKey)
+               .setConnectionPolicy(defaultPolicy)
+               .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+               .buildAsyncClient();
+
+      database = client.getDatabase("NutritionDatabase");
+      container = database.getContainer("FoodCollection");
+
+      container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
+         .flatMap(fastFoodResponse -> {
+            logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
+
+            CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
+            requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
+
+            Food fastFood = fastFoodResponse.getItem();
+            fastFood.addTag(new Tag("Demo"));
+
+            return container.upsertItem(fastFood,requestOptions);
+         })
+         .flatMap(upsertResponse -> {
+            logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
+
+            return Mono.empty();
+      }).block();
+
+      client.close();        
    }
    ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-   ```sh
-   dotnet run
-   ```
-
-   > This command will build and execute the console project.
+1. Build and execute the console project, following the same process as you did previously.
 
 1. Observe the output of the console application.
 
-   > You should see that the value of the ETag property has changed. The **ItemRequestOptions** class helped us implement optimistic concurrency by specifying that we wanted the SDK to use the If-Match header to allow the server to decide whether a resource should be updated. The If-Match value is the ETag value to be checked against. If the ETag value matches the server ETag value, the resource is updated. If the ETag is no longer current, the server rejects the operation with an "HTTP 412 Precondition failure" response code. The client then re-fetches the resource to acquire the current ETag value for the resource.
+   > You should see that the value of the ETag property has changed. The **CosmosItemRequestOptions** class helped us implement optimistic concurrency by specifying that we wanted the SDK to use the If-Match header to allow the server to decide whether a resource should be updated. The If-Match value is the ETag value to be checked against. If the ETag value matches the server ETag value, the resource is updated. If the ETag is no longer current, the server rejects the operation with an "HTTP 412 Precondition failure" response code. The client then re-fetches the resource to acquire the current ETag value for the resource.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the _using_ block within the **Main** method:
+1. Locate the _using_ block within the **main** method:
 
    ```java
    using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
