@@ -116,20 +116,20 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 1. Within the **main** method, locate the following line of code:
 
    ```java
-   logger.info("ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
+   logger.info("ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
    ```
 
    Replace that line of code with the following code:
 
    ```java
-   logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
+   logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
    ```
 
 1. After the line above (and before the ```return``` statement), two lines of code to create a ```CosmosItemRequestOptions``` instance that will use the **ETag** from the item and specify an **If-Match** header:
 
    ```java
    CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-   requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
+   requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("etag");
    ```
 
 1. Add two new lines of code to retrieve the point-read item and update a property of the retrieved item:
@@ -151,7 +151,7 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 1. Finally, add a line of code to print out the **ETag** of the newly updated item, as shown below:
 
    ```java
-   logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
+   logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("etag"));
    ```
 
 1. Your **main** method should now look like this:
@@ -179,10 +179,10 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
          container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
                .flatMap(fastFoodResponse -> {
-                  logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
+                  logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
 
                   CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-                  requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
+                  requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("etag");
 
                   Food fastFood = fastFoodResponse.getItem();
                   fastFood.addTag(new Tag("Demo"));
@@ -190,7 +190,7 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
                   CosmosAsyncItemResponse<Food> upsertResponse =
                   container.upsertItem(fastFood,requestOptions).block();
 
-                  logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
+                  logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("etag"));
 
                   return Mono.empty();
          }).block();

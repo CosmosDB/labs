@@ -60,10 +60,10 @@ public class Lab10Main {
 
         container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
             .flatMap(fastFoodResponse -> {
-                logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("ETag"));
+                logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
 
                 CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
-                requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("ETag");
+                requestOptions.IfMatchEtag = fastFoodResponse.getResponseHeaders().get("etag");
 
                 Food fastFood = fastFoodResponse.getItem();
                 fastFood.addTag(new Tag("Demo"));
@@ -71,7 +71,7 @@ public class Lab10Main {
                 CosmosAsyncItemResponse<Food> upsertResponse =
                  container.upsertItem(fastFood,requestOptions).block();
 
-                logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("ETag"));
+                logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("etag"));
 
                 fastFood = upsertResponse.getItem();
                 fastFood.addTag(new Tag("Failure"));
