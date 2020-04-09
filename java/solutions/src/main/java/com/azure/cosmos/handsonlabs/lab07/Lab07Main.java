@@ -5,6 +5,7 @@ package com.azure.cosmos.handsonlabs.lab07;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.github.javafaker.Faker;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -15,10 +16,14 @@ import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.handsonlabs.common.datatypes.DeleteStatus;
 import com.azure.cosmos.handsonlabs.common.datatypes.Food;
+import com.azure.cosmos.handsonlabs.common.datatypes.Nutrient;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
+import com.azure.cosmos.handsonlabs.common.datatypes.Serving;
 import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
+import com.azure.cosmos.handsonlabs.common.datatypes.Tag;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
 import com.azure.cosmos.models.CosmosAsyncStoredProcedureResponse;
 import com.azure.cosmos.models.CosmosContainerProperties;
@@ -49,6 +54,8 @@ public class Lab07Main {
     private static CosmosAsyncDatabase database;
     private static CosmosAsyncContainer container;  
     private static int pointer = 0;
+    private static boolean resume = false;
+    
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
         defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
@@ -66,13 +73,16 @@ public class Lab07Main {
         List<Food> foods = new ArrayList<Food>();
         Faker faker = new Faker();
 
-        for (int i= 0; i < 10000;i++){  
+        for (int i= 0; i < 1000;i++){  
             Food food = new Food(); 
 
             food.setId(UUID.randomUUID().toString());
             food.setDescription(faker.food().dish());
             food.setManufacturerName(faker.company().name());
             food.setFoodGroup("Energy Bars");
+            food.addTag(new Tag("Food"));
+            food.addNutrient(new Nutrient());
+            food.addServing(new Serving());
             foods.add(food);
         }
 
@@ -87,6 +97,7 @@ public class Lab07Main {
                     .getStoredProcedure("bulkUpload")
                     .execute(sprocArgs,options)
                     .flatMap(executeResponse -> {
+                        logger.info("Response: {}",executeResponse.getStatusCode());
                         int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
                         pointer += delta_items;
 
@@ -95,6 +106,40 @@ public class Lab07Main {
                         return Mono.empty();
             }).block();
         }
+
+        resume = true;
+        do
+        {
+            String query = "SELECT * FROM foods f WHERE f.foodGroup = 'Energy Bars'";
+
+            CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
+            options.setPartitionKey(new PartitionKey("Energy Bars"));
+    
+            Object sprocArgs[] = new Object[] {query};
+
+            container.getScripts()
+                    .getStoredProcedure("bulkDelete")
+                    .execute(sprocArgs,options)
+                    .flatMap(executeResponse -> {
+
+                        DeleteStatus result = null;
+                        
+                        try {
+                            result = mapper.readValue(executeResponse.getResponseAsString(),DeleteStatus.class);
+                        } catch (Exception ex) {
+                            logger.error("Failed to parse bulkDelete response.",ex);
+                        }
+
+                        logger.info("Batch Delete Completed. Deleted: {} Continue: {} Items Uploaded in this Iteration",
+                            result.getDeleted(),
+                            result.isContinuation());
+
+                        resume = result.isContinuation();
+
+                        return Mono.empty();
+            }).block();
+        }
+        while (resume);
 
         client.close();        
     }
