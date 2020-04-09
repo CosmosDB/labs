@@ -1,12 +1,12 @@
 # Troubleshooting Azure Cosmos DB Performance
 
-In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optimize the performance and cost of your application.
+In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optimize the performance and cost of your application.
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-## Create a .NET Core Project
+## Create a Maven Project
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab09 folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab09 folder that will be used to contain the content of your Java Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
 
 1. In the Lab09 folder, right-click the folder and select the **Open with Code** menu option.
 
@@ -32,11 +32,11 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. In the **Explorer** pane verify that you have a **DataTypes.cs** file in your project folder.
+1. In the **Explorer** pane verify that you have a **DataTypes.java** file in your project folder.
 
     > This file contains the data classes you will be working with in the following steps.
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **Lab09Main.java** link in the **Explorer** pane to open the file in the editor.
 
 1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value and for the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
 
@@ -60,13 +60,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ## Examining Response Headers
 
-*Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occurred on the server-side. The .NET SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.*
+*Azure Cosmos DB returns various response headers that can give you more metadata about your request and what operations occurred on the server-side. The Java SDK exposes many of these headers to you as properties of the ``ResourceResponse<>`` class.*
 
 ### Observe RU Charge for Large Item
 
 1. Locate the using block within the **Main** method:
 
-    ```csharp
+    ```java
     using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
     {
         var database = client.GetDatabase(_databaseId);
@@ -78,7 +78,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     
 1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named **member**:
 
-    ```csharp
+    ```java
     object member = new Member { accountHolder = new Bogus.Person() };
     ```
 
@@ -116,19 +116,19 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add a new line of code to invoke the **CreateItemAsync** method of the **Container** instance using the **member** variable as a parameter:
 
-    ```csharp
+    ```java
     ItemResponse<object> response = await peopleContainer.CreateItemAsync(member);
     ```
 
 1. After the last line of code in the using block, add a new line of code to print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
     ```
 
 1. Your **Main** method should now look like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -187,9 +187,9 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. In the **Results** pane, observe the results of your query.
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java Core project.
 
-1. In the Visual Studio Code window, double-click the **Program.cs** file to open an editor tab for the file.
+1. In the Visual Studio Code window, double-click the **Lab09Main.java** file to open an editor tab for the file.
 
 1. To view the RU charge for inserting a very large document, we will use the **Bogus** library to create a fictional family on our Member object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
 
@@ -210,17 +210,17 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     Each property will have a **Bogus**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
 
-1. Within the **Program.cs** editor tab, locate the **Main** method.
+1. Within the **Lab09Main.java** editor tab, locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
-    ```csharp
+    ```java
     object member = new Member { accountHolder = new Bogus.Person() };
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     object member = new Member
     {
         accountHolder = new Bogus.Person(),
@@ -381,7 +381,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > This query will fail immediately since this property is not indexed. Keep in mind when defining indexes that only indexed properties can be used in query conditions. 
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java Core project.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
@@ -401,7 +401,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ## Troubleshooting Requests
 
-*First, you will use the .NET SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
+*First, you will use the Java SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
 
 ### Reducing R/U Throughput for a Container
 
@@ -425,13 +425,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ### Observing Throttling (HTTP 429)
 
-1. Return to the currently open **Visual Studio Code** editor containing your .NET Core project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java Core project.
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Double-click the **Lab09Main.java** link in the **Explorer** pane to open the file in the editor.
 
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -448,7 +448,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following code to create a collection of ``Transaction`` instances:
 
-    ```csharp
+    ```java
     var transactions = new Bogus.Faker<Transaction>()
         .RuleFor(t => t.id, (fake) => Guid.NewGuid().ToString())
         .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
@@ -462,7 +462,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     
 1. Add the following foreach block to iterate over the ``Transaction`` instances:
 
-    ```csharp
+    ```java
     foreach(var transaction in transactions)
     {
     }
@@ -470,7 +470,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Within the ``foreach`` block, add the following line of code to asynchronously create an item and save the result of the creation task to a variable:
 
-    ```csharp
+    ```java
     ItemResponse<Transaction> result = await transactionContainer.CreateItemAsync(transaction);
     ```
 
@@ -478,7 +478,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
     ```
 
@@ -486,7 +486,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Your **Main** method should look like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {    
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -532,7 +532,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following lines of code:
 
-    ```csharp
+    ```java
     foreach (var transaction in transactions)
     {
         ItemResponse<Transaction> result = await transactionContainer.CreateItemAsync(transaction);
@@ -542,7 +542,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     Replace those lines of code with the following code:
 
-    ```csharp
+    ```java
     List<Task<ItemResponse<Transaction>>> tasks = new List<Task<ItemResponse<Transaction>>>();
     foreach (var transaction in transactions)
     {
@@ -560,7 +560,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Your **Main** method should look like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -612,13 +612,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     .GenerateLazy(100);
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     .GenerateLazy(5000);
     ```
 
@@ -662,13 +662,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     .GenerateLazy(5000);
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     .GenerateLazy(10000);
     ```
 
@@ -696,13 +696,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 ## Tuning Queries and Reads
 
-*You will now tune your requests to Azure Cosmos DB by manipulating the SQL query and properties of the **RequestOptions** class in the .NET SDK.*
+*You will now tune your requests to Azure Cosmos DB by manipulating the SQL query and properties of the **RequestOptions** class in the Java SDK.*
 
 ### Measuring RU Charge
 
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -717,7 +717,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
-    ```csharp
+    ```java
     string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
@@ -725,13 +725,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code to create a item query instance:
 
-    ```csharp
+    ```java
     FeedIterator<Transaction> query = transactionContainer.GetItemQueryIterator<Transaction>(sql);
     ```
 
 1. Add the following line of code to get the first "page" of results:
 
-    ```csharp
+    ```java
     var result = await query.ReadNextAsync();
     ```
 
@@ -739,7 +739,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following lines of code to print out the Request Charge metric for the query to the console:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"Request Charge: {result.RequestCharge} RUs");
     ```
 
@@ -763,13 +763,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     string sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
@@ -793,13 +793,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     string sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     string sql = "SELECT * FROM c";
     ```
 
@@ -823,13 +823,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-     ```csharp
+     ```java
      string sql = "SELECT * FROM c";
      ```
 
      Replace that line of code with the following code:
 
-     ```csharp
+     ```java
      string sql = "SELECT c.id FROM c";
      ```
 
@@ -855,7 +855,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -870,7 +870,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following lines of code to create variables to configure query options:
 
-    ```csharp
+    ```java
     int maxItemCount = 100;
     int maxDegreeOfParallelism = 1;
     int maxBufferedItemCount = 0;
@@ -878,7 +878,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following lines of code to configure options for a query from the variables:
 
-    ```csharp
+    ```java
     QueryRequestOptions options = new QueryRequestOptions
     {
         MaxItemCount = maxItemCount,
@@ -889,7 +889,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following lines of code to write various values to the console window:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"MaxItemCount:\t{maxItemCount}");
     await Console.Out.WriteLineAsync($"MaxDegreeOfParallelism:\t{maxDegreeOfParallelism}");
     await Console.Out.WriteLineAsync($"MaxBufferedItemCount:\t{maxBufferedItemCount}");
@@ -897,7 +897,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
-    ```csharp
+    ```java
     string sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
@@ -905,19 +905,19 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code to create and start new a high-precision timer:
 
-    ```csharp
+    ```java
     Stopwatch timer = Stopwatch.StartNew();
     ```
 
 1. Add the following line of code to create a item query instance:
 
-    ```csharp
+    ```java
     FeedIterator<Transaction> query = transactionContainer.GetItemQueryIterator<Transaction>(sql, requestOptions: options);
     ```
 
 1. Add the following lines of code to enumerate the result set.
 
-    ```csharp
+    ```java
     while (query.HasMoreResults)  
     {
         var result = await query.ReadNextAsync();
@@ -928,13 +928,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code stop the timer:
 
-    ```csharp
+    ```java
     timer.Stop();
     ```
 
 1. Add the following line of code to write the timer's results to the console window:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"Elapsed Time:\t{timer.Elapsed.TotalSeconds}");
     ```
 
@@ -956,13 +956,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     int maxDegreeOfParallelism = 1;
     ```
 
     Replace that line of code with the following:
 
-    ```csharp
+    ```java
     int maxDegreeOfParallelism = 5;
     ```
 
@@ -986,13 +986,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     int maxBufferedItemCount = 0;
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     int maxBufferedItemCount = -1;
     ```
 
@@ -1015,13 +1015,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
     > Again, this should have a slight impact on your performance time.
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     int maxDegreeOfParallelism = 5;
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     int maxDegreeOfParallelism = -1;
     ```
 
@@ -1045,13 +1045,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     int maxItemCount = 100;
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     int maxItemCount = 500;
     ```
 
@@ -1075,13 +1075,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     int maxItemCount = 500;
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     int maxItemCount = 1000;
     ```
 
@@ -1105,13 +1105,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```csharp
+    ```java
     int maxBufferedItemCount = -1;
     ```
 
     Replace that line of code with the following code:
 
-    ```csharp
+    ```java
     int maxBufferedItemCount = 50000;
     ```
 
@@ -1153,7 +1153,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -1168,7 +1168,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code that will store a SQL query in a string variable (replacing **example.document** with the **id ** value that you noted earlier):
 
-    ```csharp
+    ```java
     string sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
     ```
 
@@ -1176,13 +1176,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code to create a item query instance:
 
-    ```csharp
+    ```java
     FeedIterator<object> query = peopleContainer.GetItemQueryIterator<object>(sql);
     ```
 
 1. Add the following line of code to get the first page of results and then store them in a variable of type **FeedResponse<>**:
 
-    ```csharp
+    ```java
     FeedResponse<object> response = await query.ReadNextAsync();
     ```
 
@@ -1190,7 +1190,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following lines of code to print out the value of the **RequestCharge** property of the **FeedResponse<>** instance and then the content of the retrieved item:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs for ");    
     await Console.Out.WriteLineAsync($"{response.Resource.First()}");
     ```
@@ -1215,7 +1215,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -1230,13 +1230,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following code to use the **ReadItemAsync** method of the **Container** class to retrieve an item using the unique id and the partition key set to the last name from the previous step:
 
-    ```csharp
+    ```java
     ItemResponse<object> response = await peopleContainer.ReadItemAsync<object>("example.document", new PartitionKey("<Last Name>"));
     ```
 
 1. Add the following line of code to print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
     ```
    
@@ -1278,15 +1278,15 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
     > Various parameters can be changed to adjust the data shown in the graphs and there is also an option to export data to csv for further analysis. For an existing application this can be helpful in determining your query volume.
 
-1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the **Main** method in **Program.cs**:
+1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the **Main** method in **Lab09Main.java**:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
     ```
 
 1. Following that line, add the following code to use the **CreateItemAsync** method of the **Container** class to add a new item and print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
 
-    ```csharp
+    ```java
     object member = new Member { accountHolder = new Bogus.Person() };
     ItemResponse<object> createResponse = await peopleContainer.CreateItemAsync(member);
     await Console.Out.WriteLineAsync($"{createResponse.RequestCharge} RUs");
@@ -1294,7 +1294,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following lines of code to create variables to represent the estimated workload for our application:
 
-    ```csharp
+    ```java
     int expectedWritesPerSec = 200;
     int expectedReadsPerSec = 800;
     ```
@@ -1303,7 +1303,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code to print out the estimated throughput needs of our application based on our test queries:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"Estimated load: {response.RequestCharge * expectedReadsPerSec + createResponse.RequestCharge * expectedWritesPerSec} RU per sec");
     ```
 
@@ -1333,7 +1333,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
 
-    ```csharp
+    ```java
     public static async Task Main(string[] args)
     {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
@@ -1348,7 +1348,7 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following code to retrieve the current RU/sec setting for the container:
 
-    ```csharp
+    ```java
     int? throughput = await peopleContainer.ReadThroughputAsync();
     ```
 
@@ -1356,13 +1356,13 @@ In this lab, you will use the .NET SDK to tune Azure Cosmos DB requests to optim
 
 1. Add the following line of code to print out the provisioned throughput value:
 
-    ```csharp
+    ```java
     await Console.Out.WriteLineAsync($"{throughput} RU per sec");
     ```
 
 1. Add the following code to update the RU/sec setting for the container:
 
-    ```csharp
+    ```java
     await peopleContainer.ReplaceThroughputAsync(1000);
     ```
 
