@@ -223,7 +223,7 @@ _You will now implement stored procedures that may execute longer than the bound
    }
    ```
 
-   > We are going to create a while loop that will keep uploading documents until the pointer's value greater than or equal to the amount of food objects in our object set.
+   > We are going to create a while loop that will keep uploading documents until the pointer's value is greater than or equal to the amount of food objects in our object set.
 
 1. Within the **while** block, add the following lines of code to execute the stored procedure:
 
@@ -395,7 +395,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > The next stored procedure returns a complex JSON object instead of a simple typed value. We use a custom `DeleteStatus` java class to deserialize the JSON object so we can use its data in our java code.
 
-1. Next, find the very beginning of the ```Lab07Main``` class definition. Add the following line of code to create a variable named ```resume``` with a default value of **false** along with
+1. Next, find the very beginning of the ```Lab07Main``` class definition. Add the following line of code to create a variable named ```resume``` with a default value of ```false```:
 
    ```java
    private static boolean resume = false;
@@ -439,7 +439,7 @@ _You will now implement stored procedures that may execute longer than the bound
    while (resume);
    ```
 
-   > This code will execute the stored procedure that deletes documents as long as the **resume** variable is set to true. The stored procedure itself always returns an object, serialized as **DeleteStatus**, that has a boolean indicating whether we should continue deleting documents and a number indicating how many documents were deleted as part of this execution. Within the do-while loop, we simply store the value of the boolean returned from the stored procedure in our **resume** variable and continue executing the stored procedure until it returns a false value indicating that all documents were deleted.
+   > This code will execute the stored procedure that deletes documents as long as the ```resume``` variable is set to true. The stored procedure itself always returns an object, serialized as ```DeleteStatus```, that has a boolean indicating whether we should continue deleting documents and a number indicating how many documents were deleted as part of this execution. Within the do-while loop, we simply store the value of the boolean returned from the stored procedure in our ```resume``` variable and continue executing the stored procedure until it returns a false value indicating that all documents were deleted.
 
 1. Save all of your open editor tabs.
 
