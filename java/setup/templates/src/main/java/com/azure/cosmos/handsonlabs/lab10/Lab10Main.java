@@ -51,8 +51,8 @@ public class Lab10Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("EntertainmentDatabase");
-        container = database.getContainer("CustomCollection");
+        database = client.getDatabase("NutritionDatabase");
+        container = database.getContainer("FoodCollection");
 
         client.close();        
     }

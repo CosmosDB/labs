@@ -48,14 +48,21 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
 1. Double-click the **Lab10Main.java** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the _using_ block within the **Main** method:
+1. Locate the client-create/client-close block within the **main** method:
 
-   ```java
-   using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-   {
+    ```java
+    CosmosAsyncClient client = new CosmosClientBuilder()
+            .setEndpoint(endpointUri)
+            .setKey(primaryKey)
+            .setConnectionPolicy(defaultPolicy)
+            .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+            .buildAsyncClient();
 
-   }
-   ```
+    database = client.getDatabase("NutritionDatabase");
+    container = database.getContainer("FoodCollection");            
+
+    client.close();
+    ```
 
 1. Add the following code to asynchronously read a single item from the container, identified by its partition key and id:
 
