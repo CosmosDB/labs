@@ -232,7 +232,7 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
    > The ```CosmosItemRequestOptions``` instance has not been updated, so is still using the ETag value from the original object, which is now out of date so we should expect to get an error.
 
-1. Add error handling to the **upsertItem** call you just added by wrapping it with a try-catch and then output the resulting error message. The code should now look like this:
+1. Add error handling to the ```upsertItem``` call you just added by wrapping it with a try-catch and then output the resulting error message. The code should now look like this:
 
    ```java
    try
