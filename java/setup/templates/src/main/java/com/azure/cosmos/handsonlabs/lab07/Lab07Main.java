@@ -23,6 +23,7 @@ import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.IndexingMode;
 import com.azure.cosmos.models.IndexingPolicy;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.azure.cosmos.models.IncludedPath;
 
 import reactor.core.publisher.Flux;
@@ -36,6 +37,7 @@ import com.google.common.collect.Lists;
 
 public class Lab07Main {
     protected static Logger logger = LoggerFactory.getLogger(Lab07Main.class.getSimpleName());
+    private static ObjectMapper mapper = new ObjectMapper();
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase database;

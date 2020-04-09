@@ -28,6 +28,7 @@ import com.azure.cosmos.models.CosmosStoredProcedureResponse;
 import com.azure.cosmos.models.IndexingMode;
 import com.azure.cosmos.models.IndexingPolicy;
 import com.azure.cosmos.models.PartitionKey;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.azure.cosmos.models.IncludedPath;
 import com.azure.cosmos.models.CosmosAsyncStoredProcedureResponse;
 
@@ -42,6 +43,7 @@ import com.google.common.collect.Lists;
 
 public class Lab07Main {
     protected static Logger logger = LoggerFactory.getLogger(Lab07Main.class.getSimpleName());
+    private static ObjectMapper mapper = new ObjectMapper();
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase database;

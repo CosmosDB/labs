@@ -235,7 +235,6 @@ _You will now implement stored procedures that may execute longer than the bound
             .getStoredProcedure("bulkUpload")
             .execute(sprocArgs,options)
             .flatMap(executeResponse -> {
-               logger.info("Response: {}",executeResponse.getStatusCode());
                int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
                pointer += delta_items;
 
@@ -254,6 +253,7 @@ _You will now implement stored procedures that may execute longer than the bound
    ```java
    public class Lab07Main {
       protected static Logger logger = LoggerFactory.getLogger(Lab07Main.class.getSimpleName());
+      private static ObjectMapper mapper = new ObjectMapper();
       private static String endpointUri = "<your uri>";
       private static String primaryKey = "<your key>";    
       private static CosmosAsyncDatabase database;
@@ -300,7 +300,6 @@ _You will now implement stored procedures that may execute longer than the bound
                      .getStoredProcedure("bulkUpload")
                      .execute(sprocArgs,options)
                      .flatMap(executeResponse -> {
-                           logger.info("Response: {}",executeResponse.getStatusCode());
                            int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
                            pointer += delta_items;
 
@@ -321,7 +320,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. In the **Explorer** pane, right-click **Lab10Main.java** and choose the **Run** menu option.
 
-    ![Run Lab10Main.java](../media/10-vscode_run.jpg)
+    ![Run Lab07Main.java](../media/07-vscode_run.jpg)
 
     > This command will build and execute the console project.
 
@@ -375,54 +374,74 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. In the Visual Studio Code pane, double click the **Lab07Main.java** file to open it in the editor.
 
-1. Locate the **main** method and delete any existing code:
+1. Locate the point in the **main** method within the **Lab07Main** class where the Azure Cosmos DB client is created and delete any code you added.
 
    ```java
-   public static async Task Main(string[] args)
-   {
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
 
-   }
+         // <== Delete and then start adding code here
    ```
 
    > The next stored procedure returns a complex JSON object instead of a simple typed value. We use a custom `DeleteStatus` java class to deserialize the JSON object so we can use its data in our java code.
 
-1. Replace the **main** method with the following implementation:
+1. Next, find the very beginning of the ```Lab07Main``` class definition. Add the following line of code to create a variable named ```resume``` with a default value of **false** along with
 
    ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            Database database = client.GetDatabase(_databaseId);
-            Container container = database.GetContainer(_containerId);
-   
-            bool resume = true;
-            do
-            {
-                string query = "SELECT * FROM foods f WHERE f.foodGroup = 'Energy Bars'";
-                 StoredProcedureExecuteResponse<DeleteStatus> result = await container.Scripts.ExecuteStoredProcedureAsync<DeleteStatus>("bulkDelete", new PartitionKey("Energy Bars"),  new dynamic[] {query});
-                
-                await Console.Out.WriteLineAsync($"Batch Delete Completed.\tDeleted: {result.Resource.Deleted}\tContinue: {result.Resource.Continuation}");
-                resume = result.Resource.Continuation;
-            }
-            while (resume);
-        }
-    }
+   private static boolean resume = false;
+   ```
+
+1. Returning to the ```main``` method, add the following implementation:
+
+   ```java
+   resume = true;
+   do
+   {
+      String query = "SELECT * FROM foods f WHERE f.foodGroup = 'Energy Bars'";
+
+      CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
+      options.setPartitionKey(new PartitionKey("Energy Bars"));
+
+      Object sprocArgs[] = new Object[] {query};
+
+      container.getScripts()
+               .getStoredProcedure("bulkDelete")
+               .execute(sprocArgs,options)
+               .flatMap(executeResponse -> {
+
+                  DeleteStatus result = null;
+                  
+                  try {
+                        result = mapper.readValue(executeResponse.getResponseAsString(),DeleteStatus.class);
+                  } catch (Exception ex) {
+                        logger.error("Failed to parse bulkDelete response.",ex);
+                  }
+
+                  logger.info("Batch Delete Completed. Deleted: {} Continue: {} Items Uploaded in this Iteration",
+                        result.getDeleted(),
+                        result.isContinuation());
+
+                  resume = result.isContinuation();
+
+                  return Mono.empty();
+      }).block();
+   }
+   while (resume);
    ```
 
    > This code will execute the stored procedure that deletes documents as long as the **resume** variable is set to true. The stored procedure itself always returns an object, serialized as **DeleteStatus**, that has a boolean indicating whether we should continue deleting documents and a number indicating how many documents were deleted as part of this execution. Within the do-while loop, we simply store the value of the boolean returned from the stored procedure in our **resume** variable and continue executing the stored procedure until it returns a false value indicating that all documents were deleted.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-   ```sh
-   dotnet run
-   ```
-
-   > This command will build and execute the console project.
+1. Build and execute the project as you did earlier.
 
 1. Observe the results of the console project.
 
