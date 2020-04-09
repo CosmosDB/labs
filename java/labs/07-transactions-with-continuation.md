@@ -57,7 +57,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This stored procedure uploads an array of documents in one batch. If the entire batch is not completed, the stored procedure will set the response body to the number of documents that were imported. Your client-side code is expected to call this stored procedure multiple times until all documents are imported.
 
-   If you are having trouble copying the stored procedure above, the full source code for this stored procedure is located here: [bulk_upload.js](../solutions/05-authoring_stored_procedures/bulk_upload.js)
+   If you are having trouble copying the stored procedure above, the full source code for this stored procedure is located here: [bulk_upload.js](../solutions/src/main/java/com/azure/cosmos/handsonlabs/lab07/bulk_upload.js)
 
 1. Click the **Save** button at the top of the tab.
 
@@ -124,7 +124,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > This stored procedure iterates through all documents that match a specific query and deletes the documents. If the stored procedure is unable to delete all documents, it will return a continuation token. Your client-side code is expected to repeatedly call the stored procedure passing in a continuation token until the stored procedure does not return a continuation token.
 
-   If you are having trouble copying the stored procedure above, the full source code for this stored procedure is located here: [bulk_delete.js](../solutions/05-authoring_stored_procedures/bulk_delete.js)
+   If you are having trouble copying the stored procedure above, the full source code for this stored procedure is located here: [bulk_delete.js](../solutions/src/main/java/com/azure/cosmos/handsonlabs/lab07/bulk_delete.js)
 
 1. Click the **Save** button at the top of the tab.
 
@@ -140,7 +140,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. Open **Lab10Main.java** in the editor by clicking on it in the **Explorer** pane.
 
-    ![Open Lab10Main.java in editor](../media/10-vscode-first-time-editor.jpg)
+    ![Open Lab07Main.java in editor](../media/07-vscode-first-time-editor.jpg)
 
 1. In the Visual Studio Code window, in the **Explorer** pane, right-click the empty space in pane and choose the **Open in Terminal** menu option.
 
@@ -166,17 +166,17 @@ _You will now implement stored procedures that may execute longer than the bound
 
 ### Execute Bulk Upload Stored Procedure from Java SDK
 
-1. In the Visual Studio Code window, double click to open the **Program.cs** file
+1. In the Visual Studio Code window, double click to open the **Lab07Main.java** file
 
-1. Locate the **main** method within the **Program** class:
+1. Locate the **main** method within the **Lab07Main** class:
 
    ```java
-   public static async Task Main(string[] args)
+   public static void main(String[] args) {
    ```
 
-   > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 10,000 items using the Bogus library and the rules listed. The **Generate** method tells the Bogus library to use the rules to create the specified number of entities and store them in a generic **List<T>**.
+   > As a reminder, the Faker library generates a set of test data. In this example, you are creating 10,000 items using the Faker library and the rules listed. The ```Generate``` method tells the Bogus library to use the rules to create the specified number of entities and store them in a generic ```List<T>```.
 
-1. Within the **using** block, add the following line of code to create a variable named **pointer** with a default value of **zero**.
+1. After the code that creates the Azure Cosmos DB client, add the following line of code to create a variable named ```pointer``` with a default value of **zero**.
 
    ```java
    int pointer = 0;
@@ -184,7 +184,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > We are going to use this variable to determine how many documents were uploaded by our stored procedure.
 
-1. Still within the **using** block, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is _less than_ the amount of items in the **foods** collection:
+1. Next, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is _less than_ the amount of items in the **foods** collection:
 
    ```js
    while (pointer < foods.Count) {}
@@ -305,7 +305,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
 ### Execute Bulk Delete Stored Procedure from Java SDK
 
-1. In the Visual Studio Code pane, double click the **Program.cs** file to open it in the editor.
+1. In the Visual Studio Code pane, double click the **Lab07Main.java** file to open it in the editor.
 
 1. Locate the **main** method and delete any existing code:
 
