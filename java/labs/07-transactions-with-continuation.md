@@ -136,7 +136,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab07\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab07Main.java** file - this is the **main** class for the project.
+1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab07\\** folder. This directory is where you will develop code for this Lab. You should see a **Lab07Main.java** file - this is the ```main``` class for the project.
 
 1. Open **Lab07Main.java** in the editor by clicking on it in the **Explorer** pane.
 
@@ -168,7 +168,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. In the Visual Studio Code window, double click to open the **Lab07Main.java** file
 
-1. Locate the point in the **main** method within the **Lab07Main** class where the Azure Cosmos DB client is created:
+1. Locate the point in the ```main``` method within the **Lab07Main** class where the Azure Cosmos DB client is created:
 
    ```java
     public static void main(String[] args) {
@@ -184,6 +184,8 @@ _You will now implement stored procedures that may execute longer than the bound
 
          // <== Start adding code here
    ```
+
+   Add the following code to generate 1000 documents for testing Bulk Update and Delete:
 
    ```java
    List<Food> foods = new ArrayList<Food>();
@@ -213,7 +215,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
    > We are going to use this variable to determine how many documents were uploaded by our stored procedure.
 
-1. Next, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is _less than_ the amount of items in the **foods** collection:
+1. Now, back in ```main``` add the following **while** block to continue to iterate code as long as the value of the **pointer** field is _less than_ the amount of items in the **foods** collection:
 
    ```js
    while (pointer < foods.size()) {
@@ -374,7 +376,7 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. In the Visual Studio Code pane, double click the **Lab07Main.java** file to open it in the editor.
 
-1. Locate the point in the **main** method within the **Lab07Main** class where the Azure Cosmos DB client is created and delete any code you added.
+1. Locate the point in the ```main``` method within the **Lab07Main** class where the Azure Cosmos DB client is created and delete any code you added.
 
    ```java
     public static void main(String[] args) {
