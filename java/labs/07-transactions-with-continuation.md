@@ -168,15 +168,41 @@ _You will now implement stored procedures that may execute longer than the bound
 
 1. In the Visual Studio Code window, double click to open the **Lab07Main.java** file
 
-1. Locate the **main** method within the **Lab07Main** class:
+1. Locate the point in the **main** method within the **Lab07Main** class where the Azure Cosmos DB client is created:
 
    ```java
-   public static void main(String[] args) {
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+         // <== Start adding code here
    ```
 
-   > As a reminder, the Faker library generates a set of test data. In this example, you are creating 10,000 items using the Faker library and the rules listed. The ```Generate``` method tells the Bogus library to use the rules to create the specified number of entities and store them in a generic ```List<T>```.
+   ```java
+   List<Food> foods = new ArrayList<Food>();
+   Faker faker = new Faker();
 
-1. After the code that creates the Azure Cosmos DB client, add the following line of code to create a variable named ```pointer``` with a default value of **zero**.
+   for (int i= 0; i < 10000;i++){  
+      Food food = new Food(); 
+
+      food.setId(UUID.randomUUID().toString());
+      food.setDescription(faker.food().dish());
+      food.setManufacturerName(faker.company().name());
+      food.setFoodGroup("Energy Bars");
+      foods.add(food);
+   }   
+   ```   
+
+   > As a reminder, the Faker library generates a set of test data. In this example, you are creating 10,000 items using the Faker library and the rules listed. Then these items are collected in a ```List<Food>```.
+
+1. Next, add the following line of code to create a variable named ```pointer``` with a default value of **zero**.
 
    ```java
    int pointer = 0;
@@ -187,7 +213,7 @@ _You will now implement stored procedures that may execute longer than the bound
 1. Next, add the following **while** block to continue to iterate code as long as the value of the **pointer** field is _less than_ the amount of items in the **foods** collection:
 
    ```js
-   while (pointer < foods.Count) {}
+   while (pointer < foods.size()) {}
    ```
 
    > We are going to create a while loop that will keep uploading documents until the pointer's value greater than or equal to the amount of food objects in our object set.
@@ -195,52 +221,82 @@ _You will now implement stored procedures that may execute longer than the bound
 1. Within the **while** block, add the following lines of code to execute the stored procedure:
 
    ```java
-   StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), new dynamic[] {foods.Skip(pointer)});
+   CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
+   options.setPartitionKey(new PartitionKey("Energy Bars"));
+
+   Object sprocArgs[] = {foods};
+
+   container.getScripts()
+            .getStoredProcedure("bulkUpload")
+            .execute(sprocArgs,options)
+            .flatMap(executeResponse -> {
+               int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
+               pointer += delta_items;
+
+               logger.info("{} Total Items {} Items Uploaded in this Iteration",pointer,delta_items);
+
+               return Mono.empty();
+   }).block();
    ```
 
    > This line of code will execute the stored procedure using three parameters; the partition key for the data set you are executing against, the name of the stored procedure, and a list of **food** objects to send to the stored procedure.
 
-1. Still within the **while** block, add the following line of code to store the number returned by the stored procedure in the **pointer** variable:
-
-   ```java
-   pointer += result.Resource;
-   ```
-
-   > Every time the stored procedure returns how many documents were processed, we will increment the counter.
-
-1. Still within the **while** block, add the following line of code to print out the amount of documents uploaded in the current iteration:
-
-   ```java
-   await Console.Out.WriteLineAsync($"{pointer} Total Items\t{result.Resource} Items Uploaded in this Iteration");
-   ```
+   > Note that the last stage of this reactive stream retrieves the number of items processed by the stored procedure (```delta_items```), increments ```pointer``` by this amount to obtain the total progress, and then logs the progress of the stored procedure in operating on these items.
 
 1. Your **main** method should now look like this:
 
    ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            Database database = client.GetDatabase(_databaseId);
-            Container container = database.GetContainer(_containerId);
+   public static void main(String[] args) {
+      ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+      defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+   
+      CosmosAsyncClient client = new CosmosClientBuilder()
+               .setEndpoint(endpointUri)
+               .setKey(primaryKey)
+               .setConnectionPolicy(defaultPolicy)
+               .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+               .buildAsyncClient();
 
-            List<Food> foods = new Bogus.Faker<Food>()
-            .RuleFor(p => p.Id, f => (-1 - f.IndexGlobal).ToString())
-            .RuleFor(p => p.Description, f => f.Commerce.ProductName())
-            .RuleFor(p => p.ManufacturerName, f => f.Company.CompanyName())
-            .RuleFor(p => p.FoodGroup, f => "Energy Bars")
-            .Generate(10000);
+      database = client.getDatabase("NutritionDatabase");
+      container = database.getContainer("FoodCollection");
 
-            int pointer = 0;
-            while (pointer < foods.Count)
-            {
-                StoredProcedureExecuteResponse<int> result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), new dynamic[] {foods.Skip(pointer)});
-                pointer += result.Resource;
-                await Console.Out.WriteLineAsync($"{pointer} Total Items\t{result.Resource} Items Uploaded in this Iteration");
-            }
+      List<Food> foods = new ArrayList<Food>();
+      Faker faker = new Faker();
 
-        }
-    }
+      for (int i= 0; i < 10000;i++){  
+         Food food = new Food(); 
+
+         food.setId(UUID.randomUUID().toString());
+         food.setDescription(faker.food().dish());
+         food.setManufacturerName(faker.company().name());
+         food.setFoodGroup("Energy Bars");
+         foods.add(food);
+      }
+
+      while (pointer < foods.size()) {
+         //CosmosAsyncStoredProcedureResponse result = await container.Scripts.ExecuteStoredProcedureAsync<int>("bulkUpload", new PartitionKey("Energy Bars"), new dynamic[] {foods.Skip(pointer)});
+      
+         CosmosStoredProcedureRequestOptions options = new CosmosStoredProcedureRequestOptions();
+         options.setPartitionKey(new PartitionKey("Energy Bars"));
+   
+         Object sprocArgs[] = {foods};
+
+         container.getScripts()
+                  .getStoredProcedure("bulkUpload")
+                  .execute(sprocArgs,options)
+                  .flatMap(executeResponse -> {
+                     int delta_items = Integer.parseInt(executeResponse.getResponseAsString());
+                     pointer += delta_items;
+
+                     logger.info("{} Total Items {} Items Uploaded in this Iteration",pointer,delta_items);
+
+                     return Mono.empty();
+                  }).block();
+      
+      }
+
+      client.close();        
+   }
    ```
 
    > You will notice that our java code using the **Skip** method of the LINQ library to submit only the subset of our documents that are not yet uploaded. On the first execution of the while loop, we will skip **0** documents and attempt to upload all documents. When the stored procedure has finished executing, we will get a response indicating how many documents were uploaded. As an example, let's say **5000** documents were uploaded. The pointer will now be incremented to a value of **5000**. On the next check of the while loop's condition, **5000** will be evaluated to be less than **25000** causing another execution of the code in the while loop. The LINQ method will now skip **5000** documents and send the remaining **20000** documents to the stored procedure to upload. This loop will continue until all documents are uploaded. Also keep in mind that as of this writing, Cosmos DB has a 2 MB request limit on all calls. If your data is bigger than this test data, consider chaining `.Take()` to `foods.Skip(point)` to send a smaller payload with each request.

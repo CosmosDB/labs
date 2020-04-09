@@ -35,6 +35,13 @@ public class Food {
         this.nutrients = nutrients;
     }
 
+    public void addNutrient(Nutrient nutrient) {
+        if (this.nutrients == null)
+            this.nutrients = new ArrayList<Nutrient>();
+
+        this.nutrients.add(nutrient);
+    }
+
     public String getFoodGroup() {
         return foodGroup;
     }
