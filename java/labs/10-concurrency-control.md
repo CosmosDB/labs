@@ -18,7 +18,7 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
 
 1. Open **Lab10Main.java** in the editor by clicking on it in the **Explorer** pane.
 
-    ![Open Lab10Main.java in editor](../media/05-vscode-first-time-editor.jpg)
+    ![Open Lab10Main.java in editor](../media/10-vscode-first-time-editor.jpg)
 
 1. In the Visual Studio Code window, in the **Explorer** pane, right-click the empty space in pane and choose the **Open in Terminal** menu option.
 
