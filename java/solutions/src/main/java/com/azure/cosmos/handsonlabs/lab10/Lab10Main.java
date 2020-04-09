@@ -15,14 +15,20 @@ import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.handsonlabs.common.datatypes.Food;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
 import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
+import com.azure.cosmos.handsonlabs.common.datatypes.Tag;
+import com.azure.cosmos.models.AccessCondition;
+import com.azure.cosmos.models.AccessConditionType;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
 import com.azure.cosmos.models.CosmosContainerProperties;
+import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.IndexingMode;
 import com.azure.cosmos.models.IndexingPolicy;
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.IncludedPath;
 
 import reactor.core.publisher.Flux;
@@ -53,6 +59,40 @@ public class Lab10Main {
 
         database = client.getDatabase("NutritionDatabase");
         container = database.getContainer("FoodCollection");
+
+        container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
+            .flatMap(fastFoodResponse -> {
+                logger.info("Existing ETag: {}",fastFoodResponse.getResponseHeaders().get("etag"));
+
+                CosmosItemRequestOptions requestOptions = new CosmosItemRequestOptions();
+                AccessCondition accessCondition = new AccessCondition();
+                accessCondition.setType(AccessConditionType.IF_MATCH);
+                accessCondition.setCondition(fastFoodResponse.getResponseHeaders().get("etag"));
+                requestOptions.setAccessCondition(accessCondition);
+
+                Food fastFood = fastFoodResponse.getItem();
+                fastFood.addTag(new Tag("Demo"));
+
+                CosmosAsyncItemResponse<Food> upsertResponse =
+                 container.upsertItem(fastFood,requestOptions).block();
+
+                logger.info("New ETag: {}",upsertResponse.getResponseHeaders().get("etag"));
+
+                fastFood = upsertResponse.getItem();
+                fastFood.addTag(new Tag("Failure"));
+
+                try
+                {
+                    upsertResponse =
+                    container.upsertItem(fastFood,requestOptions).block();
+                }
+                catch (Exception ex)
+                {
+                    logger.error("Update error",ex);
+                }
+
+                return Mono.empty();
+        }).block();
 
         client.close();        
     }
