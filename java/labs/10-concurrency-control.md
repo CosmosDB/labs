@@ -64,7 +64,7 @@ _The SQL API supports optimistic concurrency control (OCC) through HTTP entity t
     client.close();
     ```
 
-1. Add the following lines of async code which use the **readItem** function to retrieve a single item from your Cosmos DB, identified by its partition key and id:
+1. Add the following lines of async code which use the ```readItem``` function to retrieve a single item from your Cosmos DB, identified by its partition key and id:
 
     ```java
     container.readItem("21083", new PartitionKey("Fast Foods"), Food.class)
