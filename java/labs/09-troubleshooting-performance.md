@@ -4,59 +4,42 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 > If this is your first lab and you have not already completed the setup for the lab content see the instructions for [Account Setup](00-account_setup.md) before starting this lab.
 
-## Create a Maven Project
+## Open the CosmosLabs Maven Project Template
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab09 folder that will be used to contain the content of your Java Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+1. Open Visual Studio Code.
 
-1. In the Lab09 folder, right-click the folder and select the **Open with Code** menu option.
+1. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **your\home\directory\Documents\CosmosLabs**. In Visual Studio Code, go to **File > Open Folder >** to get an Open Folder dialog and and use the dialog to open the CosmosLabs folder. 
 
-    > Alternatively, you can run a terminal in your current directory and execute the ``code .`` command.
+    ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab09\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab09Main.java** file - this is the **main** class for the project.
 
-1. In the terminal pane, enter and execute the following command:
+1. Open **Lab09Main.java** in the editor by clicking on it in the **Explorer** pane.
 
-    ```sh
-    dotnet restore
-    ```
+    ![Open Lab09Main.java in editor](../media/09-vscode-first-time-editor.jpg)
 
-    > This command will restore all packages specified as dependencies in the project.
+1. In the Visual Studio Code window, in the **Explorer** pane, right-click the empty space in pane and choose the **Open in Terminal** menu option.
 
-1. In the terminal pane, enter and execute the following command:
+    ![Open in terminal](../media/01-vscode_terminal.jpg)
 
-    ```sh
-    dotnet build
-    ```
-
-    > This command will build the project.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. In the **Explorer** pane verify that you have a **DataTypes.java** file in your project folder.
-
-    > This file contains the data classes you will be working with in the following steps.
-
-1. Double-click the **Lab09Main.java** link in the **Explorer** pane to open the file in the editor.
-
-1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value and for the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
-
-    > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";``.
-
-    > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
-    
-    > We will now execute build the application to make sure our code compiles successfully.
-
-1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. Let's start by building the template code. In the open terminal pane, enter and execute the following command:
 
     ```sh
-    dotnet build
+    mvn clean package
     ```
 
     > This command will build the console project.
+
+1. Click the **🗙** symbol to close the terminal pane.
+
+1. For the `endpointUri` variable, replace the placeholder value with the **URI** value and for the `primaryKey` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
+
+   > For example, if your **uri** is `https://cosmosacct.documents.azure.com:443/`, your new variable assignment will look like this: `private static String endpointUri = "https://cosmosacct.documents.azure.com:443/";`.
+
+   > For example, if your **primary key** is `elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==`, your new variable assignment will look like this: `private static String primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";`.
+
+   > We are now going to implement a sample query to make sure our client connection code works.
+
 
 ## Examining Response Headers
 
