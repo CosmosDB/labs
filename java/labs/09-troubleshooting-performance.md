@@ -226,9 +226,9 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
                                 new Family(new Person(), // spouse
                                             children)); // children
 
-    CosmosAsyncItemResponse<Member> response2 = peopleContainer.createItem(member).block();
+    CosmosAsyncItemResponse<Member> response = peopleContainer.createItem(member).block();
 
-    logger.info("Second item insert: {} RUs", response2.getRequestCharge());                                            
+    logger.info("Second item insert: {} RUs", response.getRequestCharge());                                            
     ```
 
     > This new block of code will create the large JSON object discussed above.
