@@ -41,7 +41,8 @@ public class Lab09Main {
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase database;
-    private static CosmosAsyncContainer container;  
+    private static CosmosAsyncContainer peopleContainer;  
+    private static CosmosAsyncContainer transactionContainer;   
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
         defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
@@ -53,8 +54,9 @@ public class Lab09Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("NutritionDatabase");
-        container = database.getContainer("FoodCollection");
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");
 
         client.close();        
     }

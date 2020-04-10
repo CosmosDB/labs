@@ -5,6 +5,8 @@ package com.azure.cosmos.handsonlabs.lab09;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.javafaker.Animal;
 import com.github.javafaker.Faker;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -15,6 +17,9 @@ import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.handsonlabs.common.datatypes.Family;
+import com.azure.cosmos.handsonlabs.common.datatypes.Member;
+import com.azure.cosmos.handsonlabs.common.datatypes.Person;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
 import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
@@ -41,10 +46,11 @@ public class Lab09Main {
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase database;
-    private static CosmosAsyncContainer container;  
+    private static CosmosAsyncContainer peopleContainer;  
+    private static CosmosAsyncContainer transactionContainer;      
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
-        defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US 2"));
     
         CosmosAsyncClient client = new CosmosClientBuilder()
                 .setEndpoint(endpointUri)
@@ -53,8 +59,35 @@ public class Lab09Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("NutritionDatabase");
-        container = database.getContainer("FoodCollection");
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");
+
+        Person person = new Person(); 
+        CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
+
+        logger.info("First item insert: {} RUs", response.getRequestCharge());
+
+        
+        List<Person> children = new ArrayList<Person>();
+        for (int i=0; i<4; i++) children.add(new Person());
+        Member member = new Member(UUID.randomUUID().toString(),
+                                   new Person(), // accountHolder
+                                   new Family(new Person(), // spouse
+                                              children)); // children
+
+        CosmosAsyncItemResponse<Member> response2 = peopleContainer.createItem(member).block();
+
+        logger.info("Second item insert: {} RUs", response2.getRequestCharge());
+
+        try {
+
+            System.out.println("\n\n" + mapper.writeValueAsString(new Person()) + "\n\n");
+
+        } catch (Exception ex) {
+            logger.error("Failed JSON.",ex);
+        }
+
 
         client.close();        
     }

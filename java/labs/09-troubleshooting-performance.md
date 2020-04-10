@@ -47,100 +47,112 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 ### Observe RU Charge for Large Item
 
-1. Locate the using block within the **Main** method:
+1. Locate the client-create/client-close block within the **main** method:
 
     ```java
-    using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-    {
-        var database = client.GetDatabase(_databaseId);
-        var peopleContainer = database.GetContainer(_peopleCollectionId);
-        var transactionContainer = database.GetContainer(_transactionCollectionId);
+    CosmosAsyncClient client = new CosmosClientBuilder()
+            .setEndpoint(endpointUri)
+            .setKey(primaryKey)
+            .setConnectionPolicy(defaultPolicy)
+            .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+            .buildAsyncClient();
 
-    }
+    database = client.getDatabase("FinancialDatabase");
+    peopleContainer = database.getContainer("PeopleCollection");
+    transactionContainer = database.getContainer("TransactionCollection");         
+
+    client.close();
     ```
     
-1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named **member**:
+1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named ```person```:
 
     ```java
-    object member = new Member { accountHolder = new Bogus.Person() };
+    Person person = new Person(); 
     ```
 
-    > The **Bogus** library has a special helper class (``Bogus.Person``) that will generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
+    > The ```Person``` class uses the **Faker** library to generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
     
-    ```js
+    ```json
     {
-        "Gender": 1,
-        "FirstName": "Rosalie",
-        "LastName": "Dach",
-        "FullName": "Rosalie Dach",
-        "UserName": "Rosalie_Dach",
-        "Avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/mastermindesign/128.jpg",
-        "Email": "Rosalie27@gmail.com",
-        "DateOfBirth": "1962-02-22T21:48:51.9514906-05:00",
-        "Address": {
-            "Street": "79569 Wilton Trail",
-            "Suite": "Suite 183",
-            "City": "Caramouth",
-            "ZipCode": "85941-7829",
-            "Geo": {
-                "Lat": -62.1607,
-                "Lng": -123.9278
+        "website":"boehm.com",
+        "gender":"female",
+        "firstName":"Aurea",
+        "lastName":"Schmeler",
+        "userName":"rhoda.price",
+        "avatar":"Rocky Mountain",
+        "email":"porter.abbott@gmail.com",
+        "dateOfBirth":-85629219547,
+        "address":{
+            "street":"Daron",
+            "suite":"9578",
+            "city":"Schoenhaven",
+            "state":"Massachusetts",
+            "zipCode":"97232",
+            "geo":{
+                "lat":-3.74887,
+                "lng":128.71832
             }
         },
-        "Phone": "303.318.0433 x5168",
-        "Website": "gerhard.com",
-        "Company": {
-            "Name": "Mertz - Gibson",
-            "CatchPhrase": "Focused even-keeled policy",
-            "Bs": "architect mission-critical markets"
+        "phone":"755-113-3899 x227",
+        "company":{
+            "name":"Thompson LLC",
+            "catchPhrase":"Visionary dynamic strategy",
+            "bs":"embrace proactive infrastructures"
         }
     }
     ```
 
-1. Add a new line of code to invoke the **CreateItemAsync** method of the **Container** instance using the **member** variable as a parameter:
+1. Add a new line of code to invoke the ```createItem``` method of the ```CosmosAsyncContainer``` instance using the ```person``` variable as a parameter:
 
     ```java
-    ItemResponse<object> response = await peopleContainer.CreateItemAsync(member);
+    CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
     ```
 
 1. After the last line of code in the using block, add a new line of code to print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
 
     ```java
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
+    logger.info("{} RUs", response.getRequestCharge());
     ```
 
 1. Your **Main** method should now look like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
-            object member = new Member { id = "example.document", accountHolder = new Bogus.Person() };
-            ItemResponse<object> response = await peopleContainer.CreateItemAsync(member);
-            await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");
-        }
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");
+
+
+        Person person = new Person(); 
+        CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
+
+        logger.info("{} RUs", response.getRequestCharge());
+
+        client.close();        
     }
     ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. In the **Explorer** pane, right-click **Lab09Main.java** and choose the **Run** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
+    ![Run Lab09Main.java](../media/09-vscode_run.jpg)
 
     > This command will build and execute the console project.
 
 1. Observe the results of the console project.
 
-    > You should see the document creation operation use approximately 10 RUs.
+    > You should see the document creation operation use between 10 and 20 RUs.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
@@ -174,9 +186,9 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. In the Visual Studio Code window, double-click the **Lab09Main.java** file to open an editor tab for the file.
 
-1. To view the RU charge for inserting a very large document, we will use the **Bogus** library to create a fictional family on our Member object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
+1. To view the RU charge for inserting a very large document, we will create a ```Family``` instance. The ```Family``` class uses the **Faker** library to create a fictional family on our ```Member``` object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
 
-    ```js
+    ```json
     {
         "accountHolder":  { ... }, 
         "relatives": {
@@ -191,43 +203,39 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    Each property will have a **Bogus**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
+    Each property will have a **Faker**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
 
 1. Within the **Lab09Main.java** editor tab, locate the **Main** method.
 
 1. Within the **Main** method, locate the following line of code: 
 
     ```java
-    object member = new Member { accountHolder = new Bogus.Person() };
+    Person person = new Person(); 
+    CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
+
+    logger.info("First item insert: {} RUs", response.getRequestCharge());
     ```
 
     Replace that line of code with the following code:
 
     ```java
-    object member = new Member
-    {
-        accountHolder = new Bogus.Person(),
-        relatives = new Family
-        {
-            spouse = new Bogus.Person(),
-            children = Enumerable.Range(0, 4).Select(r => new Bogus.Person())
-        }
-    };
+    List<Person> children = new ArrayList<Person>();
+    for (int i=0; i<4; i++) children.add(new Person());
+    Member member = new Member(UUID.randomUUID().toString(),
+                                new Person(), // accountHolder
+                                new Family(new Person(), // spouse
+                                            children)); // children
+
+    CosmosAsyncItemResponse<Member> response2 = peopleContainer.createItem(member).block();
+
+    logger.info("Second item insert: {} RUs", response2.getRequestCharge());                                            
     ```
 
     > This new block of code will create the large JSON object discussed above.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Right-click and run the project as you did previously.
 
 1. Observe the results of the console project.
 
