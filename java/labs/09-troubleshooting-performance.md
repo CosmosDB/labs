@@ -12,7 +12,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
     ![Open with Visual Studio Code](../media/01-vscode_open_folder.jpg)
 
-1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab09\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab09Main.java** file - this is the **main** class for the project.
+1. Expand the directory tree to **src\main\java\com\azure\cosmos\handsonlabs\\lab09\\** folder. This directory is where you will develop code for this Lab. You should see only a **Lab09Main.java** file - this is the ``main`` class for the project.
 
 1. Open **Lab09Main.java** in the editor by clicking on it in the **Explorer** pane.
 
@@ -47,7 +47,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 ### Observe RU Charge for Large Item
 
-1. Locate the client-create/client-close block within the **main** method:
+1. Locate the client-create/client-close block within the ``main`` method:
 
     ```java
     CosmosAsyncClient client = new CosmosClientBuilder()
@@ -64,13 +64,13 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     client.close();
     ```
     
-1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named ```person```:
+1. After the last line of code in the using block, add a new line of code to create a new object and store it in a variable named ``person``:
 
     ```java
     Person person = new Person(); 
     ```
 
-    > The ```Person``` class uses the **Faker** library to generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
+    > The ``Person`` class uses the **Faker** library to generate a fictional person with randomized properties. Here's an example of a fictional person JSON document:
     
     ```json
     {
@@ -102,7 +102,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-1. Add a new line of code to invoke the ```createItem``` method of the ```CosmosAsyncContainer``` instance using the ```person``` variable as a parameter:
+1. Add a new line of code to invoke the ``createItem`` method of the ``CosmosAsyncContainer`` instance using the ``person`` variable as a parameter:
 
     ```java
     CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
@@ -114,7 +114,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     logger.info("{} RUs", response.getRequestCharge());
     ```
 
-1. Your **Main** method should now look like this:
+1. Your ``main`` method should now look like this:
 
     ```java
     public static void main(String[] args) {
@@ -186,7 +186,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. In the Visual Studio Code window, double-click the **Lab09Main.java** file to open an editor tab for the file.
 
-1. To view the RU charge for inserting a very large document, we will create a ```Family``` instance. The ```Family``` class uses the **Faker** library to create a fictional family on our ```Member``` object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
+1. To view the RU charge for inserting a very large document, we will create a ``Family`` instance. The ``Family`` class uses the **Faker** library to create a fictional family on our ``Member`` object. To create a fictional family, we will generate a spouse and an array of 4 fictional children:
 
     ```json
     {
@@ -205,9 +205,9 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
     Each property will have a **Faker**-generated fictional person. This should create a large JSON document that we can use to observe RU charges.
 
-1. Within the **Lab09Main.java** editor tab, locate the **Main** method.
+1. Within the **Lab09Main.java** editor tab, locate the ``main`` method.
 
-1. Within the **Main** method, locate the following line of code: 
+1. Within the ``main`` method, locate the following line of code: 
 
     ```java
     Person person = new Person(); 
@@ -392,7 +392,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 ## Troubleshooting Requests
 
-*First, you will use the Java SDK to issue request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
+*First, you will use the Java SDK to issue a request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
 
 ### Reducing R/U Throughput for a Container
 
@@ -420,100 +420,93 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Double-click the **Lab09Main.java** link in the **Explorer** pane to open the file in the editor.
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
+    public static void main(String[] args) {
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
 
-        }
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");         
+
+        client.close();
     }
     ```
 
-    > For the next few instructions, we will use the **Bogus** library to create test data. This library allows you to create a collection of objects with fake data set on each object's property. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library. With that intent in mind, the next set of instructions will expedite the process of creating test data.
+    > For the next few instructions, we will generate test data by creating 100 ```Transaction``` instances. Internally the empty ```Transaction``` constructor uses the **Faker** library to populate the object fields. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library; therefore we will introduce the code that creates the dataset but not spend too much time discussing how it works internally.
 
 1. Add the following code to create a collection of ``Transaction`` instances:
 
     ```java
-    var transactions = new Bogus.Faker<Transaction>()
-        .RuleFor(t => t.id, (fake) => Guid.NewGuid().ToString())
-        .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-        .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-        .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-        .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-        .GenerateLazy(100);
+    List<Transaction> transactions = new ArrayList<Transaction>();
+    for (int i=0; i<100; i++) transactions.add(new Transaction());
     ```
-
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
     
 1. Add the following foreach block to iterate over the ``Transaction`` instances:
 
     ```java
-    foreach(var transaction in transactions)
-    {
+    for (Transaction transaction : transactions) {
+
     }
     ```
 
-1. Within the ``foreach`` block, add the following line of code to asynchronously create an item and save the result of the creation task to a variable:
+1. Within the foreach block, add the following line of code to asynchronously create an item and save the result of the creation task to a variable:
 
     ```java
-    ItemResponse<Transaction> result = await transactionContainer.CreateItemAsync(transaction);
+    CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
     ```
 
-    > The ``CreateItemAsync`` method of the ``Container`` class takes in an object that you would like to serialize into JSON and store as an item within the specified collection.
+    > The ``createItem`` method of the ``Container`` class takes in an object that you would like to serialize into JSON and store as an item within the specified collection.
 
-1. Still within the ``foreach`` block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
+1. Still within the foreach block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
     ```java
     await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
     ```
 
-    > The ``ItemResponse`` type has a property named ``Resource`` that can give you access to the item instance resulting from the operation.
+    > The ``CosmosAsyncItemResponse`` type has an access method named ``getItem`` that can give you access to the item instance resulting from the operation.
 
-1. Your **Main** method should look like this:
+1. Your ```main``` method should look like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {    
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
-            var transactions = new Bogus.Faker<Transaction>()
-                .RuleFor(t => t.id, (fake) => Guid.NewGuid().ToString())
-                .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-                .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-                .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-                .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-                .GenerateLazy(100);
-            foreach (var transaction in transactions)
-            {
-                ItemResponse<Transaction> result = await transactionContainer.CreateItemAsync(transaction);
-                await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
-            }
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US 2"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");
+
+        List<Transaction> transactions = new ArrayList<Transaction>();
+        for (int i=0; i<100; i++) transactions.add(new Transaction());
+
+        for (Transaction transaction : transactions) {
+            CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
+            logger.info("Item Created {}", result.getItem().getId());
         }
+
+        client.close();        
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates items in Azure Cosmos DB.
+    > As a reminder, under the hood the **Faker** library generates a set of test data inside of the ``Transaction`` constructor. 
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -549,7 +542,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
     > We are going to attempt to run as many of these creation tasks in parallel as possible. Remember, our container is configured at 400 RU/s.
 
-1. Your **Main** method should look like this:
+1. Your ```main``` method should look like this:
 
     ```java
     public static async Task Main(string[] args)
@@ -691,7 +684,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 ### Measuring RU Charge
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
     ```java
     public static async Task Main(string[] args)
@@ -844,7 +837,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 ### Managing SDK Query Options
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
     ```java
     public static async Task Main(string[] args)
@@ -1142,7 +1135,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Take note of the **id** property value of any document as well as that document's **partition key**.
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
     ```java
     public static async Task Main(string[] args)
@@ -1204,7 +1197,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
     ```java
     public static async Task Main(string[] args)
@@ -1269,7 +1262,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
     > Various parameters can be changed to adjust the data shown in the graphs and there is also an option to export data to csv for further analysis. For an existing application this can be helpful in determining your query volume.
 
-1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the **Main** method in **Lab09Main.java**:
+1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the ```main``` method in **Lab09Main.java**:
 
     ```java
     await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
@@ -1320,9 +1313,9 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 *Many applications have workloads that vary over time in a predictable way. For example, business applications that have a heavy workload during a 9-5 business day but minimal usage outside of those hours. Cosmos throughput settings can also be varied to match this type of usage pattern.*
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section:
+1. Locate the *using* block within the ```main``` method and delete the code added for the previous section:
 
-1. Locate the *using* block within the **Main** method and delete the code added for the previous section so it again looks like this:
+1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
     ```java
     public static async Task Main(string[] args)
