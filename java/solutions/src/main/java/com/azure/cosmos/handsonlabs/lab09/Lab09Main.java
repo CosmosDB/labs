@@ -21,6 +21,7 @@ import com.azure.cosmos.handsonlabs.common.datatypes.Family;
 import com.azure.cosmos.handsonlabs.common.datatypes.Member;
 import com.azure.cosmos.handsonlabs.common.datatypes.Person;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
+import com.azure.cosmos.handsonlabs.common.datatypes.Transaction;
 import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
@@ -80,14 +81,32 @@ public class Lab09Main {
 
         logger.info("Second item insert: {} RUs", response2.getRequestCharge());
 
-        try {
+        List<Transaction> transactions = new ArrayList<Transaction>();
+        for (int i=0; i<5000; i++) transactions.add(new Transaction());
 
-            System.out.println("\n\n" + mapper.writeValueAsString(new Person()) + "\n\n");
-
-        } catch (Exception ex) {
-            logger.error("Failed JSON.",ex);
+        /**
+         * Although this block of code uses Async API to insert Cosmos DB docs into a container,
+         * we are blocking on each createItem call, so this implementation is effectively Sync.
+         * We will not get enough throughput to saturate 400 RU/s with this approach.
+                 
+        for (Transaction transaction : transactions) {
+            CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
+            logger.info("Item Created {}", result.getItem().getId());
         }
 
+        */
+
+        /** Try this truly asynchronous use of createItem. You will see it can generate much more throughput to Azure Cosmos DB. */
+
+        Flux<Transaction> interactionsFlux = Flux.fromIterable(transactions);
+        List<CosmosAsyncItemResponse<Transaction>> results = 
+            interactionsFlux.flatMap(interaction -> {
+                return transactionContainer.createItem(interaction);
+        })
+        .collectList()
+        .block();
+
+        results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
 
         client.close();        
     }

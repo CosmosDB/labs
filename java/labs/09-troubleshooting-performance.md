@@ -439,13 +439,13 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > For the next few instructions, we will generate test data by creating 100 ```Transaction``` instances. Internally the empty ```Transaction``` constructor uses the **Faker** library to populate the object fields. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library; therefore we will introduce the code that creates the dataset but not spend too much time discussing how it works internally.
+    > For the next few instructions, we will generate test data by creating 10 ```Transaction``` instances. Internally the empty ```Transaction``` constructor uses the **Faker** library to populate the object fields. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library; therefore we will introduce the code that creates the dataset but not spend too much time discussing how it works internally.
 
 1. Add the following code to create a collection of ``Transaction`` instances:
 
     ```java
     List<Transaction> transactions = new ArrayList<Transaction>();
-    for (int i=0; i<100; i++) transactions.add(new Transaction());
+    for (int i=0; i<10; i++) transactions.add(new Transaction());
     ```
     
 1. Add the following foreach block to iterate over the ``Transaction`` instances:
@@ -491,7 +491,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
         transactionContainer = database.getContainer("TransactionCollection");
 
         List<Transaction> transactions = new ArrayList<Transaction>();
-        for (int i=0; i<100; i++) transactions.add(new Transaction());
+        for (int i=0; i<10; i++) transactions.add(new Transaction());
 
         for (Transaction transaction : transactions) {
             CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
@@ -514,30 +514,27 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Back in the code editor tab, locate the following lines of code:
+1. Although this code uses the Async API to insert documents into an Azure Cosmos DB container, we are using the API in a synchronous manner by blocking on each ``createItem`` call. A sync implementation on one thread probably can't saturate the container provisioned throughput. Now let's rewrite this ``createItem`` calls in an async Reactive Streams fashion and see what happens when we saturate the full 400 RU/s provisioned for the container. Back in the code editor tab, locate the following lines of code:
 
     ```java
-    foreach (var transaction in transactions)
-    {
-        ItemResponse<Transaction> result = await transactionContainer.CreateItemAsync(transaction);
-        await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
+    for (Transaction transaction : transactions) {
+        CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
+        logger.info("Item Created {}", result.getItem().getId());
     }
     ```
 
     Replace those lines of code with the following code:
 
     ```java
-    List<Task<ItemResponse<Transaction>>> tasks = new List<Task<ItemResponse<Transaction>>>();
-    foreach (var transaction in transactions)
-    {
-        Task<ItemResponse<Transaction>> resultTask = transactionContainer.CreateItemAsync(transaction);
-        tasks.Add(resultTask);
-    }
-    Task.WaitAll(tasks.ToArray());
-    foreach (var task in tasks)
-    {
-        await Console.Out.WriteLineAsync($"Item Created\t{task.Result.Resource.id}");
-    }
+    Flux<Transaction> interactionsFlux = Flux.fromIterable(transactions);
+    List<CosmosAsyncItemResponse<Transaction>> results = 
+        interactionsFlux.flatMap(interaction -> {
+            return transactionContainer.createItem(interaction);
+    })
+    .collectList()
+    .block();
+
+    results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
     ```
 
     > We are going to attempt to run as many of these creation tasks in parallel as possible. Remember, our container is configured at 400 RU/s.
@@ -545,48 +542,62 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Your ```main``` method should look like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
-            var transactions = new Bogus.Faker<Transaction>()
-                .RuleFor(t => t.id, (fake) => Guid.NewGuid().ToString())
-                .RuleFor(t => t.amount, (fake) => Math.Round(fake.Random.Double(5, 500), 2))
-                .RuleFor(t => t.processed, (fake) => fake.Random.Bool(0.6f))
-                .RuleFor(t => t.paidBy, (fake) => $"{fake.Name.FirstName().ToLower()}.{fake.Name.LastName().ToLower()}")
-                .RuleFor(t => t.costCenter, (fake) => fake.Commerce.Department(1).ToLower())
-                .GenerateLazy(100);
-            List<Task<ItemResponse<Transaction>>> tasks = new List<Task<ItemResponse<Transaction>>>();
-            foreach (var transaction in transactions)
-            {
-                Task<ItemResponse<Transaction>> resultTask = transactionContainer.CreateItemAsync(transaction);
-                tasks.Add(resultTask);
-            }
-            Task.WaitAll(tasks.ToArray());
-            foreach (var task in tasks)
-            {
-                await Console.Out.WriteLineAsync($"Item Created\t{task.Result.Resource.id}");
-            }
-        }  
+    public static void main(String[] args) {
+        ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("your-cosmosdb-account-location"));
+    
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");
+
+        Person person = new Person(); 
+        CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
+
+        logger.info("First item insert: {} RUs", response.getRequestCharge());
+
+        
+        List<Person> children = new ArrayList<Person>();
+        for (int i=0; i<4; i++) children.add(new Person());
+        Member member = new Member(UUID.randomUUID().toString(),
+                                   new Person(), // accountHolder
+                                   new Family(new Person(), // spouse
+                                              children)); // children
+
+        CosmosAsyncItemResponse<Member> response2 = peopleContainer.createItem(member).block();
+
+        logger.info("Second item insert: {} RUs", response2.getRequestCharge());
+
+        List<Transaction> transactions = new ArrayList<Transaction>();
+        for (int i=0; i<10; i++) transactions.add(new Transaction());
+
+        Flux<Transaction> interactionsFlux = Flux.fromIterable(transactions);
+        List<CosmosAsyncItemResponse<Transaction>> results = 
+            interactionsFlux.flatMap(interaction -> {
+                return transactionContainer.createItem(interaction);
+        })
+        .collectList()
+        .block();
+
+        results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
+
+        client.close();        
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 100 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 100 items by returning a variable of type **IEnumerable<Transaction>**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loops at the end of this code block iterates over the collection and creates asynchronous tasks. Each asynchronous task will issue a request to Azure Cosmos DB. These requests are issued in parallel and should cause an exceptional scenario since your  does not have enough assigned throughput to handle the volume of requests.
+    > In this implementation we use a **Reactor factory method** ``Flux.fromIterable`` to create a Reactive Flux ``interactionsFlux`` from our ``Transaction`` list. We then use ``interactionsFlux`` as the ``Publisher`` in a Reactive Streams pipeline which issues successive ``createItem`` requests without waiting for the previous request to complete. Thus this is an Async implementation. The **for-each** loop at the end of this code block iterates over the request results and prints a notification for each. Since these requests are issued nearly in parallel they should cause an exceptional scenario since your machine does not have enough assigned throughput to handle the volume of requests.
 
 1. Save all of your open editor tabs.
 
 1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -597,30 +608,22 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Back in the code editor tab, locate the following line of code:
 
     ```java
-    .GenerateLazy(100);
+            for (int i=0; i<10; i++) transactions.add(new Transaction());
     ```
 
     Replace that line of code with the following code:
 
     ```java
-    .GenerateLazy(5000);
+            for (int i=0; i<5000; i++) transactions.add(new Transaction());
     ```
 
     > We are going to try and create 5000 items in parallel to see if we can hit out throughput limit.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
+1. Run the project.
 
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
-
-1. Observe that the application will crash after some time.
+1. Observe that the application will begin issuing error messages and possibly crash during this time.
 
     > This query will most likely hit our throughput limit. You will see multiple error messages indicating that specific requests have failed.
 
