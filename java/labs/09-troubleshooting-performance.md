@@ -602,7 +602,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-### Increasing R/U Throughput to Reduce Throttling
+### Increasing RU Throughput to Reduce Throttling
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -651,8 +651,6 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 *You will now tune your requests to Azure Cosmos DB by manipulating the SQL query and properties of the **RequestOptions** class in the Java SDK.*
 
 ### Measuring RU Charge
-
-1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
 1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
@@ -881,7 +879,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     int maxDegreeOfParallelism = 5;
     ```
 
-    > Setting the ``maxConcurrency`` query parameter to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
+    > Setting the ``maxDegreeOfParallelism`` query parameter to a value of ``1`` effectively eliminates parallelism. Here we "bump up" the parallelism to a value of ``5``.
 
 1. Save all of your open editor tabs.
 
@@ -924,7 +922,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     int maxDegreeOfParallelism = -1;
     ```
 
-    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned container is fetched serially with respect to the query setting the ``maxConcurrency`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
+    > Parallel query works by querying multiple partitions in parallel. However, data from an individual partitioned container is fetched serially with respect to the query setting the ``maxDegreeOfParallelism`` property to a value of ``-1`` effectively tells the SDK to manage this setting. Setting the **MaxDegreeOfParallelism** to the number of partitions has the maximum chance of achieving the most performant query, provided all other system conditions remain the same.
 
 1. Save all of your open editor tabs.
 
