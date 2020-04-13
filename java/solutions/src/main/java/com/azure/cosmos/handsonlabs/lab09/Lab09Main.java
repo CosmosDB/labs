@@ -5,6 +5,8 @@ package com.azure.cosmos.handsonlabs.lab09;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.javafaker.Animal;
 import com.github.javafaker.Faker;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -15,7 +17,11 @@ import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.handsonlabs.common.datatypes.Family;
+import com.azure.cosmos.handsonlabs.common.datatypes.Member;
+import com.azure.cosmos.handsonlabs.common.datatypes.Person;
 import com.azure.cosmos.handsonlabs.common.datatypes.PurchaseFoodOrBeverage;
+import com.azure.cosmos.handsonlabs.common.datatypes.Transaction;
 import com.azure.cosmos.handsonlabs.common.datatypes.ViewMap;
 import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
@@ -41,10 +47,11 @@ public class Lab09Main {
     private static String endpointUri = "<your uri>";
     private static String primaryKey = "<your key>";   
     private static CosmosAsyncDatabase database;
-    private static CosmosAsyncContainer container;  
+    private static CosmosAsyncContainer peopleContainer;  
+    private static CosmosAsyncContainer transactionContainer;      
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
-        defaultPolicy.setPreferredLocations(Lists.newArrayList("<your cosmos db account location>"));
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US 2"));
     
         CosmosAsyncClient client = new CosmosClientBuilder()
                 .setEndpoint(endpointUri)
@@ -53,8 +60,53 @@ public class Lab09Main {
                 .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
                 .buildAsyncClient();
 
-        database = client.getDatabase("NutritionDatabase");
-        container = database.getContainer("FoodCollection");
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");
+
+        Person person = new Person(); 
+        CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
+
+        logger.info("First item insert: {} RUs", response.getRequestCharge());
+
+        
+        List<Person> children = new ArrayList<Person>();
+        for (int i=0; i<4; i++) children.add(new Person());
+        Member member = new Member(UUID.randomUUID().toString(),
+                                   new Person(), // accountHolder
+                                   new Family(new Person(), // spouse
+                                              children)); // children
+
+        CosmosAsyncItemResponse<Member> response2 = peopleContainer.createItem(member).block();
+
+        logger.info("Second item insert: {} RUs", response2.getRequestCharge());
+
+        List<Transaction> transactions = new ArrayList<Transaction>();
+        for (int i=0; i<5000; i++) transactions.add(new Transaction());
+
+        /**
+         * Although this block of code uses Async API to insert Cosmos DB docs into a container,
+         * we are blocking on each createItem call, so this implementation is effectively Sync.
+         * We will not get enough throughput to saturate 400 RU/s with this approach.
+                 
+        for (Transaction transaction : transactions) {
+            CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
+            logger.info("Item Created {}", result.getItem().getId());
+        }
+
+        */
+
+        /** Try this truly asynchronous use of createItem. You will see it can generate much more throughput to Azure Cosmos DB. */
+
+        Flux<Transaction> interactionsFlux = Flux.fromIterable(transactions);
+        List<CosmosAsyncItemResponse<Transaction>> results = 
+            interactionsFlux.flatMap(interaction -> {
+                return transactionContainer.createItem(interaction);
+        })
+        .collectList()
+        .block();
+
+        results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
 
         client.close();        
     }
