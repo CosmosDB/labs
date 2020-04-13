@@ -1134,7 +1134,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the ```main``` method in **Lab09Main.java**:
 
     ```java
-    logger.info("\n\n{} RUs\n\n",pointReadResponse.getRequestCharge());
+    logger.info("\n\n{} RUs\n\n",response.getRequestCharge());
     ```
 
 1. Following that line, add the following code to use the ```createItem``` method of the ```CosmosAsyncContainer``` class to add a new item and print out the value of the **RequestCharge** property:
@@ -1179,8 +1179,6 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 ### Adjusting for Usage Patterns
 
 *Many applications have workloads that vary over time in a predictable way. For example, business applications that have a heavy workload during a 9-5 business day but minimal usage outside of those hours. Cosmos throughput settings can also be varied to match this type of usage pattern.*
-
-1. Locate the *using* block within the ```main``` method and delete the code added for the previous section:
 
 1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
