@@ -3,6 +3,7 @@
 
 package com.azure.cosmos.handsonlabs.lab09;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,10 @@ import com.azure.cosmos.handsonlabs.common.datatypes.WatchLiveTelevisionChannel;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.azure.cosmos.models.FeedOptions;
 import com.azure.cosmos.models.IndexingMode;
 import com.azure.cosmos.models.IndexingPolicy;
+import com.azure.cosmos.models.PartitionKey;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.azure.cosmos.models.IncludedPath;
 
@@ -38,7 +41,10 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 public class Lab09Main {
@@ -52,7 +58,7 @@ public class Lab09Main {
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
         defaultPolicy.setPreferredLocations(Lists.newArrayList("West US 2"));
-    
+
         CosmosAsyncClient client = new CosmosClientBuilder()
                 .setEndpoint(endpointUri)
                 .setKey(primaryKey)
@@ -82,7 +88,7 @@ public class Lab09Main {
         logger.info("Second item insert: {} RUs", response2.getRequestCharge());
 
         List<Transaction> transactions = new ArrayList<Transaction>();
-        for (int i=0; i<5000; i++) transactions.add(new Transaction());
+        for (int i=0; i<100; i++) transactions.add(new Transaction());
 
         /**
          * Although this block of code uses Async API to insert Cosmos DB docs into a container,
@@ -98,9 +104,9 @@ public class Lab09Main {
 
         /** Try this truly asynchronous use of createItem. You will see it can generate much more throughput to Azure Cosmos DB. */
 
-        Flux<Transaction> interactionsFlux = Flux.fromIterable(transactions);
+        Flux<Transaction> transactionsFlux = Flux.fromIterable(transactions);
         List<CosmosAsyncItemResponse<Transaction>> results = 
-            interactionsFlux.flatMap(interaction -> {
+            transactionsFlux.flatMap(interaction -> {
                 return transactionContainer.createItem(interaction);
         })
         .collectList()
@@ -108,6 +114,72 @@ public class Lab09Main {
 
         results.forEach(result -> logger.info("Item Created\t{}",result.getItem().getId()));
 
+        int maxItemCount = 1000;
+        int maxDegreeOfParallelism = -1;
+        int maxBufferedItemCount = -1;
+
+        FeedOptions options = new FeedOptions();
+        options.setMaxItemCount(maxItemCount);
+        options.setMaxBufferedItemCount(maxBufferedItemCount);
+        options.setMaxDegreeOfParallelism(maxDegreeOfParallelism);
+
+        logger.info("\n\n" +
+                    "MaxItemCount:\t{}\n" +
+                    "MaxDegreeOfParallelism:\t{}\n" +
+                    "MaxBufferedItemCount:\t{}" + 
+                    "\n\n",
+                    maxItemCount, maxDegreeOfParallelism, maxBufferedItemCount);
+
+        String sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";                    
+
+        StopWatch timer = StopWatch.createStarted();
+
+        transactionContainer.queryItems(sql, options, Transaction.class)
+                .byPage()
+                .flatMap(page -> {
+                //Don't do anything with the query page results
+                return Mono.empty();
+        }).blockLast();
+
+        timer.stop();
+
+        logger.info("\n\nElapsed Time:\t{}s\n\n", ((double)timer.getTime(TimeUnit.MILLISECONDS))/1000.0);
+
+        String sqlItemQuery = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";                    
+
+        FeedOptions optionsItemQuery = new FeedOptions();
+
+        peopleContainer.queryItems(sqlItemQuery, optionsItemQuery, Member.class)
+                .byPage()
+                .next()
+                .flatMap(page -> {
+                logger.info("\n\n" +
+                            "{} RUs for\n" +
+                            "{}" + 
+                            "\n\n",
+                            page.getRequestCharge(),
+                            page.getElements().iterator().next());
+                return Mono.empty();
+        }).block();
+
+        peopleContainer.readItem("example.document", new PartitionKey("<LastName>"), Member.class)
+        .flatMap(pointReadResponse -> {
+           int expectedWritesPerSec = 200;
+           int expectedReadsPerSec = 800;
+           logger.info("\n\n{} RUs\n\n",pointReadResponse.getRequestCharge());
+           logger.info("\n\nEstimated load: {} RU per sec\n\n",
+                response.getRequestCharge() * expectedReadsPerSec + response.getRequestCharge() * expectedWritesPerSec);           
+           return Mono.empty();
+        }).block();
+        
+        Member memberItem = new Member();
+        CosmosAsyncItemResponse<Member> createResponse = peopleContainer.createItem(memberItem).block();
+        logger.info("{} RUs", createResponse.getRequestCharge());
+
+        int throughput = peopleContainer.readProvisionedThroughput().block();
+        logger.info("{} RU per sec", throughput);
+        peopleContainer.replaceProvisionedThroughput(1000).block();
+        
         client.close();        
     }
 }
