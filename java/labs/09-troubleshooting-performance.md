@@ -439,13 +439,13 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > For the next few instructions, we will generate test data by creating 10 ```Transaction``` instances. Internally the empty ```Transaction``` constructor uses the **Faker** library to populate the object fields. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library; therefore we will introduce the code that creates the dataset but not spend too much time discussing how it works internally.
+    > For the next few instructions, we will generate test data by creating 100 ```Transaction``` instances. Internally the empty ```Transaction``` constructor uses the **Faker** library to populate the object fields. For this lab, our intent is to **focus on Azure Cosmos DB** instead of this library; therefore we will introduce the code that creates the dataset but not spend too much time discussing how it works internally.
 
 1. Add the following code to create a collection of ``Transaction`` instances:
 
     ```java
     List<Transaction> transactions = new ArrayList<Transaction>();
-    for (int i=0; i<10; i++) transactions.add(new Transaction());
+    for (int i=0; i<100; i++) transactions.add(new Transaction());
     ```
     
 1. Add the following foreach block to iterate over the ``Transaction`` instances:
@@ -477,7 +477,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     ```java
     public static void main(String[] args) {
         ConnectionPolicy defaultPolicy = ConnectionPolicy.getDefaultPolicy();
-        defaultPolicy.setPreferredLocations(Lists.newArrayList("West US 2"));
+        defaultPolicy.setPreferredLocations(Lists.newArrayList("your-cosmosdb-account-location"));
     
         CosmosAsyncClient client = new CosmosClientBuilder()
                 .setEndpoint(endpointUri)
@@ -491,7 +491,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
         transactionContainer = database.getContainer("TransactionCollection");
 
         List<Transaction> transactions = new ArrayList<Transaction>();
-        for (int i=0; i<10; i++) transactions.add(new Transaction());
+        for (int i=0; i<100; i++) transactions.add(new Transaction());
 
         for (Transaction transaction : transactions) {
             CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
@@ -557,25 +557,8 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
         peopleContainer = database.getContainer("PeopleCollection");
         transactionContainer = database.getContainer("TransactionCollection");
 
-        Person person = new Person(); 
-        CosmosAsyncItemResponse<Person> response = peopleContainer.createItem(person).block();
-
-        logger.info("First item insert: {} RUs", response.getRequestCharge());
-
-        
-        List<Person> children = new ArrayList<Person>();
-        for (int i=0; i<4; i++) children.add(new Person());
-        Member member = new Member(UUID.randomUUID().toString(),
-                                   new Person(), // accountHolder
-                                   new Family(new Person(), // spouse
-                                              children)); // children
-
-        CosmosAsyncItemResponse<Member> response2 = peopleContainer.createItem(member).block();
-
-        logger.info("Second item insert: {} RUs", response2.getRequestCharge());
-
         List<Transaction> transactions = new ArrayList<Transaction>();
-        for (int i=0; i<10; i++) transactions.add(new Transaction());
+        for (int i=0; i<100; i++) transactions.add(new Transaction());
 
         Flux<Transaction> interactionsFlux = Flux.fromIterable(transactions);
         List<CosmosAsyncItemResponse<Transaction>> results = 
@@ -601,23 +584,23 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Observe the output of the console application.
 
-    > This query should execute successfully. We are only creating 100 items and we most likely will not run into any throughput issues here.
+    > This query should execute successfully. We are only creating 10 items and we most likely will not run into any throughput issues here.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
 1. Back in the code editor tab, locate the following line of code:
 
     ```java
-            for (int i=0; i<10; i++) transactions.add(new Transaction());
+    for (int i=0; i<100; i++) transactions.add(new Transaction());
     ```
 
     Replace that line of code with the following code:
 
     ```java
-            for (int i=0; i<5000; i++) transactions.add(new Transaction());
+    for (int i=0; i<5000; i++) transactions.add(new Transaction());
     ```
 
-    > We are going to try and create 5000 items in parallel to see if we can hit out throughput limit.
+    > We are going to try and create 5000 items in parallel to see if we can hit the container throughput limit. The numbers will depend highly on your PC hardware specs so you may need to tweak the document count.
 
 1. Save all of your open editor tabs.
 
@@ -649,29 +632,21 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Back in the code editor tab, locate the following line of code:
 
-    ```java
-    .GenerateLazy(5000);
+    ```csharp
+    for (int i=0; i<5000; i++) transactions.add(new Transaction());
     ```
 
     Replace that line of code with the following code:
 
-    ```java
-    .GenerateLazy(10000);
+    ```csharp
+    for (int i=0; i<10000; i++) transactions.add(new Transaction());
     ```
 
     > We are going to try creating 10000 items in parallel against the new higher throughput limit.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe that the application will complete after some time.
 
@@ -689,58 +664,52 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
 
-    ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
+1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
-        }
+    ```java
+    public static void main(String[] args) {
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");         
+
+        client.close();
     }
     ```
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
     ```java
-    string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
+    String sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     > This query will perform a cross-partition ORDER BY and only return the top 1000 out of 50000 items.
 
-1. Add the following line of code to create a item query instance:
-
-    ```java
-    FeedIterator<Transaction> query = transactionContainer.GetItemQueryIterator<Transaction>(sql);
-    ```
-
-1. Add the following line of code to get the first "page" of results:
-
-    ```java
-    var result = await query.ReadNextAsync();
-    ```
+1. Add the following Reactive Stream code which creates an item query instance. Let's take only the first "page" of results. We'll include a line which prints out the Request Charge metric for the query to the console:
 
     > We will not enumerate the full result set. We are only interested in the metrics for the first page of results.
 
-1. Add the following lines of code to print out the Request Charge metric for the query to the console:
-
     ```java
-    await Console.Out.WriteLineAsync($"Request Charge: {result.RequestCharge} RUs");
+    FeedOptions options = new FeedOptions();
+    //optionsA.setMaxDegreeOfParallelism(1);
+    transactionContainer.queryItems(sql, options, Transaction.class)
+            .byPage()
+            .next() // Take only the first page
+            .flatMap(page -> {
+            logger.info("Request Charge: {} RUs",page.getRequestCharge());
+            return Mono.empty();
+    }).block();
     ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -751,62 +720,46 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Back in the code editor tab, locate the following line of code:
 
     ```java
-    string sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
+    String sql = "SELECT TOP 1000 * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     Replace that line of code with the following code:
 
     ```java
-    string sql = "SELECT * FROM c WHERE c.processed = true";
+    String sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
     > This new query does not perform a cross-partition ORDER BY.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
-    > You should see a reduction in both the **Request Charge** value.
+    > You should see a reduction in the **Request Charge** value.
 
 1. Back in the code editor tab, locate the following line of code:
 
     ```java
-    string sql = "SELECT * FROM c WHERE c.processed = true";
+    String sql = "SELECT * FROM c WHERE c.processed = true";
     ```
 
     Replace that line of code with the following code:
 
     ```java
-    string sql = "SELECT * FROM c";
+    String sql = "SELECT * FROM c";
     ```
 
     > This new query does not filter the result set.
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
-    > Observe the slight differences in the various metric values.
+    > The **Request Charge** should be even lower.
 
 1. Back in the code editor tab, locate the following line of code:
 
@@ -824,34 +777,30 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
-    > Observe the slight differences in the metric value.
+    > Observe the slight differences in the **Request Charge** value.
 
 ### Managing SDK Query Options
 
-1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
+1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
+    public static void main(String[] args) {
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
 
-        }
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");         
+
+        client.close();
     }
     ```
 
@@ -866,26 +815,27 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Add the following lines of code to configure options for a query from the variables:
 
     ```java
-    QueryRequestOptions options = new QueryRequestOptions
-    {
-        MaxItemCount = maxItemCount,
-        MaxBufferedItemCount = maxBufferedItemCount,
-        MaxConcurrency = maxDegreeOfParallelism
-    };
+    FeedOptions options = new FeedOptions();
+    options.setMaxItemCount(maxItemCount);
+    options.setMaxBufferedItemCount(maxBufferedItemCount);
+    options.setMaxDegreeOfParallelism(maxDegreeOfParallelism);
     ```
 
-1. Add the following lines of code to write various values to the console window:
+1. Add the following code to write various values to the console window:
 
     ```java
-    await Console.Out.WriteLineAsync($"MaxItemCount:\t{maxItemCount}");
-    await Console.Out.WriteLineAsync($"MaxDegreeOfParallelism:\t{maxDegreeOfParallelism}");
-    await Console.Out.WriteLineAsync($"MaxBufferedItemCount:\t{maxBufferedItemCount}");
+    logger.info("\n\n" +
+                "MaxItemCount:\t{}\n" +
+                "MaxDegreeOfParallelism:\t{}\n" +
+                "MaxBufferedItemCount:\t{}" + 
+                "\n\n",
+                maxItemCount, maxDegreeOfParallelism, maxBufferedItemCount);
     ```
 
 1. Add the following line of code that will store a SQL query in a string variable:
 
     ```java
-    string sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
+    String sql = "SELECT * FROM c WHERE c.processed = true ORDER BY c.amount DESC";
     ```
 
     > This query will perform a cross-partition ORDER BY on a filtered result set.
@@ -893,49 +843,37 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Add the following line of code to create and start new a high-precision timer:
 
     ```java
-    Stopwatch timer = Stopwatch.StartNew();
+    StopWatch timer = StopWatch.createStarted();
     ```
 
-1. Add the following line of code to create a item query instance:
+1. Add the following line of code to create a item query instance and enumerate the result set:
 
     ```java
-    FeedIterator<Transaction> query = transactionContainer.GetItemQueryIterator<Transaction>(sql, requestOptions: options);
+    transactionContainer.queryItems(sql, options, Transaction.class)
+            .byPage()
+            .flatMap(page -> {
+            //Don't do anything with the query page results
+            return Mono.empty();
+    }).blockLast();
     ```
 
-1. Add the following lines of code to enumerate the result set.
-
-    ```java
-    while (query.HasMoreResults)  
-    {
-        var result = await query.ReadNextAsync();
-    }
-    ```
-
-    > Since the results are paged, we will need to call the ``ReadNextAsync`` method multiple times in a while loop.
+    > Since the results are paged and the pages are exposed a ```Flux```, we will use ```flatMap``` to service each page.
 
 1. Add the following line of code stop the timer:
 
     ```java
-    timer.Stop();
+    timer.stop();
     ```
 
 1. Add the following line of code to write the timer's results to the console window:
 
     ```java
-    await Console.Out.WriteLineAsync($"Elapsed Time:\t{timer.Elapsed.TotalSeconds}");
+    logger.info("\n\nElapsed Time:\t{}s\n\n", ((double)timer.getTime(TimeUnit.MILLISECONDS))/1000.0);
     ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -957,15 +895,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -987,15 +917,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1016,15 +938,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1046,15 +960,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1076,15 +982,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1106,15 +1004,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1138,61 +1028,55 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Take note of the **id** property value of any document as well as that document's **partition key**.
 
-1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
+1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
-    
-        }
+    public static void main(String[] args) {
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
+
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");         
+
+        client.close();
     }
     ```
 
 1. Add the following line of code that will store a SQL query in a string variable (replacing **example.document** with the **id ** value that you noted earlier):
 
     ```java
-    string sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
+    String sql = "SELECT TOP 1 * FROM c WHERE c.id = 'example.document'";
     ```
 
     > This query will find a single item matching the specified unique id.
 
-1. Add the following line of code to create a item query instance:
+1. Add the following line of code to create an item query instance and get the first page of results. We'll also print out the value of the **RequestCharge** property for the page and then the content of the retrieved item:
 
     ```java
-    FeedIterator<object> query = peopleContainer.GetItemQueryIterator<object>(sql);
-    ```
+    FeedOptions options = new FeedOptions();
 
-1. Add the following line of code to get the first page of results and then store them in a variable of type **FeedResponse<>**:
-
-    ```java
-    FeedResponse<object> response = await query.ReadNextAsync();
-    ```
-
-    > We only need to retrieve a single page since we are getting the ``TOP 1`` items from the .
-
-1. Add the following lines of code to print out the value of the **RequestCharge** property of the **FeedResponse<>** instance and then the content of the retrieved item:
-
-    ```java
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs for ");    
-    await Console.Out.WriteLineAsync($"{response.Resource.First()}");
+    peopleContainer.queryItems(sql, options, Member.class)
+            .byPage()
+            .next()
+            .flatMap(page -> {
+            logger.info("\n\n" +
+                        "{} RUs for\n" +
+                        "{}" + 
+                        "\n\n",
+                        page.getRequestCharge(),
+                        page.getElements().iterator().next());
+            return Mono.empty();
+    }).block();
     ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1200,44 +1084,38 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
+1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
+    public static void main(String[] args) {
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
 
-        }
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");         
+
+        client.close();
     }
     ```
 
-1. Add the following code to use the **ReadItemAsync** method of the **Container** class to retrieve an item using the unique id and the partition key set to the last name from the previous step:
+1. Add the following code to use the ```readItem``` method of the ```CosmosAsyncContainer``` class to retrieve an item using the unique id and the partition key set to the last name from the previous step. Add a line to print out the value of the **RequestCharge** property:
 
     ```java
-    ItemResponse<object> response = await peopleContainer.ReadItemAsync<object>("example.document", new PartitionKey("<Last Name>"));
-    ```
-
-1. Add the following line of code to print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
-
-    ```java
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    peopleContainer.readItem("example.document", new PartitionKey("<LastName>"), Member.class)
+    .flatMap(response -> {
+        logger.info("\n\n{} RUs\n\n",response.getRequestCharge());
+        return Mono.empty();
+    }).block();
     ```
    
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1268,43 +1146,41 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Return to the Visual Studio Code window and locate the *WriteLineAsync* line within the ```main``` method in **Lab09Main.java**:
 
     ```java
-    await Console.Out.WriteLineAsync($"{response.RequestCharge} RUs");    
+    logger.info("\n\n{} RUs\n\n",pointReadResponse.getRequestCharge());
     ```
 
-1. Following that line, add the following code to use the **CreateItemAsync** method of the **Container** class to add a new item and print out the value of the **RequestCharge** property of the **ItemResponse<>** instance:
+1. Following that line, add the following code to use the ```createItem``` method of the ```CosmosAsyncContainer``` class to add a new item and print out the value of the **RequestCharge** property:
 
     ```java
-    object member = new Member { accountHolder = new Bogus.Person() };
-    ItemResponse<object> createResponse = await peopleContainer.CreateItemAsync(member);
-    await Console.Out.WriteLineAsync($"{createResponse.RequestCharge} RUs");
+    Member member = new Member();
+    CosmosAsyncItemResponse<Member> createResponse = peopleContainer.createItem(member).block();
+    logger.info("{} RUs", createResponse.getRequestCharge());
     ```
 
-1. Add the following lines of code to create variables to represent the estimated workload for our application:
+1. Now, find the following line inside the ```readItem``` Reactive Stream
+
+    ```java
+    logger.info("\n\n{} RUs\n\n",response.getRequestCharge());
+    ```
+   Above this line add the following lines of code to create variables to represent the estimated workload for our application:
 
     ```java
     int expectedWritesPerSec = 200;
     int expectedReadsPerSec = 800;
     ```
 
-    > These types of numbers could come from planning a new application or tracking actual usage of an existing one. Details of determining workload are outside the scope of this lab.
+    > These types of numbers could come from planning a new application or tracking actual usage of an existing one. Details of determining workload are outside the scope of this lab.   
 
-1. Add the following line of code to print out the estimated throughput needs of our application based on our test queries:
+   Below this line add the following line of code to print out the estimated throughput needs of our application based on our test queries:
 
     ```java
-    await Console.Out.WriteLineAsync($"Estimated load: {response.RequestCharge * expectedReadsPerSec + createResponse.RequestCharge * expectedWritesPerSec} RU per sec");
+    logger.info("\n\nEstimated load: {} RU per sec\n\n",
+                    response.getRequestCharge() * expectedReadsPerSec + response.getRequestCharge() * expectedWritesPerSec);
     ```
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
@@ -1318,25 +1194,29 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Locate the *using* block within the ```main``` method and delete the code added for the previous section:
 
-1. Locate the *using* block within the ```main``` method and delete the code added for the previous section so it again looks like this:
+1. Delete the code you added in ```main``` so that ```main``` once again looks like this:
 
     ```java
-    public static async Task Main(string[] args)
-    {
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-        {
-            var database = client.GetDatabase(_databaseId);
-            var peopleContainer = database.GetContainer(_peopleCollectionId);
-            var transactionContainer = database.GetContainer(_transactionCollectionId);
+    public static void main(String[] args) {
+        CosmosAsyncClient client = new CosmosClientBuilder()
+                .setEndpoint(endpointUri)
+                .setKey(primaryKey)
+                .setConnectionPolicy(defaultPolicy)
+                .setConsistencyLevel(ConsistencyLevel.EVENTUAL)
+                .buildAsyncClient();
 
-        }
+        database = client.getDatabase("FinancialDatabase");
+        peopleContainer = database.getContainer("PeopleCollection");
+        transactionContainer = database.getContainer("TransactionCollection");         
+
+        client.close();
     }
     ```
 
 1. Add the following code to retrieve the current RU/sec setting for the container:
 
     ```java
-    int? throughput = await peopleContainer.ReadThroughputAsync();
+    int throughput = peopleContainer.readProvisionedThroughput().block();
     ```
 
     > Note that the type of the **Throughput** property is a nullable value. Provisioned throughput can be set either at the container or database level. If set at the database level, this property read from the **Container** will return null. When set at the container level, the same method on **Database** will return null.
@@ -1344,28 +1224,20 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Add the following line of code to print out the provisioned throughput value:
 
     ```java
-    await Console.Out.WriteLineAsync($"{throughput} RU per sec");
+    logger.info("{} RU per sec", throughput);
     ```
 
 1. Add the following code to update the RU/sec setting for the container:
 
     ```java
-    await peopleContainer.ReplaceThroughputAsync(1000);
+    peopleContainer.replaceProvisionedThroughput(1000).block();
     ```
 
-    > Although the overall minimum throughput that can be set is 400 RU/s, specific containers or databases may have higher limits depending on size of stored data, previous maximum throughput settings, or number of containers in a database. Trying to set a value below the available minimum will cause an exception here. The current allowed minumum value can be found on the **ThroughputResponse.MinThroughput** property.
+    > Although the overall minimum throughput that can be set is 400 RU/s, specific containers or databases may have higher limits depending on size of stored data, previous maximum throughput settings, or number of containers in a database. Trying to set a value below the available minimum will cause an exception here. 
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Run the project.
 
 1. Observe the output of the console application.
 
