@@ -182,7 +182,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. In the **Results** pane, observe the results of your query.
 
-1. Return to the currently open **Visual Studio Code** editor containing your Java Core project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java project.
 
 1. In the Visual Studio Code window, double-click the **Lab09Main.java** file to open an editor tab for the file.
 
@@ -384,7 +384,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 *First, you will use the Java SDK to issue a request beyond the assigned capacity for a container. Request unit consumption is evaluated at a per-second rate. For applications that exceed the provisioned request unit rate, requests are rate-limited until the rate drops below the provisioned throughput level. When a request is rate-limited, the server preemptively ends the request with an HTTP status code of ``429 RequestRateTooLargeException`` and returns the ``x-ms-retry-after-ms`` header. The header indicates the amount of time, in milliseconds, that the client must wait before retrying the request. You will observe the rate-limiting of your requests in an example application.*
 
-### Reducing R/U Throughput for a Container
+### Reducing RU Throughput for a Container
 
 1. Return to the **Azure Portal** (<http://portal.azure.com>).
 
@@ -406,7 +406,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 ### Observing Throttling (HTTP 429)
 
-1. Return to the currently open **Visual Studio Code** editor containing your Java Core project.
+1. Return to the currently open **Visual Studio Code** editor containing your Java project.
 
 1. Double-click the **Lab09Main.java** link in the **Explorer** pane to open the file in the editor.
 
