@@ -372,17 +372,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
     > This query will fail immediately since this property is not indexed. Keep in mind when defining indexes that only indexed properties can be used in query conditions. 
 
-1. Return to the currently open **Visual Studio Code** editor containing your Java Core project.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
-
-    ```sh
-    dotnet run
-    ```
-
-    > This command will build and execute the console project.
+1. Now, return to Visual Studio code and run the project.
 
 1. Observe the results of the console project.
 
