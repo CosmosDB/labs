@@ -504,7 +504,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Click the **🗙** symbol to close the terminal pane.
 
-1. Although this code uses the Async API to insert documents into an Azure Cosmos DB container, we are using the API in a synchronous manner by blocking on each ``createItem`` call. A sync implementation on one thread probably can't saturate the container provisioned throughput. Now let's rewrite this ``createItem`` calls in an async Reactive Streams fashion and see what happens when we saturate the full 400 RU/s provisioned for the container. Back in the code editor tab, locate the following lines of code:
+1. Although this code uses the Async API to insert documents into an Azure Cosmos DB container, we are using the API in a synchronous manner by blocking on each ``createItem`` call. A sync implementation on one thread probably can't saturate the container provisioned throughput. Now let's rewrite these ``createItem`` calls in an async Reactive Programming fashion and see what happens when we saturate the full 400 RU/s provisioned for the container. Back in the code editor tab, locate the following lines of code:
 
     ```java
     for (Transaction transaction : transactions) {
@@ -564,7 +564,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     }
     ```
 
-    > In this implementation we use a **Reactor factory method** ``Flux.fromIterable`` to create a Reactive Flux ``interactionsFlux`` from our ``Transaction`` list. We then use ``interactionsFlux`` as the ``Publisher`` in a Reactive Streams pipeline which issues successive ``createItem`` requests without waiting for the previous request to complete. Thus this is an Async implementation. The **for-each** loop at the end of this code block iterates over the request results and prints a notification for each. Since these requests are issued nearly in parallel they should cause an exceptional scenario since your machine does not have enough assigned throughput to handle the volume of requests.
+    > In this implementation we use a **Reactor factory method** ``Flux.fromIterable`` to create a Reactive Flux ``interactionsFlux`` from our ``Transaction`` list. We then use ``interactionsFlux`` as the ``Publisher`` in a Reactive Streams pipeline which issues successive ``createItem`` requests without waiting for the previous request to complete. Thus this is an Async implementation. The **for-each** loop at the end of this code block iterates over the request results and prints a notification for each. Since these requests are issued nearly in parallel, increasing the number of documents should quickly cause an exceptional scenario since your Azure Cosmos DB container does not have enough assigned throughput to handle the volume of requests.
 
 1. Save all of your open editor tabs.
 
@@ -574,7 +574,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 
 1. Observe the output of the console application.
 
-    > This query should execute successfully. We are only creating 10 items and we most likely will not run into any throughput issues here.
+    > This query should execute successfully. We are only creating 100 items and we most likely will not run into any throughput issues here.
 
 1. Click the **🗙** symbol to close the terminal pane.
 
