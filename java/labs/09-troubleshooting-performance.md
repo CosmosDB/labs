@@ -457,7 +457,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
 1. Still within the foreach block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
     ```java
-    await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
+    logger.info("Item Created {}", result.getItem().getId());
     ```
 
     > The ``CosmosAsyncItemResponse`` type has an access method named ``getItem`` that can give you access to the item instance resulting from the operation.
