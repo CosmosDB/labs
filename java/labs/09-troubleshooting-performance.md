@@ -452,7 +452,7 @@ In this lab, you will use the Java SDK to tune Azure Cosmos DB requests to optim
     CosmosAsyncItemResponse<Transaction> result = transactionContainer.createItem(transaction).block();
     ```
 
-    > The ``createItem`` method of the ``Container`` class takes in an object that you would like to serialize into JSON and store as an item within the specified collection.
+    > The ``createItem`` method of the ``CosmosAsyncContainer`` class takes in an object that you would like to serialize into JSON and store as an item within the specified collection.
 
 1. Still within the foreach block, add the following line of code to write the value of the newly created resource's ``id`` property to the console:
 
