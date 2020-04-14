@@ -60,19 +60,19 @@ DevOps Projects creates Azure resources, such as Azure Cosmos DB, Application In
 
 1. Select the **Create a resource** section in the left pane.
 
-1. Type **DevOps Projects** in the search box and then click **Add**.
+1. Type **DevOps Projects** in the search box and then select **Add**.
 
    ![DevOps-projects-create](media/devops-projects-create.png)
 
 1. Choose **Node.js** as the runtime, then choose **Next**. Select **Express.js** under **Choose an application framework**.
 
-1. Activate the **Add a Cosmos DB** database section and click Next.
+1. Activate the **Add a Cosmos DB** database section and select Next.
 
    ![cosmos-db-template](media/cosmos-db-template.png)
 
    Cosmos DB supports various application frameworks like **Express.js**, **Sample Node.js app**, and **Sail.js**. In this tutorial, let’s consider **Express.js**.
 
-1. To deploy the application, select an Azure service. You have various services like Windows Web App, Kubernetes Service and Web App for Containers. We're going to use **Windows Web App** for this tutorial.  Click on **Next**.
+1. To deploy the application, select an Azure service. You have various services like Windows Web App, Kubernetes Service and Web App for Containers. We're going to use **Windows Web App** for this tutorial.  Select on **Next**.
 
 ## Configure Azure DevOps and an Azure subscription
 
@@ -82,7 +82,7 @@ DevOps Projects creates Azure resources, such as Azure Cosmos DB, Application In
 
 1. Select your Azure subscription.
 
-1. To view additional Azure configuration settings and to identify the pricing tier and location, click on Additional settings. This pane shows different options for configuring the pricing tier and location of Azure services.
+1. To view additional Azure configuration settings and to identify the pricing tier and location, select on Additional settings. This pane shows different options for configuring the pricing tier and location of Azure services.
 
 1. Exit the Azure configuration area, and then select **Done**.
 
@@ -120,7 +120,7 @@ DevOps Projects automatically configures a CI/CD pipeline in your Azure DevOps o
 
 1. Go to the DevOps Projects dashboard.
 
-1. Click on the hyperlink under **Build**. A browser tab displays your new project's build pipeline.
+1. Select on the hyperlink under **Build**. A browser tab displays your new project's build pipeline.
 
    ![build](media/build.png)
 
@@ -142,7 +142,7 @@ DevOps Projects automatically creates and configures the necessary steps to depl
 
 1. Navigate to the **Pipelines | Releases**.
 
-1. Click on **Edit**.
+1. Select on **Edit**.
 
 1. Under **Artifacts**, select **Drop**. The build pipeline you examined in the previous steps produces the output that's used for the artifact.
 
@@ -150,7 +150,7 @@ DevOps Projects automatically creates and configures the necessary steps to depl
 
 1. At the right, select the section **View releases** to display a history of releases.
 
-1. Click on the release, which will display the pipeline. Click on any environment to check the release **Summary, Commits**, associated **Work Items**.
+1. Select on the release, which will display the pipeline. Select on any environment to check the release **Summary, Commits**, associated **Work Items**.
 
 1. Select **Commits**. This view shows code commits that are associated with this deployment. Compare releases to view the commit differences between deployments.
 
