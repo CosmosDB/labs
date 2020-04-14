@@ -6,21 +6,26 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 ## Create Containers using the .NET SDK
 
-> You will start by using the .NET SDK to create containers to use in the lab.
+You will start by using the .NET SDK to create containers to use in this and following labs.
 
 ### Create a .NET Core Project
 
-1. On your local machine, locate the CosmosLabs folder in your Documents folder and open the Lab01 folder that will be used to contain the content of your .NET Core project. If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+1. On your local machine, locate the **CosmosLabs** folder in your **Documents** folder
+1. Open the **Lab01** folder that will be used to contain the content of your .NET Core project.
 
-1. In the Lab01 folder, right-click the folder and select the **Open with Code** menu option.
+   - If you do not have this folder, you did not run the `labCodeSetup.ps1` script in the [Account Setup](00-account_setup.md) steps.
 
-    ![Open with Visual Studio Code](../media/02-open_with_code.jpg)
+   - If you are completing this lab through Microsoft Hands-on Labs, the CosmosLabs folder will be located at the path: **C:\labs\CosmosLabs**
+
+1. In the **Lab01** folder, right-click the folder and select the **Open with Code** menu option.
+
+    ![Open with Code is highlighted](../media/02-open_with_code.jpg "Open the directory with Visual Studio Code")
 
     > Alternatively, you can run a terminal in your current directory and execute the ``code .`` command.
 
 1. In the Visual Studio Code window that appears, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
-    ![Open in Terminal](../media/open_in_terminal.jpg)
+    ![Open in Terminal is highlighted](../media/open_in_terminal.jpg "Open a terminal in Visual Studio Code")
 
 1. In the open terminal pane, enter and execute the following command:
 
@@ -28,14 +33,14 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
     dotnet new console --output .
     ```
 
-    > This command will create a new .NET Core 2.2 project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
+    > This command will create a new .NET Core project. The project will be a **console** project and the project will be created in the current directly since you used the ``--output .`` option.
 
 1. Visual Studio Code will most likely prompt you to install various extensions related to **.NET Core** or **Azure Cosmos DB** development. None of these extensions are required to complete the labs.
 
 1. In the terminal pane, enter and execute the following command:
 
     ```sh
-    dotnet add package Microsoft.Azure.Cosmos --version 3.0.0
+    dotnet add package Microsoft.Azure.Cosmos --version 3.7.0
     ```
 
     > This command will add the [Microsoft.Azure.Cosmos](https://www.nuget.org/packages/Microsoft.Azure.Cosmos/) NuGet package as a project dependency. The lab instructions have been tested using the ``3.0.0`` version of this NuGet package.
@@ -64,13 +69,13 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     > This command will build the project.
 
-1. Click the **🗙** symbol to close the terminal pane.
+1. Select the **🗙** symbol to close the terminal pane.
 
 1. Observe the **Program.cs** and **[folder name].csproj** files created by the .NET Core CLI.
 
-    ![Project files](../media/02-project_files.jpg)
+    ![The project file and the program.cs file are highlighted](../media/02-project_files.jpg "Review the Project files")
 
-1. Double-click the **[folder name].csproj** link in the **Explorer** pane to open the file in the editor.
+1. Select the **[folder name].csproj** file in the **Explorer** pane to open the file in the editor.
 
 1. We will now add a new **PropertyGroup** XML element to the project configuration within the **Project** element. To add a new **PropertyGroup**, insert the following lines of code under the line that reads ``<Project Sdk="Microsoft.NET.Sdk">``:
 
@@ -83,28 +88,28 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 1. Your new XML should look like this:
 
     ```xml
-    <Project Sdk="Microsoft.NET.Sdk">        
+    <Project Sdk="Microsoft.NET.Sdk">
         <PropertyGroup>
             <LangVersion>latest</LangVersion>
-        </PropertyGroup>        
+        </PropertyGroup>
         <PropertyGroup>
             <OutputType>Exe</OutputType>
-            <TargetFramework>netcoreapp2.2</TargetFramework>
-        </PropertyGroup>        
+            <TargetFramework>netcoreapp3.0</TargetFramework>
+        </PropertyGroup>
         <ItemGroup>
             <PackageReference Include="Bogus" Version="22.0.8" />
             <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.0.0" />
-        </ItemGroup>        
+        </ItemGroup>
     </Project>
     ```
 
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Select the **Program.cs** file in the **Explorer** pane to open the file in the editor.
 
-    ![Open editor](../media/02-program_editor.jpg)
+    ![The program.cs file is opened in VS Code](../media/02-program_editor.jpg "Open the program.cs file")
 
 ### Create CosmosClient Instance
 
-*The CosmosClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **CosmosClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.*
+The CosmosClient class is the main "entry point" to using the SQL API in Azure Cosmos DB. We are going to create an instance of the **CosmosClient** class by passing in connection metadata as parameters of the class' constructor. We will then use this class instance throughout the lab.
 
 1. Within the **Program.cs** editor tab, Add the following using blocks to the top of the editor:
 
@@ -122,7 +127,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
     public class Program
     {
         public static async Task Main(string[] args)
-        {         
+        {
         }
     }
     ```
@@ -134,9 +139,11 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
     private static readonly string _primaryKey = "";
     ```
 
-1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value and for the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account. Use [these instructions](00-account_setup.md) to get these values if you do not already have them:
+1. For the ``_endpointUri`` variable, replace the placeholder value with the **URI** value from your Azure Cosmos DB account
 
     > For example, if your **uri** is ``https://cosmosacct.documents.azure.com:443/``, your new variable assignment will look like this: ``private static readonly string _endpointUri = "https://cosmosacct.documents.azure.com:443/";``.
+
+1. For the ``_primaryKey`` variable, replace the placeholder value with the **PRIMARY KEY** value from your Azure Cosmos DB account
 
     > For example, if your **primary key** is ``elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==``, your new variable assignment will look like this: ``private static readonly string _primaryKey = "elzirrKCnXlacvh1CRAnQdYVbVLspmYHQyYrhx0PltHi8wn5lHVHFnd1Xm3ad5cn4TUcH4U0MSeHsVykkFPHpQ==";``.
 
@@ -146,7 +153,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ```csharp
     public static async Task Main(string[] args)
-    { 
+    {
     }
     ```
 
@@ -154,7 +161,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ```csharp
     using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-    {        
+    {
     }
     ```
 
@@ -162,14 +169,15 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ```csharp
     public class Program
-    { 
+    {
         private static readonly string _endpointUri = "<your uri>";
         private static readonly string _primaryKey = "<your key>";
+
         public static async Task Main(string[] args)
-        {    
+        {
             using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
             {
-            }     
+            }
         }
     }
     ```
@@ -178,17 +186,15 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
 1. In the open terminal pane, enter and execute the following command:
 
     ```sh
     dotnet build
     ```
 
-    > This command will build the console project.
+    > This command will build the console project, ensure there are no errors.
 
-1. Click the **🗙** symbol to close the terminal pane.
+1. Select the **🗙** symbol to close the terminal pane.
 
 1. Close all open editor tabs.
 
@@ -198,7 +204,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ```csharp
     using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-    {                        
+    {
     }
     ```
 
@@ -220,8 +226,6 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
     > The ``targetDatabase`` variable will have metadata about the database whether a new database is created or an existing one is read.
 
 1. Save all of your open editor tabs.
-
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
 
 1. In the open terminal pane, enter and execute the following command:
 
@@ -247,12 +251,11 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     > Since the database already exists, the SDK detected that the database already exists and used the existing database instance instead of creating a new instance of the database.
 
-1. Click the **🗙** symbol to close the terminal pane.
-
+1. Select the **🗙** symbol to close the terminal pane.
 
 ### Create a Partitioned Container using the SDK
 
-*To create a container, you must specify a name and a partition key path. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](../media/https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).*
+To create a container, you must specify a name and a partition key path. You will specify those values when creating a container in this task. A partition key is a logical hint for distributing data onto a scaled out underlying set of physical partitions and for efficiently routing queries to the appropriate underlying partition. To learn more, refer to [/docs.microsoft.com/azure/cosmos-db/partition-data](../media/https://docs.microsoft.com/en-us/azure/cosmos-db/partition-data).
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
@@ -317,22 +320,17 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
 1. In the open terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
 1. Observe the output of the running command.
 
-1. Click the **🗙** symbol to close the terminal pane.
+1. Select the **🗙** symbol to close the terminal pane.
 
 1. Close all open editor tabs.
-
 
 ## Populate a Container with Items using the SDK
 
@@ -340,17 +338,15 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 ### Populate Container with Data
 
-1. In the Visual Studio Code window, look in the **Explorer** pane and verify that you have a **DataTypes.cs** file in your project folder.
+1. In the Visual Studio Code window, look in the **Explorer** pane and verify that you have a **DataTypes.cs** file in your project folder. This file contains the data classes you will be working with in the following steps.
 
-    > This file contains the data classes you will be working with in the following steps.
-
-1. Double-click the **Program.cs** link in the **Explorer** pane to open the file in the editor.
+1. Switch to the **Program.cs** file in Visual Studio code
 
 1. Locate the using block within the **Main** method and delete any existing code:
 
     ```csharp
     using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
-    {                        
+    {
     }
     ```
 
@@ -378,7 +374,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
     ```
 
     > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 500 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated.
-    
+
 1. Add the following foreach block to iterate over the ``PurchaseFoodOrBeverage`` instances:
 
     ```csharp
@@ -407,7 +403,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ```csharp
     public static async Task Main(string[] args)
-    {    
+    {
         using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
         {
             var targetDatabase = client.GetDatabase("EntertainmentDatabase");
@@ -422,9 +418,9 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
             foreach(var interaction in foodInteractions)
             {
                 ItemResponse<PurchaseFoodOrBeverage> result = await customContainer.CreateItemAsync(interaction);
-                await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
+                await Console.Out.WriteLineAsync($"Document [PurchaseFoodOrBeverage] Created\t{result.Resource.id}");
             }
-        }     
+        }
     }
     ```
 
@@ -432,21 +428,15 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. Switch to the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+1. Observe the output of the console application. You should see a list of item ids associated with new items that are being created by this tool.
 
-1. Observe the output of the console application.
-
-    > You should see a list of item ids associated with new items that are being created by this tool.
-
-1. Click the **🗙** symbol to close the terminal pane.
+    ![Terminal output displayed with Items being created](../media/01-item-creation.png "Review the output, notice unique document ids being created")
 
 ### Populate Container with Data of Different Types
 
@@ -454,7 +444,7 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
     ```csharp
     public static async Task Main(string[] args)
-    {                           
+    {
     }
     ```
 
@@ -473,10 +463,11 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
                 .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
                 .RuleFor(i => i.channelName, (fake) => fake.PickRandom(new List<string> { "NEWS-6", "DRAMA-15", "ACTION-12", "DOCUMENTARY-4", "SPORTS-8" }))
                 .GenerateLazy(500);
+
             foreach(var interaction in tvInteractions)
             {
                 ItemResponse<WatchLiveTelevisionChannel> result = await customContainer.CreateItemAsync(interaction);
-                await Console.Out.WriteLineAsync($"Item Created\t{result.Resource.id}");
+                await Console.Out.WriteLineAsync($"Document [WatchLiveTelevisionChannel] Created\t{result.Resource.id}");
             }
         }
     }
@@ -486,27 +477,19 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
 
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. Switch to the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
-
-1. Observe the output of the console application.
-
-    > You should see a list of item ids associated with new items that are being created.
-
-1. Click the **🗙** symbol to close the terminal pane.
+1. Observe the output of the console application. You should see a list of item ids associated with new items that are being created.
 
 1. Locate the **Main** method and delete any existing code:
 
     ```csharp
     public static async Task Main(string[] args)
-    {                            
+    {
     }
     ```
 
@@ -524,37 +507,26 @@ In this lab, you will create multiple Azure Cosmos DB containers using different
                 .RuleFor(i => i.type, (fake) => nameof(ViewMap))
                 .RuleFor(i => i.minutesViewed, (fake) => fake.Random.Number(1, 45))
                 .GenerateLazy(500);
+
             foreach(var interaction in mapInteractions)
             {
                 ItemResponse<ViewMap> result = await customContainer.CreateItemAsync(interaction);
-                await Console.Out.WriteLineAsync($"Document Created\t{result.Resource.id}");
+                await Console.Out.WriteLineAsync($"Document [ViewMap] Created\t{result.Resource.id}");
             }
         }
     }
     ```
 
-    > As a reminder, the Bogus library generates a set of test data. In this example, you are creating 500 items using the Bogus library and the rules listed above. The **GenerateLazy** method tells the Bogus library to prepare for a request of 500 items by returning a variable of type **IEnumerable**. Since LINQ uses deferred execution by default, the items aren't actually created until the collection is iterated. The **foreach** loop at the end of this code block iterates over the collection and creates items in Azure Cosmos DB.
-
 1. Save all of your open editor tabs.
 
-1. In the Visual Studio Code window, right-click the **Explorer** pane and select the **Open in Terminal** menu option.
-
-1. In the open terminal pane, enter and execute the following command:
+1. Switch to the terminal pane, enter and execute the following command:
 
     ```sh
     dotnet run
     ```
 
-    > This command will build and execute the console project.
+1. Observe the output of the console application. You should see a list of item ids associated with new items that are being created. You have now placed three different types of documents (PurchaseFoodOrBeverage, WatchLiveTelevisionChannel, ViewMap) into the `CustomCollection` showing how Cosmos DB is schema-less.
 
-1. Observe the output of the console application.
+1. Close the folder in Visual Studio Code
 
-    > You should see a list of item ids associated with new items that are being created.
-
-1. Click the **🗙** symbol to close the terminal pane.
-
-1. Close all open editor tabs.
-
-1. Close the Visual Studio Code application.
-
-> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources.

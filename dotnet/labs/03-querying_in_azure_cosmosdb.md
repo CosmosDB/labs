@@ -6,7 +6,7 @@ If this is your first lab and you have not already completed the setup for the l
 
 ## Query Overview
 
-Querying JSON with SQL allows Azure Cosmos DB to combine the advantages of a legacy relational databases with a NoSQL database. You can use many rich query capabilities such as subqueries or aggregation functions but still retain the many advantages of modeling data in a NoSQL database.
+Querying JSON with SQL allows Azure Cosmos DB to combine the advantages of a legacy relational databases with a NoSQL database. You can use many rich query capabilities such as sub-queries or aggregation functions but still retain the many advantages of modeling data in a NoSQL database.
 
 Azure Cosmos DB supports strict JSON items only. The type system and expressions are restricted to deal only with JSON types. For more information, see the [JSON specification](https://www.json.org/).
 
@@ -18,25 +18,34 @@ You will begin by running basic queries with `SELECT`, `WHERE`, and `FROM` claus
 
 ### Open Data Explorer
 
-1. In the **Azure Cosmos DB** blade, locate and click the **Data Explorer** link on the left side of the blade.
+1. In the **Azure Cosmos DB** blade, locate and select the **Data Explorer** link on the left side of the blade.
 2. In the **Data Explorer** section, expand the **NutritionDatabase** database node and then expand the **FoodCollection** container node.
-3. Within the **FoodCollection** node, click the **Items** link.
+3. Within the **FoodCollection** node, select the **Items** link.
 4. View the items within the container. Observe how these documents have many properties, including arrays.
-5. Click **New SQL Query**. Paste the following SQL query and select **Execute Query**.
 
-```sql
-SELECT *
-FROM food
-WHERE food.foodGroup = "Snacks" and food.id = "19015"
-```
+    ![The NutritionDatabase and FoodCollection is displayed and highlighted](../media/04-food_container.jpg "Browse to the FoodCollection and select an item to review its properties")
 
-6. You will see that the query returned the single document where id is "19015" and the foodGroup is "Snacks".
-7. Explore the structure of this item as it is representative of the items within the **FoodCollection** container that we will be working with for the remainder of this section.
+5. Select **New SQL Query**.
+
+      ![New SQL Query is highlighted](../media/04-new_query.jpg "Create a new SQL Query")
+
+6. Paste the following SQL query and select **Execute Query**.
+
+    ```sql
+    SELECT *
+    FROM food
+    WHERE food.foodGroup = "Snacks" and food.id = "19015"
+    ```
+
+7. You will see that the query returned the single document where id is "19015" and the foodGroup is "Snacks". Explore the structure of this item as it is representative of the items within the **FoodCollection** container that we will be working with for the remainder of this section.
+
+      ![The query results are displayed](../media/04-query_01_results.jpg "Review the results")
 
 ## Dot and quoted property projection accessors
 
-You can choose which properties of the document to project into the result using the dot notation. If you wanted to return only the item's id you could run the query below:
-by clicking the **New SQL Query**. Paste the following SQL query and selecting **Execute Query**.
+You can choose which properties of the document to project into the result using the dot notation. If you wanted to return only the item's id you could run the query below.
+
+Select **New SQL Query**. Paste the following SQL query and selecting **Execute Query**.
 
 ```sql
 SELECT food.id
@@ -56,7 +65,9 @@ WHERE food["foodGroup"] = "Snacks" and food["id"] = "19015"
 
 Let’s explore WHERE clauses. You can add complex scalar expressions including arithmetic, comparison and logical operators in the WHERE clause.
 
-1. Run the below query by clicking the **New SQL Query**. Paste the following SQL query and then click **Execute Query**.
+Run the below query by selecting the **New SQL Query**.
+
+Paste the following SQL query and then select **Execute Query**.
 
 ```sql
 SELECT food.id,
@@ -101,6 +112,10 @@ Azure Cosmos DB supports several forms of transformation on the resultant JSON. 
 
 By running the query below you will see that the element names are transformed. In addition, the projection is accessing only the first element in the servings array for all items specified by the WHERE clause.
 
+Run the below query by selecting the **New SQL Query**.
+
+Paste the following SQL query and then select **Execute Query**.
+
 ```sql
 SELECT food.description,
 food.foodGroup,
@@ -115,9 +130,13 @@ AND food.servings[0].description = "cup"
 
 Azure Cosmos DB supports adding an ORDER BY clause to sort results based on one or more properties
 
+Run the below query by selecting the **New SQL Query**.
+
+Paste the following SQL query and then select **Execute Query**.
+
 ```sql
-SELECT food.description, 
-food.foodGroup, 
+SELECT food.description,
+food.foodGroup,
 food.servings[0].description AS servingDescription,
 food.servings[0].weightInGrams AS servingWeight
 FROM food
@@ -131,6 +150,7 @@ https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-order-by).
 ## Limiting query result size
 
 Azure Cosmos DB supports the TOP keyword. TOP can be used to limit the number of returning values from a query.
+
 Run the query below to see the top 20 results.
 
 ```sql
@@ -159,7 +179,9 @@ When OFFSET LIMIT is used in conjunction with an ORDER BY clause, the result set
 
 ## More advanced filtering
 
-Let’s add the IN and BETWEEN keywords into our queries. IN can be used to check whether a specified value matches any element in a given list and BETWEEN can be used to run queries against a range of values. Run some sample queries below:
+Let’s add the IN and BETWEEN keywords into our queries. IN can be used to check whether a specified value matches any element in a given list and BETWEEN can be used to run queries against a range of values.
+
+Run the query below:
 
 ```sql
 SELECT food.id,
@@ -174,15 +196,17 @@ WHERE food.foodGroup IN ("Poultry Products", "Sausages and Luncheon Meats")
 
 ## More advanced projection
 
-Azure Cosmos DB supports JSON projection within its queries. Let’s project a new JSON Object with modified property names. Run the query below to see the results.
+Azure Cosmos DB supports JSON projection within its queries. Let’s project a new JSON Object with modified property names.
+
+Run the query below to see the results.
 
 ```sql
-SELECT { 
+SELECT {
 "Company": food.manufacturerName,
 "Brand": food.commonName,
 "Serving Description": food.servings[0].description,
 "Serving in Grams": food.servings[0].weightInGrams,
-"Food Group": food.foodGroup 
+"Food Group": food.foodGroup
 } AS Food
 FROM food
 WHERE food.id = "21421"
@@ -234,17 +258,17 @@ AND food.foodGroup IN ("Sausages and Luncheon Meats", "Legumes and Legume Produc
 AND food.id > "42178"
 ```
 
-## Correlated subqueries
+## Correlated sub-queries
 
-In many scenarios, a subquery may be effective. A correlated subquery is a query that references values from an outer query. We will walk through some of the most useful examples here. You can [learn more about subqueries](https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-subquery).
+In many scenarios, a sub-query may be effective. A correlated sub-query is a query that references values from an outer query. We will walk through some of the most useful examples here. You can [learn more about subqueries](https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-subquery).
 
-There are two types of subqueries: Multi-value subqueries and scalar subqueries. Multi-value subqueries return a set of documents and are always used within the FROM clause. A scalar subquery expression is a subquery that evaluates to a single value.
+There are two types of sub-queries: Multi-value sub-queries and scalar sub-queries. Multi-value sub-queries return a set of documents and are always used within the FROM clause. A scalar sub-query expression is a sub-query that evaluates to a single value.
 
 ### Multi-value subqueries
 
-You can optimize JOIN expressions with a subquery.
+You can optimize JOIN expressions with a sub-query.
 
-Consider the following query which performs a self-join and then applies a filter on name, nutritionValue, and amount. We can use a subquery to filter out the joined array items before joining with the next expression.
+Consider the following query which performs a self-join and then applies a filter on name, nutritionValue, and amount. We can use a sub-query to filter out the joined array items before joining with the next expression.
 
 ```sql
 SELECT VALUE COUNT(1)
@@ -252,11 +276,11 @@ FROM c
 JOIN t IN c.tags
 JOIN n IN c.nutrients
 JOIN s IN c.servings
-WHERE t.name = 'infant formula' AND (n.nutritionValue > 0 
+WHERE t.name = 'infant formula' AND (n.nutritionValue > 0
 AND n.nutritionValue < 10) AND s.amount > 1
 ```
 
-We could rewrite this query using three subqueries to optimize and reduce the Request Unit (RU) charge. Observe that the multi-value subquery always appears in the FROM clause of the outer query.
+We could rewrite this query using three sub-queries to optimize and reduce the Request Unit (RU) charge. Observe that the multi-value sub-query always appears in the FROM clause of the outer query.
 
 ```sql
 SELECT VALUE COUNT(1)
@@ -266,9 +290,9 @@ JOIN (SELECT VALUE n FROM n IN c.nutrients WHERE n.nutritionValue > 0 AND n.nutr
 JOIN (SELECT VALUE s FROM s IN c.servings WHERE s.amount > 1)
 ```
 
-### Scalar subqueries
+### Scalar sub-queries
 
-One use case of scalar subqueries is rewriting ARRAY_CONTAINS as EXISTS.
+One use case of scalar sub-queries is rewriting ARRAY_CONTAINS as EXISTS.
 
 Consider the following query that uses ARRAY_CONTAINS:
 
@@ -286,7 +310,9 @@ FROM food f
 WHERE EXISTS(SELECT VALUE t FROM t IN f.tags WHERE t.name = 'orange')
 ```
 
-The major advantage of using EXISTS is the ability to have complex filters in the EXISTS function, rather than just the simple equality filters which ARRAY_CONTAINS permits. Here is an example:
+The major advantage of using EXISTS is the ability to have complex filters in the EXISTS function, rather than just the simple equality filters which ARRAY_CONTAINS permits. 
+
+Here is an example:
 
 ```sql
 SELECT VALUE c.description
@@ -295,4 +321,4 @@ JOIN n IN c.nutrients
 WHERE n.units= "mg" AND n.nutritionValue > 0
 ```
 
-> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources. 
+> If this is your final lab, follow the steps in [Removing Lab Assets](11-cleaning_up.md) to remove all lab resources.

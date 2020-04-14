@@ -27,19 +27,5 @@ namespace Shared
         {
             Id = Guid.NewGuid().ToString();
         }
-    }
-
-    public class StateCount
-    {
-        [JsonProperty("id")]
-        public string Id { get; set; }
-        public string State { get; set; }
-        public int Count { get; set; }
-        public double TotalSales { get; set; }
-
-        public StateCount()
-        {
-            Id = Guid.NewGuid().ToString();
-        }
-    }
+    }    
 }
